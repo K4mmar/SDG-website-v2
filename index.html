@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SDG Sint Jansklooster</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Updated Tailwind CDN to include the typography plugin -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -41,6 +42,11 @@
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #555; 
+      }
+      
+      /* Additional helper to ensure empty paragraphs from WP take up space if needed */
+      .prose p:empty {
+        min-height: 1em;
       }
     </style>
   <script type="importmap">

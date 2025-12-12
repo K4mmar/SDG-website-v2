@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Music, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,6 +8,9 @@ const Navbar: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Proxy URL for the logo to ensure HTTPS and optimization
+  const logoUrl = "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2012/07/SDG-logo-nieuw-web.png&w=300&output=webp";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,7 +64,7 @@ const Navbar: React.FC = () => {
   return (
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4 text-white'
+        scrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
       } ${isOpen ? 'bg-white text-slate-900' : ''}`}
     >
       <div className="container mx-auto px-4 md:px-6">
@@ -69,10 +72,17 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <button 
             onClick={() => handleNavClick(null, '/')} 
-            className={`text-2xl font-bold flex items-center gap-2 ${scrolled || isOpen ? 'text-sdg-red' : 'text-white'}`}
+            className="flex items-center gap-2 focus:outline-none"
           >
-            <Music className="w-8 h-8" />
-            <span>SDG</span>
+            <img 
+              src={logoUrl} 
+              alt="SDG Logo" 
+              className={`h-10 md:h-14 w-auto transition-all duration-300 ${
+                // Apply a filter to make the logo white when on dark background (not scrolled and menu closed)
+                // Assumes the original logo is dark/colored. brightness(0) invert(1) turns it white.
+                scrolled || isOpen ? '' : 'brightness-0 invert'
+              }`}
+            />
           </button>
 
           {/* Desktop Menu */}
@@ -103,7 +113,6 @@ const Navbar: React.FC = () => {
                </button>
                
                {/* Dropdown Menu */}
-               {/* Added top-full and pt-2 to create an invisible bridge for the mouse */}
                <div className={`absolute left-0 top-full pt-2 w-48 transition-all duration-200 origin-top-left ${dropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
                  <div className="bg-white rounded-md shadow-xl py-2 border border-gray-100">
                    {overOnsLinks.map((subLink) => (

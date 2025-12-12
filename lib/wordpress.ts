@@ -98,7 +98,8 @@ async function fetchGraphQL(query: string, variables?: any) {
 
     const json = await res.json();
     if (json.errors) {
-      console.error('GraphQL Errors:', json.errors);
+      // Improved logging: Stringify the error object so it's readable in the console
+      console.warn('GraphQL Query Error:', JSON.stringify(json.errors, null, 2));
       return null;
     }
     return json.data;
@@ -133,17 +134,13 @@ export async function getNewsPosts(): Promise<Post[]> {
 }
 
 export async function getLidWordenPage(): Promise<LidWordenPageData | null> {
+  // Simplified query: Removed 'lidWordenFields' (ACF) to prevent schema errors if not configured.
+  // The frontend component has built-in fallbacks for the FAQs.
   const query = `
     query GetLidWordenPage {
       page(id: "lid-worden", idType: URI) {
         title
         content(format: RENDERED)
-        lidWordenFields {
-          faqs {
-            vraag
-            antwoord
-          }
-        }
       }
     }
   `;
