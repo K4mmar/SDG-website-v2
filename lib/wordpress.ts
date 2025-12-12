@@ -80,7 +80,6 @@ const MOCK_POSTS: Post[] = [
 ];
 
 // MOCK_PAGES is now empty for specific pages to ensure we use the Real API.
-// If the API returns nothing, the getPageBySlug function will return a generic error page.
 const MOCK_PAGES: Record<string, Page> = {
   // We removed 'geschiedenis', 'identiteit', etc. so they are fetched from WordPress.
 };
@@ -127,7 +126,6 @@ export async function getNewsPosts(): Promise<Post[]> {
   `;
 
   const data = await fetchGraphQL(query);
-  // Return API data if available, otherwise mock data
   if (data?.posts?.nodes && data.posts.nodes.length > 0) {
     return data.posts.nodes;
   }
@@ -182,11 +180,45 @@ export async function getPostBySlug(slug: string) {
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
-  // Ensure we are querying by URI, which corresponds to the slug for top-level pages
+  // Improved Query: Search by slug (name) in all pages. 
+  // This bypasses issues where the URI might differ (e.g. parent/child structure)
   const query = `
-    query GetPageBySlug($id: ID!) {
+    query GetPageBySlug($slug: String) {
+      pages(where: {name: $slug}) {
+        nodes {
+          id
+          title
+          slug
+          content(format: RENDERED)
+          featuredImage {
+            node {
+              sourceUrl
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  console.log(`Fetching page from API via slug search: ${slug}`);
+  const data = await fetchGraphQL(query, { slug });
+  
+  // If found, return the first match
+  if (data && data.pages && data.pages.nodes && data.pages.nodes.length > 0) {
+    return data.pages.nodes[0];
+  }
+  
+  // Fallback: If slug search failed, try exact URI match (in case slug != uri for some reason)
+  return getPageByUriFallback(slug);
+}
+
+async function getPageByUriFallback(uri: string): Promise<Page | null> {
+    const query = `
+    query GetPageByUri($id: ID!) {
       page(id: $id, idType: URI) {
+        id
         title
+        slug
         content(format: RENDERED)
         featuredImage {
           node {
@@ -196,20 +228,14 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
       }
     }
   `;
-
-  console.log(`Fetching page from API: ${slug}`); // Debug logging
-  const data = await fetchGraphQL(query, { id: slug });
+  const data = await fetchGraphQL(query, { id: uri });
   
   if (!data || !data.page) {
-    // Check if we have a mock fallback (usually empty now for 'over ons' pages)
-    if (MOCK_PAGES[slug]) return MOCK_PAGES[slug];
-    
-    // Return a generic error object so the UI handles it gracefully
-    return {
+      return {
       id: 'error-page',
       title: 'Pagina niet gevonden',
-      slug: slug,
-      content: `<p>De pagina met slug <strong>'${slug}'</strong> is niet gevonden in WordPress. <br/><br/>Controleer of de pagina bestaat en gepubliceerd is.</p>`,
+      slug: uri,
+      content: `<p>De pagina met slug <strong>'${uri}'</strong> is niet gevonden in WordPress. <br/><br/>Controleer in WordPress of de 'slug' (URL-naam) van de pagina exact overeenkomt met de link (kleine letters).</p>`,
       featuredImage: { node: { sourceUrl: 'https://picsum.photos/1200/500?random=404' } }
     };
   }
