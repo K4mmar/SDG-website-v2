@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Hero from '../components/Hero';
 import Recruitment from '../components/Recruitment';
 import NewsGrid from '../components/NewsGrid';
+import AgendaList from '../components/AgendaList';
 
 const Home: React.FC = () => {
   const location = useLocation();
@@ -17,10 +18,6 @@ const Home: React.FC = () => {
           element.scrollIntoView({ behavior: 'smooth' });
         }, 100);
       }
-      
-      // Optional: Clear state to prevent scrolling on refresh? 
-      // React Router state persists on refresh usually, but handling that is minor.
-      // We can replace history state if needed, but not critical for this demo.
     }
   }, [location]);
 
@@ -29,19 +26,22 @@ const Home: React.FC = () => {
       <Hero />
       
       {/* Intro Section */}
-      <section id="over-ons" className="py-20 bg-white">
+      <section id="over-ons" className="py-24 bg-white">
         <div className="container mx-auto px-6 max-w-4xl text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">Al meer dan 75 jaar een muzikaal begrip</h2>
-          <p className="text-lg text-slate-600 leading-relaxed">
+          <span className="text-sdg-gold font-bold uppercase tracking-widest text-sm mb-4 block">Onze Vereniging</span>
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-8 leading-tight">Al meer dan 75 jaar een <span className="text-sdg-red italic">muzikaal begrip</span></h2>
+          <p className="text-xl text-slate-600 leading-relaxed font-light">
             SDG Sint Jansklooster is een bruisende muziekvereniging waar plezier en prestatie hand in hand gaan. 
             Met ons fanfareorkest, de actieve slagwerkgroep en een groeiende jeugdafdeling zijn we diep geworteld 
             in de gemeenschap. Wij geloven dat muziek verbindt, verbroedert en vrolijk maakt.
           </p>
+          <div className="mt-10 h-1 w-20 bg-sdg-gold mx-auto rounded-full"></div>
         </div>
       </section>
 
-      <Recruitment />
+      <AgendaList />
       <NewsGrid />
+      <Recruitment />
       
       {/* Contact anchor */}
       <div id="contact"></div>

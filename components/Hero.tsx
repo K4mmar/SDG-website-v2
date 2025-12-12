@@ -47,7 +47,7 @@ const Hero: React.FC = () => {
             }`}
           >
             <span className="h-[1px] w-8 bg-sdg-gold/60 inline-block"></span>
-            <span className="text-sdg-gold font-semibold tracking-[0.2em] uppercase text-sm">
+            <span className="text-sdg-gold font-sans font-semibold tracking-[0.2em] uppercase text-sm">
               Christelijke Muziekvereniging
             </span>
             <span className="h-[1px] w-8 bg-sdg-gold/60 inline-block"></span>
@@ -55,7 +55,7 @@ const Hero: React.FC = () => {
 
           {/* 2. The Headline - Slightly smaller on mobile */}
           <h1 
-            className={`text-4xl md:text-7xl lg:text-8xl font-bold text-white mb-4 md:mb-6 tracking-tight leading-tight transition-all duration-1000 delay-300 ${
+            className={`font-serif text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 md:mb-8 tracking-tight leading-tight transition-all duration-1000 delay-300 ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
@@ -63,28 +63,28 @@ const Hero: React.FC = () => {
             {/* Space needed for mobile when BR is hidden to prevent "Muziek makendoe" */}
             <span className="inline md:hidden"> </span>
             <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-300">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-200 italic pr-2">
              doe je 
-            </span>{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sdg-gold to-white">
+            </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sdg-gold to-yellow-200">
               samen.
             </span>
           </h1>
 
           {/* 3. Sub-headline - The "Elegant" Context line */}
           <div 
-             className={`mb-6 md:mb-8 transition-all duration-1000 delay-500 ${
+             className={`mb-8 md:mb-10 transition-all duration-1000 delay-500 ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
             <p className="text-xl md:text-3xl font-serif italic text-gray-200">
-              Het kloppend hart van <span className="font-sans font-bold not-italic text-white text-shadow-sm">Sint Jansklooster</span>
+              Het kloppend hart van <span className="font-bold not-italic text-white text-shadow-sm">Sint Jansklooster</span>
             </p>
           </div>
 
           {/* 4. Description - Hidden on small mobile screens to save space */}
           <p 
-            className={`hidden sm:block text-lg md:text-xl text-gray-300 mb-8 md:mb-10 max-w-2xl mx-auto font-light leading-relaxed transition-all duration-1000 delay-700 ${
+            className={`hidden sm:block text-lg md:text-xl text-gray-300 mb-10 md:mb-12 max-w-2xl mx-auto font-light leading-relaxed transition-all duration-1000 delay-700 ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
@@ -93,16 +93,16 @@ const Hero: React.FC = () => {
           
           {/* 5. Action Buttons */}
           <div 
-            className={`flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center transition-all duration-1000 delay-900 ${
+            className={`flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center transition-all duration-1000 delay-900 ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
             <button
               onClick={() => navigate('/lid-worden')}
-              className="group relative w-full sm:w-auto px-8 py-3 md:py-4 bg-sdg-red text-white rounded-full font-bold overflow-hidden shadow-lg shadow-sdg-red/20 transition-all hover:scale-105 hover:shadow-sdg-red/40"
+              className="group relative w-full sm:w-auto px-10 py-4 bg-sdg-red text-white rounded-full font-bold overflow-hidden shadow-lg shadow-sdg-red/20 transition-all hover:scale-105 hover:shadow-sdg-red/40"
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
-              <span className="relative flex items-center justify-center gap-2">
+              <span className="relative flex items-center justify-center gap-2 font-sans tracking-wide">
                 Word Lid
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </span>
@@ -110,7 +110,7 @@ const Hero: React.FC = () => {
             
             <button
               onClick={scrollToAgenda}
-              className="w-full sm:w-auto px-8 py-3 md:py-4 rounded-full font-bold text-white border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-sm"
+              className="w-full sm:w-auto px-10 py-4 rounded-full font-bold text-white border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-sm font-sans tracking-wide"
             >
               Bekijk Agenda
             </button>
@@ -123,7 +123,7 @@ const Hero: React.FC = () => {
          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}>
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
-          <div className="flex flex-wrap justify-center md:justify-between items-center gap-4 md:gap-6 text-xs md:text-base text-gray-300 font-medium tracking-wide uppercase">
+          <div className="flex flex-wrap justify-center md:justify-between items-center gap-4 md:gap-6 text-xs md:text-base text-gray-300 font-medium tracking-wide uppercase font-sans">
              <div className="hidden md:block">
                <span className="text-sdg-gold mr-2">Est.</span> 19XX
              </div>

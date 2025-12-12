@@ -20,9 +20,24 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/lid-worden" element={<JoinUs />} />
+            
+            {/* News & Agenda */}
             <Route path="/nieuws/:slug" element={<PostDetail />} />
+            
+            {/* Top Level Pages - Explicitly defined for clarity */}
+            <Route path="/over-ons" element={<PageDetail />} />
+            <Route path="/jeugd" element={<PageDetail />} />
+
+            {/* Structure for Groups (Fanfare, Malletband) */}
+            <Route path="/groepen/:slug" element={<PageDetail />} />
+            
+            {/* Structure for Subpages of Over SDG */}
             <Route path="/over-ons/:slug" element={<PageDetail />} />
-            {/* Fallback for other routes */}
+            
+            {/* Catch-all for other top-level pages */}
+            <Route path="/:slug" element={<PageDetail />} />
+
+            {/* Fallback for 404s redirects to Home */}
             <Route path="*" element={<Home />} />
           </Routes>
         </main>

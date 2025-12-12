@@ -1,45 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPageBySlug, Page } from '../lib/wordpress';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
 
 const PageDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [page, setPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Mapping object for specific frontend routes to WordPress slugs
+  const SLUG_MAPPING: Record<string, string> = {
+    'jeugd': 'jeugd-2',
+    'over-ons': 'identiteit',
+    'over-sdg': 'identiteit'
+  };
 
   useEffect(() => {
     async function loadPage() {
-      if (slug) {
+      let requestedSlug = slug;
+      if (!requestedSlug) {
+        const pathSegments = location.pathname.split('/').filter(Boolean);
+        if (pathSegments.length > 0) {
+            requestedSlug = pathSegments[pathSegments.length - 1];
+        }
+      }
+
+      let actualSlug = requestedSlug;
+      if (requestedSlug && SLUG_MAPPING[requestedSlug]) {
+        actualSlug = SLUG_MAPPING[requestedSlug];
+      }
+
+      if (actualSlug) {
         setLoading(true);
-        // We try to fetch using the slug directly. 
-        // Note: If your WP page is nested (e.g. parent "Over ons"), 
-        // you might need to ensure the slug in WordPress matches or pass the full URI.
-        const data = await getPageBySlug(slug);
+        const data = await getPageBySlug(actualSlug);
         setPage(data);
         setLoading(false);
       }
     }
     loadPage();
-  }, [slug]);
+  }, [slug, location.pathname]);
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-32 flex justify-center">
+      <div className="min-h-screen pt-32 flex justify-center bg-slate-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sdg-red"></div>
       </div>
     );
   }
 
-  // If page is null or has the error-page ID (from our fallback logic)
+  // Fallback
   if (!page || page.id === 'error-page') {
     return (
       <div className="min-h-screen pt-32 bg-slate-50">
         <div className="container mx-auto px-6 max-w-4xl text-center">
-          <h1 className="text-3xl font-bold mb-4 text-slate-800">{page?.title || 'Pagina niet gevonden'}</h1>
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200" dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
-          <button onClick={() => navigate('/')} className="mt-8 text-sdg-red hover:underline font-semibold">
+          <h1 className="text-3xl font-serif font-bold mb-4 text-slate-800">Pagina niet gevonden</h1>
+          <button onClick={() => navigate('/')} className="mt-8 text-sdg-red hover:underline font-bold uppercase tracking-wide">
             &larr; Terug naar home
           </button>
         </div>
@@ -48,40 +65,95 @@ const PageDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header Image - Using a slightly smaller height than PostDetail */}
-      <div className="relative h-[40vh] min-h-[300px]">
-        <img 
-          src={page.featuredImage?.node?.sourceUrl || 'https://picsum.photos/1920/800?blur=2'} 
-          alt={page.title} 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-slate-900/50"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-md text-center px-4">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      
+      {/* 1. Cinematic Hero Section */}
+      <div className="relative h-[60vh] min-h-[500px] overflow-hidden">
+        {/* Background Image with Slow Zoom Effect */}
+        <div className="absolute inset-0 z-0">
+           <img 
+            src={page.featuredImage?.node?.sourceUrl || 'https://picsum.photos/1920/1080?blur=2'} 
+            alt={page.title} 
+            className="w-full h-full object-cover animate-[scale-in_20s_ease-out_forwards]"
+            style={{ animationFillMode: 'forwards' }}
+          />
+          <style>{`
+            @keyframes scale-in {
+              0% { transform: scale(1); }
+              100% { transform: scale(1.1); }
+            }
+          `}</style>
+        </div>
+
+        {/* Cinematic Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-slate-900/50 to-slate-900/90 z-10"></div>
+
+        {/* Header Content */}
+        <div className="absolute inset-0 z-20 flex flex-col justify-center items-center text-center px-6">
+          <div className="max-w-4xl opacity-0 animate-[fade-up_1s_ease-out_0.5s_forwards]">
+            {/* Kicker */}
+            <div className="flex items-center justify-center gap-3 mb-6">
+               <span className="h-[1px] w-8 bg-sdg-gold/80 inline-block"></span>
+               <span className="text-sdg-gold font-sans font-semibold tracking-[0.2em] uppercase text-xs md:text-sm">
+                 SDG Sint Jansklooster
+               </span>
+               <span className="h-[1px] w-8 bg-sdg-gold/80 inline-block"></span>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-6 drop-shadow-2xl leading-tight">
               {page.title}
             </h1>
+          </div>
         </div>
       </div>
 
-      {/* Breadcrumb / Back Link */}
-      <div className="bg-slate-50 border-b border-gray-200">
-        <div className="container mx-auto px-6 py-4">
-            <button onClick={() => navigate('/')} className="inline-flex items-center text-slate-500 hover:text-sdg-red text-sm font-semibold transition-colors">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Home / Over ons
+      {/* 2. Floating Content Card */}
+      <div className="relative z-30 container mx-auto px-4 md:px-6 -mt-24 md:-mt-32 pb-20">
+        <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden max-w-5xl mx-auto">
+          
+          {/* Top Bar inside Card */}
+          <div className="bg-white border-b border-gray-100 p-6 md:p-8 flex justify-between items-center sticky top-0 z-10 bg-opacity-95 backdrop-blur-sm">
+            <button 
+              onClick={() => navigate('/')} 
+              className="group flex items-center text-slate-500 hover:text-sdg-red transition-colors text-sm font-bold uppercase tracking-wider"
+            >
+              <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mr-3 group-hover:bg-sdg-red/10 transition-colors">
+                <ArrowLeft className="w-4 h-4" />
+              </div>
+              Terug
             </button>
+            <div className="hidden sm:block">
+              <button className="text-slate-400 hover:text-sdg-gold transition-colors">
+                <Share2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="p-8 md:p-16">
+            <div className="max-w-3xl mx-auto">
+               <div 
+                  className="prose prose-lg prose-slate hover:prose-a:text-sdg-red prose-img:rounded-2xl prose-img:shadow-lg max-w-none"
+                  dangerouslySetInnerHTML={{ __html: page.content }} 
+               />
+               
+               {/* Decorative Footer Symbol */}
+               <div className="mt-20 flex justify-center opacity-30">
+                 <div className="w-16 h-1 bg-sdg-red rounded-full"></div>
+               </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Content */}
-      <div className="container mx-auto px-6 py-16">
-        <div className="max-w-4xl mx-auto">
-          <div 
-            className="prose prose-lg prose-slate prose-headings:font-bold prose-headings:text-slate-900 prose-a:text-sdg-red hover:prose-a:text-red-800 prose-img:rounded-xl shadow-none max-w-none"
-            dangerouslySetInnerHTML={{ __html: page.content }} 
-          />
-        </div>
-      </div>
+      <style>{`
+        @keyframes fade-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };

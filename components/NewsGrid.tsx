@@ -26,30 +26,29 @@ const NewsGrid: React.FC = () => {
   }
 
   return (
-    <section id="agenda" className="py-20 bg-white">
+    <section className="py-24 bg-white">
       <div className="container mx-auto px-6">
-        <div className="flex justify-between items-end mb-12">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900">Laatste Nieuws & Agenda</h2>
-            <p className="text-slate-500 mt-2">Blijf op de hoogte van onze activiteiten.</p>
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+          <div className="max-w-2xl">
+            <h2 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4">Laatste Nieuws</h2>
+            <p className="text-slate-500 text-lg font-light">Lees de laatste updates van onze vereniging.</p>
           </div>
           <button 
             onClick={() => navigate('/nieuws')}
-            className="hidden md:flex items-center text-sdg-red font-semibold hover:text-red-900 transition-colors"
+            className="hidden md:flex items-center text-sdg-red font-semibold hover:text-red-900 transition-colors border-b-2 border-transparent hover:border-sdg-red pb-1"
           >
-            Bekijk alles <ArrowRight className="ml-2 w-4 h-4" />
+            Bekijk nieuwsarchief <ArrowRight className="ml-2 w-4 h-4" />
           </button>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
           {posts.map((post) => {
              const dateObj = new Date(post.date);
              const day = dateObj.getDate();
              const month = dateObj.toLocaleString('nl-NL', { month: 'short' });
              
              // Determine category badge
-             const category = post.categories?.nodes[0]?.name || 'Algemeen';
-             const isAgenda = category.toLowerCase() === 'agenda';
+             const category = post.categories?.nodes[0]?.name || 'Nieuws';
 
              return (
               <article 
@@ -57,47 +56,47 @@ const NewsGrid: React.FC = () => {
                 onClick={() => navigate(`/nieuws/${post.slug}`)} 
                 className="group block h-full cursor-pointer"
               >
-                <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 h-full flex flex-col transform hover:-translate-y-1">
                   {/* Image Area */}
-                  <div className="relative h-56 overflow-hidden bg-gray-200">
+                  <div className="relative h-64 overflow-hidden bg-gray-100">
                     {post.featuredImage ? (
                       <img 
                         src={post.featuredImage.node.sourceUrl} 
                         alt={post.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                       />
                     ) : (
-                       <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
-                         <Calendar className="w-12 h-12" />
+                       <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300">
+                         <Calendar className="w-16 h-16 opacity-50" />
                        </div>
                     )}
-                    <div className="absolute top-4 left-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white ${isAgenda ? 'bg-sdg-gold' : 'bg-sdg-red'}`}>
+                    <div className="absolute top-5 left-5">
+                      <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide text-white shadow-sm bg-sdg-red">
                         {category}
                       </span>
                     </div>
                   </div>
 
                   {/* Content Area */}
-                  <div className="p-6 flex flex-col flex-grow">
-                    <div className="flex items-start gap-4 mb-3">
+                  <div className="p-8 flex flex-col flex-grow">
+                    <div className="flex items-start gap-5 mb-4">
                       {/* Date Box */}
-                      <div className="flex flex-col items-center justify-center bg-slate-50 rounded-lg p-2 w-14 border border-slate-100 text-center shrink-0">
-                        <span className="text-xl font-bold text-slate-900 leading-none">{day}</span>
-                        <span className="text-xs uppercase text-slate-500 font-semibold">{month}</span>
+                      <div className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl w-16 h-16 border border-slate-100 text-center shrink-0 shadow-inner group-hover:bg-slate-100 transition-colors">
+                        <span className="text-xl font-bold text-slate-900 leading-none font-serif">{day}</span>
+                        <span className="text-xs uppercase text-slate-500 font-semibold mt-1 leading-none">{month}</span>
                       </div>
-                      <h3 className="text-xl font-bold text-slate-900 group-hover:text-sdg-red transition-colors line-clamp-2">
+                      <h3 className="text-2xl font-serif font-bold text-slate-900 group-hover:text-sdg-red transition-colors line-clamp-2 leading-tight">
                         {post.title}
                       </h3>
                     </div>
                     
                     <div 
-                      className="text-slate-600 mb-4 line-clamp-3 text-sm flex-grow"
+                      className="text-slate-600 mb-6 line-clamp-3 text-sm flex-grow font-light leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: post.excerpt }} 
                     />
                     
-                    <div className="mt-auto pt-4 border-t border-gray-50 flex items-center text-sm font-semibold text-sdg-red">
-                      Lees meer
+                    <div className="mt-auto pt-6 border-t border-gray-50 flex items-center text-sm font-bold text-sdg-red uppercase tracking-wider">
+                      Lees bericht
                     </div>
                   </div>
                 </div>
@@ -106,9 +105,9 @@ const NewsGrid: React.FC = () => {
           })}
         </div>
         
-        <div className="mt-8 text-center md:hidden">
+        <div className="mt-12 text-center md:hidden">
            <button onClick={() => navigate('/nieuws')} className="btn-secondary inline-flex items-center text-sdg-red font-semibold">
-            Bekijk alles <ArrowRight className="ml-2 w-4 h-4" />
+            Bekijk nieuwsarchief <ArrowRight className="ml-2 w-4 h-4" />
           </button>
         </div>
       </div>
