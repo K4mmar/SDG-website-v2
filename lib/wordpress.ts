@@ -48,7 +48,7 @@ export interface LidWordenPageData {
   };
 }
 
-// Fallback Mock Data (kept for robustness in case API is empty/down)
+// Fallback Mock Data (Only used if API is completely unreachable or returns empty lists)
 const MOCK_POSTS: Post[] = [
   {
     id: '1',
@@ -79,21 +79,10 @@ const MOCK_POSTS: Post[] = [
   }
 ];
 
+// MOCK_PAGES is now empty for specific pages to ensure we use the Real API.
+// If the API returns nothing, the getPageBySlug function will return a generic error page.
 const MOCK_PAGES: Record<string, Page> = {
-  'geschiedenis': {
-    id: 'p1',
-    slug: 'geschiedenis',
-    title: 'Geschiedenis',
-    content: `<h3>Een rijke historie</h3><p>Muziekvereniging SDG Sint Jansklooster kent een lange en rijke geschiedenis.</p>`,
-    featuredImage: { node: { sourceUrl: 'https://picsum.photos/1200/500?random=10' } }
-  },
-  'identiteit': {
-    id: 'p2',
-    slug: 'identiteit',
-    title: 'Identiteit',
-    content: `<h3>Wie zijn wij?</h3><p>Soli Deo Gloria is een christelijke muziekvereniging.</p>`,
-    featuredImage: { node: { sourceUrl: 'https://picsum.photos/1200/500?random=11' } }
-  }
+  // We removed 'geschiedenis', 'identiteit', etc. so they are fetched from WordPress.
 };
 
 /**
@@ -182,17 +171,18 @@ export async function getPostBySlug(slug: string) {
   `;
 
   const data = await fetchGraphQL(query, { id: slug });
-  // We don't have a specific mock for every slug, so we return a generic one if API fails
+  
   if (!data || !data.post) return { 
-    title: 'Voorbeeld bericht', 
+    title: 'Bericht niet gevonden', 
     date: new Date().toISOString(), 
-    content: '<p>Dit bericht kon niet worden geladen of bestaat niet in de demo omgeving.</p>',
+    content: '<p>Dit bericht kon niet worden geladen uit de API.</p>',
     featuredImage: { node: { sourceUrl: 'https://picsum.photos/1200/600?random=error' } }
   };
   return data.post;
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
+  // Ensure we are querying by URI, which corresponds to the slug for top-level pages
   const query = `
     query GetPageBySlug($id: ID!) {
       page(id: $id, idType: URI) {
@@ -207,16 +197,20 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
     }
   `;
 
+  console.log(`Fetching page from API: ${slug}`); // Debug logging
   const data = await fetchGraphQL(query, { id: slug });
   
   if (!data || !data.page) {
+    // Check if we have a mock fallback (usually empty now for 'over ons' pages)
     if (MOCK_PAGES[slug]) return MOCK_PAGES[slug];
+    
+    // Return a generic error object so the UI handles it gracefully
     return {
-      id: 'mock-page',
-      title: slug.charAt(0).toUpperCase() + slug.slice(1),
+      id: 'error-page',
+      title: 'Pagina niet gevonden',
       slug: slug,
-      content: '<p>Inhoud kon niet geladen worden. Controleer de API verbinding.</p>',
-      featuredImage: { node: { sourceUrl: 'https://picsum.photos/1200/500?random=99' } }
+      content: `<p>De pagina met slug <strong>'${slug}'</strong> is niet gevonden in WordPress. <br/><br/>Controleer of de pagina bestaat en gepubliceerd is.</p>`,
+      featuredImage: { node: { sourceUrl: 'https://picsum.photos/1200/500?random=404' } }
     };
   }
   return data.page;

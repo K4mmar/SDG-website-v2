@@ -12,6 +12,10 @@ const PageDetail: React.FC = () => {
   useEffect(() => {
     async function loadPage() {
       if (slug) {
+        setLoading(true);
+        // We try to fetch using the slug directly. 
+        // Note: If your WP page is nested (e.g. parent "Over ons"), 
+        // you might need to ensure the slug in WordPress matches or pass the full URI.
         const data = await getPageBySlug(slug);
         setPage(data);
         setLoading(false);
@@ -28,11 +32,17 @@ const PageDetail: React.FC = () => {
     );
   }
 
-  if (!page) {
+  // If page is null or has the error-page ID (from our fallback logic)
+  if (!page || page.id === 'error-page') {
     return (
-      <div className="min-h-screen pt-32 text-center container mx-auto px-6">
-        <h1 className="text-2xl font-bold mb-4">Pagina niet gevonden</h1>
-        <button onClick={() => navigate('/')} className="text-sdg-red hover:underline">Terug naar home</button>
+      <div className="min-h-screen pt-32 bg-slate-50">
+        <div className="container mx-auto px-6 max-w-4xl text-center">
+          <h1 className="text-3xl font-bold mb-4 text-slate-800">{page?.title || 'Pagina niet gevonden'}</h1>
+          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200" dangerouslySetInnerHTML={{ __html: page?.content || '' }} />
+          <button onClick={() => navigate('/')} className="mt-8 text-sdg-red hover:underline font-semibold">
+            &larr; Terug naar home
+          </button>
+        </div>
       </div>
     );
   }
