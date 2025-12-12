@@ -88,7 +88,7 @@ const Navbar: React.FC = () => {
 
             {/* Over ons Dropdown */}
             <div 
-              className="relative group"
+              className="relative group h-full flex items-center"
               onMouseEnter={() => setDropdownOpen(true)}
               onMouseLeave={() => setDropdownOpen(false)}
             >
@@ -103,16 +103,19 @@ const Navbar: React.FC = () => {
                </button>
                
                {/* Dropdown Menu */}
-               <div className={`absolute left-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 transition-all duration-200 origin-top-left ${dropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-                 {overOnsLinks.map((subLink) => (
-                   <button
-                     key={subLink.name}
-                     onClick={() => handleNavClick(null, subLink.path)}
-                     className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-sdg-red transition-colors"
-                   >
-                     {subLink.name}
-                   </button>
-                 ))}
+               {/* Added top-full and pt-2 to create an invisible bridge for the mouse */}
+               <div className={`absolute left-0 top-full pt-2 w-48 transition-all duration-200 origin-top-left ${dropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                 <div className="bg-white rounded-md shadow-xl py-2 border border-gray-100">
+                   {overOnsLinks.map((subLink) => (
+                     <button
+                       key={subLink.name}
+                       onClick={() => handleNavClick(null, subLink.path)}
+                       className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-sdg-red transition-colors"
+                     >
+                       {subLink.name}
+                     </button>
+                   ))}
+                 </div>
                </div>
             </div>
 

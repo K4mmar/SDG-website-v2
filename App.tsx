@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HashRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -9,6 +9,8 @@ import PageDetail from './pages/PageDetail';
 import { Menu, X } from 'lucide-react';
 
 // Main App Component simulating Layout
+// Note: Using MemoryRouter to ensure compatibility with restricted preview environments (blob origins).
+// For production on Netlify, you can switch this back to HashRouter or BrowserRouter.
 const App: React.FC = () => {
   return (
     <Router>
