@@ -73,7 +73,7 @@ const fixContentUrls = (html: string | undefined) => {
 /**
  * ULTRA ROBUST FETCH STRATEGY
  * Mobile devices are extremely strict about CORS and SSL chains.
- * We attempt 3 distinct strategies to get the data.
+ * We attempt 4 distinct strategies to get the data.
  */
 async function fetchGraphQL(query: string, variables?: any) {
   const body = JSON.stringify({ query, variables });
@@ -124,7 +124,7 @@ async function fetchGraphQL(query: string, variables?: any) {
     console.warn('Strategy 2 (GET) failed:', error);
   }
 
-  // STRATEGY 3: Proxy (The "Nuclear Option")
+  // STRATEGY 3: Proxy 1 (CorsProxy.io)
   try {
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(API_URL)}`;
     const res = await fetch(proxyUrl, {
@@ -137,17 +137,43 @@ async function fetchGraphQL(query: string, variables?: any) {
     if (res.ok) {
       const json = await res.json();
       if (!json.errors) return json.data;
-      lastErrorDetail = `Proxy GraphQL Error: ${json.errors[0]?.message}`;
+      lastErrorDetail = `Proxy 1 GraphQL Error: ${json.errors[0]?.message}`;
     } else {
-      lastErrorDetail = `Proxy Error: ${res.status} ${res.statusText}`;
+      lastErrorDetail = `Proxy 1 Error: ${res.status} ${res.statusText}`;
     }
   } catch (error) {
-    lastErrorDetail = `Proxy Exception: ${error instanceof Error ? error.message : String(error)}`;
-    console.error('All fetch strategies failed:', error);
+    lastErrorDetail = `Proxy 1 Exception: ${error instanceof Error ? error.message : String(error)}`;
+    console.warn('Strategy 3 (CorsProxy) failed:', error);
+  }
+
+  // STRATEGY 4: Proxy 2 (AllOrigins) - Often more lenient with SSL than CorsProxy
+  try {
+    const urlParams = new URLSearchParams();
+    urlParams.append('query', query);
+    if (variables) urlParams.append('variables', JSON.stringify(variables));
+    const targetUrl = `${API_URL}?${urlParams.toString()}`;
+    
+    // We use the raw endpoint of allorigins to get the JSON directly
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+    
+    const res = await fetch(proxyUrl, {
+        method: 'GET',
+        // No headers to stay simple
+    });
+    
+    if (res.ok) {
+        const json = await res.json();
+        if (!json.errors) return json.data;
+        lastErrorDetail = `Proxy 2 GraphQL Error: ${json.errors[0]?.message}`;
+    } else {
+        lastErrorDetail = `Proxy 2 Error: ${res.status} ${res.statusText}`;
+    }
+  } catch (error) {
+     lastErrorDetail = `Proxy 2 Exception: ${error instanceof Error ? error.message : String(error)}`;
+     console.error('Strategy 4 (AllOrigins) failed:', error);
   }
 
   // If we reach here, ALL strategies failed. 
-  // We throw an error so the UI shows the "Error" state instead of "Empty" state.
   throw new Error(`Connection failed. Details: ${lastErrorDetail}`);
 }
 
