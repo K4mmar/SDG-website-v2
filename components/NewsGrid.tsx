@@ -1,26 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getNewsPosts, Post } from '../lib/wordpress';
-import { Calendar, ArrowRight, Newspaper } from 'lucide-react';
+import { Calendar, ArrowRight, Newspaper, RefreshCw } from 'lucide-react';
 
 const NewsGrid: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    async function loadData() {
+  async function loadData() {
+    setLoading(true);
+    setError(false);
+    try {
       const data = await getNewsPosts();
       setPosts(data);
+      // If we got an array but it's empty, technically it's not an error, just no news.
+      // But if fetch returned 'undefined' due to network error, getNewsPosts returns [].
+      // To differentiate, we rely on the fact that if getNewsPosts returns [], it handled the error internally.
+    } catch (e) {
+      console.error(e);
+      setError(true);
+    } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
     loadData();
   }, []);
 
   if (loading) {
     return (
       <div className="py-20 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sdg-red mx-auto"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sdg-red mx-auto mb-4"></div>
+        <p className="text-slate-400 text-sm">Nieuws laden...</p>
       </div>
     );
   }
@@ -47,7 +61,15 @@ const NewsGrid: React.FC = () => {
           <div className="bg-slate-50 rounded-3xl border border-gray-200 p-12 text-center">
              <Newspaper className="w-16 h-16 text-slate-300 mx-auto mb-4" />
              <h3 className="text-xl font-bold text-slate-700 mb-2">Geen nieuwsberichten</h3>
-             <p className="text-slate-500">Er zijn momenteel geen nieuwsberichten beschikbaar.</p>
+             <p className="text-slate-500 mb-6">
+               Er konden geen berichten worden opgehaald. Controleer je internetverbinding.
+             </p>
+             <button 
+               onClick={loadData}
+               className="inline-flex items-center gap-2 px-6 py-2 bg-white border border-gray-300 rounded-full text-slate-700 font-bold hover:bg-gray-50 transition-colors"
+             >
+               <RefreshCw className="w-4 h-4" /> Probeer opnieuw
+             </button>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">

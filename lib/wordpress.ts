@@ -50,26 +50,46 @@ export interface LidWordenPageData {
   };
 }
 
-// HELPER: Forces a URL to be HTTPS. 
-// This acts as a safety net if the database still contains http links.
-const ensureHttps = (url: string | undefined) => {
+// HELPER: Proxies an image URL through Weserv.
+// This ensures the image is served over valid HTTPS, fixes Mixed Content,
+// and optimizes the image for web (WebP).
+const proxyImage = (url?: string) => {
   if (!url) return undefined;
-  return url.replace('http://', 'https://');
+  // If it's already a data URL or already proxied, leave it
+  if (url.startsWith('data:') || url.includes('images.weserv.nl')) return url;
+  
+  // Clean URL
+  const cleanUrl = url.replace(/^https?:\/\//, '');
+  return `https://images.weserv.nl/?url=${cleanUrl}&output=webp&q=80`;
 };
 
 // HELPER: Fixes content strings (HTML) to ensure images inside the text are also HTTPS
 const fixContentUrls = (html: string | undefined) => {
   if (!html) return '';
-  return html.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
+  // 1. Replace HTTP domain links
+  let clean = html.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
+  
+  // 2. Proxy embedded images to ensure they load on mobile
+  const domainPattern = 'api.sdgsintjansklooster.nl';
+  const imgRegex = new RegExp(`src=["'](https?:\\/\\/${domainPattern}[^"']+)["']`, 'g');
+  
+  clean = clean.replace(imgRegex, (match, srcUrl) => {
+      return `src="${proxyImage(srcUrl)}"`;
+  });
+
+  return clean;
 };
 
 /**
- * Standard Fetch Wrapper for GraphQL
+ * Robust Fetch Wrapper for GraphQL with Fallback
+ * Mobile devices often fail on direct fetch due to strict SSL/CORS.
+ * This wrapper tries direct first, then falls back to a proxy.
  */
 async function fetchGraphQL(query: string, variables?: any) {
   const headers = { 'Content-Type': 'application/json' };
   const body = JSON.stringify({ query, variables });
 
+  // 1. Try Direct Connection
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -77,22 +97,32 @@ async function fetchGraphQL(query: string, variables?: any) {
       body,
     });
 
-    if (!res.ok) {
-      console.error(`API Error: ${res.status}`);
-      return null;
+    if (res.ok) {
+      const json = await res.json();
+      if (!json.errors) return json.data;
     }
-
-    const json = await res.json();
-    if (json.errors) {
-      console.error('GraphQL Errors:', json.errors);
-      return null;
-    }
-
-    return json.data;
   } catch (error) {
-    console.error('Network Error:', error);
-    return null;
+    console.warn('Direct fetch failed, attempting fallback...', error);
   }
+
+  // 2. Fallback: CorsProxy (Fixes mobile SSL/CORS issues)
+  try {
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(API_URL)}`;
+    const res = await fetch(proxyUrl, {
+      method: 'POST',
+      headers,
+      body,
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      if (!json.errors) return json.data;
+    }
+  } catch (error) {
+    console.error('All fetch attempts failed:', error);
+  }
+
+  return null;
 }
 
 export async function getNewsPosts(): Promise<Post[]> {
@@ -130,7 +160,7 @@ export async function getNewsPosts(): Promise<Post[]> {
       featuredImage: post.featuredImage ? {
         node: {
           ...post.featuredImage.node,
-          sourceUrl: ensureHttps(post.featuredImage.node.sourceUrl) || ''
+          sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || ''
         }
       } : undefined
     }));
@@ -163,7 +193,7 @@ export async function getAllPosts(): Promise<Post[]> {
       featuredImage: post.featuredImage ? {
         node: {
           ...post.featuredImage.node,
-          sourceUrl: ensureHttps(post.featuredImage.node.sourceUrl) || ''
+          sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || ''
         }
       } : undefined
     }));
@@ -227,7 +257,7 @@ export async function getPostBySlug(slug: string) {
     featuredImage: post.featuredImage ? {
       node: {
         ...post.featuredImage.node,
-        sourceUrl: ensureHttps(post.featuredImage.node.sourceUrl)
+        sourceUrl: proxyImage(post.featuredImage.node.sourceUrl)
       }
     } : undefined
   };
@@ -268,7 +298,7 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
       featuredImage: pageData.featuredImage ? {
         node: {
           ...pageData.featuredImage.node,
-          sourceUrl: ensureHttps(pageData.featuredImage.node.sourceUrl) || ''
+          sourceUrl: proxyImage(pageData.featuredImage.node.sourceUrl) || ''
         }
       } : undefined
     };
