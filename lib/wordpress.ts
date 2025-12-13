@@ -51,50 +51,43 @@ export interface LidWordenPageData {
 }
 
 // HELPER: Proxies an image URL through Weserv.
-// This ensures the image is served over valid HTTPS, fixes Mixed Content,
-// and optimizes the image for web (WebP).
 const proxyImage = (url?: string) => {
   if (!url) return undefined;
-  // If it's already a data URL or already proxied, leave it
   if (url.startsWith('data:') || url.includes('images.weserv.nl')) return url;
-  
-  // Clean URL
   const cleanUrl = url.replace(/^https?:\/\//, '');
   return `https://images.weserv.nl/?url=${cleanUrl}&output=webp&q=80`;
 };
 
-// HELPER: Fixes content strings (HTML) to ensure images inside the text are also HTTPS
+// HELPER: Fixes content strings (HTML)
 const fixContentUrls = (html: string | undefined) => {
   if (!html) return '';
-  // 1. Replace HTTP domain links
   let clean = html.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
-  
-  // 2. Proxy embedded images to ensure they load on mobile
   const domainPattern = 'api.sdgsintjansklooster.nl';
   const imgRegex = new RegExp(`src=["'](https?:\\/\\/${domainPattern}[^"']+)["']`, 'g');
-  
   clean = clean.replace(imgRegex, (match, srcUrl) => {
       return `src="${proxyImage(srcUrl)}"`;
   });
-
   return clean;
 };
 
 /**
- * Robust Fetch Wrapper for GraphQL with Fallback
- * Mobile devices often fail on direct fetch due to strict SSL/CORS.
- * This wrapper tries direct first, then falls back to a proxy.
+ * ULTRA ROBUST FETCH STRATEGY
+ * Mobile devices are extremely strict about CORS and SSL chains.
+ * We attempt 3 distinct strategies to get the data.
  */
 async function fetchGraphQL(query: string, variables?: any) {
   const headers = { 'Content-Type': 'application/json' };
   const body = JSON.stringify({ query, variables });
 
-  // 1. Try Direct Connection
+  // STRATEGY 1: Standard POST (Best for computers)
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers,
       body,
+      mode: 'cors',
+      credentials: 'omit', // Crucial for mobile to avoid cookie issues
+      cache: 'no-store',   // Ensure fresh data
     });
 
     if (res.ok) {
@@ -102,16 +95,43 @@ async function fetchGraphQL(query: string, variables?: any) {
       if (!json.errors) return json.data;
     }
   } catch (error) {
-    console.warn('Direct fetch failed, attempting fallback...', error);
+    console.warn('Strategy 1 (POST) failed, trying fallback...', error);
   }
 
-  // 2. Fallback: CorsProxy (Fixes mobile SSL/CORS issues)
+  // STRATEGY 2: GET Request (The "Secret Weapon" for mobile)
+  // GET requests bypass many strict CORS preflight checks that block POSTs.
+  try {
+    // Construct query parameters manually
+    const urlParams = new URLSearchParams();
+    urlParams.append('query', query);
+    if (variables) urlParams.append('variables', JSON.stringify(variables));
+
+    const getUrl = `${API_URL}?${urlParams.toString()}`;
+    
+    const res = await fetch(getUrl, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors',
+        credentials: 'omit',
+    });
+
+    if (res.ok) {
+        const json = await res.json();
+        if (!json.errors) return json.data;
+    }
+  } catch (error) {
+    console.warn('Strategy 2 (GET) failed, trying proxy...', error);
+  }
+
+  // STRATEGY 3: Proxy (The "Nuclear Option")
+  // If direct connection is totally blocked, route through a neutral third party.
   try {
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(API_URL)}`;
     const res = await fetch(proxyUrl, {
       method: 'POST',
       headers,
       body,
+      cache: 'no-store'
     });
 
     if (res.ok) {
@@ -119,7 +139,7 @@ async function fetchGraphQL(query: string, variables?: any) {
       if (!json.errors) return json.data;
     }
   } catch (error) {
-    console.error('All fetch attempts failed:', error);
+    console.error('All fetch strategies failed:', error);
   }
 
   return null;
@@ -153,7 +173,6 @@ export async function getNewsPosts(): Promise<Post[]> {
       return postDate >= oneYearAgo;
     });
 
-    // Clean up URLs before returning
     return filteredPosts.slice(0, 6).map((post: Post) => ({
       ...post,
       excerpt: fixContentUrls(post.excerpt) || '',
