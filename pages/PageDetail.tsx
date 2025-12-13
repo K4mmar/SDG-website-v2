@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getPageBySlug, Page } from '../lib/wordpress';
+import { getPageBySlug, Page, proxyImage, sanitizeContent } from '../lib/wordpress';
 import { ArrowLeft, Share2 } from 'lucide-react';
 
 const PageDetail: React.FC = () => {
@@ -64,6 +64,10 @@ const PageDetail: React.FC = () => {
     );
   }
 
+  // Sanitize
+  const heroImage = page.featuredImage ? proxyImage(page.featuredImage.node.sourceUrl) : 'https://picsum.photos/1920/1080?blur=2';
+  const cleanContent = sanitizeContent(page.content);
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       
@@ -72,7 +76,7 @@ const PageDetail: React.FC = () => {
         {/* Background Image with Slow Zoom Effect */}
         <div className="absolute inset-0 z-0">
            <img 
-            src={page.featuredImage?.node?.sourceUrl || 'https://picsum.photos/1920/1080?blur=2'} 
+            src={heroImage} 
             alt={page.title} 
             className="w-full h-full object-cover animate-[scale-in_20s_ease-out_forwards]"
             style={{ animationFillMode: 'forwards' }}
@@ -135,7 +139,7 @@ const PageDetail: React.FC = () => {
             <div className="max-w-3xl mx-auto">
                <div 
                   className="prose prose-lg prose-slate hover:prose-a:text-sdg-red prose-img:rounded-2xl prose-img:shadow-lg max-w-none"
-                  dangerouslySetInnerHTML={{ __html: page.content }} 
+                  dangerouslySetInnerHTML={{ __html: cleanContent }} 
                />
                
                {/* Decorative Footer Symbol */}

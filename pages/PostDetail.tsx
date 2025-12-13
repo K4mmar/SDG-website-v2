@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getPostBySlug } from '../lib/wordpress';
+import { getPostBySlug, proxyImage, sanitizeContent } from '../lib/wordpress';
 import { getUpcomingEvents, CalendarEvent } from '../lib/calendar';
 import { ArrowLeft, Calendar, Tag, Share2, Clock, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
@@ -56,6 +56,10 @@ const PostDetail: React.FC = () => {
   const dateObj = new Date(post.date);
   const dateStr = dateObj.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
   const timeStr = dateObj.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  
+  // Sanitize images
+  const heroImage = post.featuredImage ? proxyImage(post.featuredImage.node.sourceUrl) : 'https://picsum.photos/1200/600?blur=5';
+  const cleanContent = sanitizeContent(post.content);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
@@ -64,7 +68,7 @@ const PostDetail: React.FC = () => {
       <div className="relative h-[60vh] min-h-[500px] overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src={post.featuredImage?.node?.sourceUrl || 'https://picsum.photos/1200/600?blur=5'} 
+            src={heroImage} 
             alt={post.title} 
             className="w-full h-full object-cover animate-[scale-in_20s_ease-out_forwards]"
           />
@@ -129,7 +133,7 @@ const PostDetail: React.FC = () => {
 
                     <div 
                         className="prose prose-lg prose-slate hover:prose-a:text-sdg-red prose-img:rounded-xl prose-img:shadow-md max-w-none"
-                        dangerouslySetInnerHTML={{ __html: post.content }} 
+                        dangerouslySetInnerHTML={{ __html: cleanContent }} 
                     />
 
                     {/* Footer CTA in Content */}

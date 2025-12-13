@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getNewsPosts, Post } from '../lib/wordpress';
+import { getNewsPosts, Post, proxyImage, sanitizeContent } from '../lib/wordpress';
 import { Calendar, ArrowRight, Newspaper } from 'lucide-react';
 
 const NewsGrid: React.FC = () => {
@@ -58,6 +58,10 @@ const NewsGrid: React.FC = () => {
                
                // Determine category badge
                const category = post.categories?.nodes[0]?.name || 'Nieuws';
+               
+               // Enforce Proxy for Images
+               const imageUrl = post.featuredImage ? proxyImage(post.featuredImage.node.sourceUrl) : null;
+               const cleanExcerpt = sanitizeContent(post.excerpt);
 
                return (
                 <article 
@@ -68,10 +72,11 @@ const NewsGrid: React.FC = () => {
                   <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 h-full flex flex-col transform hover:-translate-y-1">
                     {/* Image Area */}
                     <div className="relative h-64 overflow-hidden bg-gray-100">
-                      {post.featuredImage ? (
+                      {imageUrl ? (
                         <img 
-                          src={post.featuredImage.node.sourceUrl} 
+                          src={imageUrl} 
                           alt={post.title} 
+                          loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                         />
                       ) : (
@@ -101,7 +106,7 @@ const NewsGrid: React.FC = () => {
                       
                       <div 
                         className="text-slate-600 mb-6 line-clamp-3 text-sm flex-grow font-light leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: post.excerpt }} 
+                        dangerouslySetInnerHTML={{ __html: cleanExcerpt }} 
                       />
                       
                       <div className="mt-auto pt-6 border-t border-gray-50 flex items-center text-sm font-bold text-sdg-red uppercase tracking-wider">
