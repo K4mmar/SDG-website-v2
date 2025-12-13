@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getNewsPosts, Post, proxyImage, sanitizeContent } from '../lib/wordpress';
+import { getNewsPosts, Post } from '../lib/wordpress';
 import { Calendar, ArrowRight, Newspaper } from 'lucide-react';
 
 const NewsGrid: React.FC = () => {
@@ -47,7 +47,7 @@ const NewsGrid: React.FC = () => {
           <div className="bg-slate-50 rounded-3xl border border-gray-200 p-12 text-center">
              <Newspaper className="w-16 h-16 text-slate-300 mx-auto mb-4" />
              <h3 className="text-xl font-bold text-slate-700 mb-2">Geen nieuwsberichten</h3>
-             <p className="text-slate-500">Er zijn momenteel geen nieuwsberichten beschikbaar of de verbinding met de server is verbroken.</p>
+             <p className="text-slate-500">Er zijn momenteel geen nieuwsberichten beschikbaar.</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
@@ -59,9 +59,7 @@ const NewsGrid: React.FC = () => {
                // Determine category badge
                const category = post.categories?.nodes[0]?.name || 'Nieuws';
                
-               // Enforce Proxy for Images
-               const imageUrl = post.featuredImage ? proxyImage(post.featuredImage.node.sourceUrl) : null;
-               const cleanExcerpt = sanitizeContent(post.excerpt);
+               const imageUrl = post.featuredImage?.node.sourceUrl;
 
                return (
                 <article 
@@ -106,7 +104,7 @@ const NewsGrid: React.FC = () => {
                       
                       <div 
                         className="text-slate-600 mb-6 line-clamp-3 text-sm flex-grow font-light leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: cleanExcerpt }} 
+                        dangerouslySetInnerHTML={{ __html: post.excerpt }} 
                       />
                       
                       <div className="mt-auto pt-6 border-t border-gray-50 flex items-center text-sm font-bold text-sdg-red uppercase tracking-wider">

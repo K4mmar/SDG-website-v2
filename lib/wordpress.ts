@@ -3,14 +3,6 @@ const API_URL = (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_WORD
   ? process.env.NEXT_PUBLIC_WORDPRESS_API_URL 
   : 'https://api.sdgsintjansklooster.nl/graphql';
 
-// List of Proxies to try in order. 
-// 1. Corsproxy.io (Fast, reliable)
-// 2. AllOrigins (Good backup)
-const PROXIES = [
-  'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url='
-];
-
 export interface Post {
   id: string;
   title: string;
@@ -59,98 +51,36 @@ export interface LidWordenPageData {
 }
 
 /**
- * HELPER: Proxies an image URL through Weserv.
- * This ensures the image is served over valid HTTPS, fixes Mixed Content,
- * and optimizes the image for web (WebP).
- */
-export function proxyImage(url?: string): string {
-  if (!url) return '';
-  // If it's already a data URL or already proxied, leave it
-  if (url.startsWith('data:') || url.includes('images.weserv.nl')) return url;
-  
-  // Strip protocol (http:// or https://) to prevent double encoding issues
-  const cleanUrl = url.replace(/^https?:\/\//, '');
-  
-  // Return proxied URL
-  return `https://images.weserv.nl/?url=${cleanUrl}&output=webp&q=80`;
-}
-
-/**
- * HELPER: Sanitizes HTML content.
- * 1. Upgrades HTTP links to HTTPS.
- * 2. Rewrites <img> src attributes to use the Weserv proxy.
- * This guarantees no "Mixed Content" warnings appear in the browser.
- */
-export function sanitizeContent(html: string): string {
-  if (!html) return '';
-
-  // 1. Basic Protocol Upgrade for links
-  let clean = html.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl')
-                  .replace(/http:\/\/www\.sdgsintjansklooster\.nl/g, 'https://www.sdgsintjansklooster.nl');
-  
-  // 2. "Nuclear" Image Fix: Find all images pointing to our WP install and route them through Proxy
-  // This Regex looks for src="..." containing the WP domain
-  const domainPattern = 'api.sdgsintjansklooster.nl';
-  const imgRegex = new RegExp(`src=["'](https?:\\/\\/${domainPattern}[^"']+)["']`, 'g');
-  
-  clean = clean.replace(imgRegex, (match, srcUrl) => {
-      return `src="${proxyImage(srcUrl)}"`;
-  });
-
-  return clean;
-}
-
-/**
- * Robust fetch wrapper for GraphQL with Multi-Proxy Fallback
+ * Standard Fetch Wrapper for GraphQL
  */
 async function fetchGraphQL(query: string, variables?: any) {
   const headers = { 'Content-Type': 'application/json' };
   const body = JSON.stringify({ query, variables });
 
-  const parseResponse = async (res: Response) => {
-    const text = await res.text();
-    // Pre-clean the raw JSON text to avoid http strings
-    const cleanText = text.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
-    
-    try {
-      const json = JSON.parse(cleanText);
-      if (json.errors) {
-        console.warn('GraphQL Query Error:', JSON.stringify(json.errors, null, 2));
-        return null;
-      }
-      return json.data;
-    } catch (e) {
-      console.error("Failed to parse WP response", e);
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers,
+      body,
+      // 'credentials': 'include' // Uncomment if you need cookies/auth, usually not for public GET
+    });
+
+    if (!res.ok) {
+      console.error(`API Error: ${res.status}`);
       return null;
     }
-  };
 
-  // 1. Try Direct (Works on Desktop often)
-  try {
-    const res = await fetch(API_URL, { method: 'POST', headers, body });
-    if (res.ok) return await parseResponse(res);
-    throw new Error('Direct fetch failed');
-  } catch (directError) {
-    console.warn('Direct fetch failed, trying proxies...', directError);
-  }
-
-  // 2. Try Proxies in order (Fixes Mobile/SSL/CORS)
-  for (const proxyBase of PROXIES) {
-    try {
-      // Encode API URL for the proxy
-      const proxyUrl = `${proxyBase}${encodeURIComponent(API_URL)}`;
-      const res = await fetch(proxyUrl, { method: 'POST', headers, body });
-      
-      if (res.ok) {
-        return await parseResponse(res);
-      }
-    } catch (proxyError) {
-      console.warn(`Proxy ${proxyBase} failed`, proxyError);
+    const json = await res.json();
+    if (json.errors) {
+      console.error('GraphQL Errors:', json.errors);
+      return null;
     }
-  }
 
-  console.error('All fetch attempts failed.');
-  return null;
+    return json.data;
+  } catch (error) {
+    console.error('Network Error:', error);
+    return null;
+  }
 }
 
 export async function getNewsPosts(): Promise<Post[]> {
