@@ -77,6 +77,7 @@ const fixContentUrls = (html: string | undefined) => {
  */
 async function fetchGraphQL(query: string, variables?: any) {
   const body = JSON.stringify({ query, variables });
+  let lastErrorDetail = '';
 
   // STRATEGY 1: Standard POST (Best for computers)
   try {
@@ -84,20 +85,21 @@ async function fetchGraphQL(query: string, variables?: any) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
-      // Removed 'next' property as it is specific to Next.js and causes type errors in standard React
     });
 
     if (res.ok) {
       const json = await res.json();
       if (!json.errors) return json.data;
+      lastErrorDetail = `GraphQL Error: ${json.errors[0]?.message}`;
+    } else {
+      lastErrorDetail = `POST Error: ${res.status} ${res.statusText}`;
     }
   } catch (error) {
-    console.warn('Strategy 1 (POST) failed, trying fallback...', error);
+    lastErrorDetail = `POST Exception: ${error instanceof Error ? error.message : String(error)}`;
+    console.warn('Strategy 1 (POST) failed:', error);
   }
 
   // STRATEGY 2: "Simple" GET Request (The Mobile Fix)
-  // By removing custom headers (like Content-Type), we trigger a "Simple Request".
-  // Mobile browsers SKIP the Preflight (OPTIONS) check for Simple Requests.
   try {
     const urlParams = new URLSearchParams();
     urlParams.append('query', query);
@@ -113,13 +115,16 @@ async function fetchGraphQL(query: string, variables?: any) {
     if (res.ok) {
         const json = await res.json();
         if (!json.errors) return json.data;
+        lastErrorDetail = `GET GraphQL Error: ${json.errors[0]?.message}`;
+    } else {
+        lastErrorDetail = `GET Error: ${res.status} ${res.statusText}`;
     }
   } catch (error) {
-    console.warn('Strategy 2 (GET) failed, trying proxy...', error);
+    lastErrorDetail = `GET Exception: ${error instanceof Error ? error.message : String(error)}`;
+    console.warn('Strategy 2 (GET) failed:', error);
   }
 
   // STRATEGY 3: Proxy (The "Nuclear Option")
-  // If direct connection is totally blocked, route through a neutral third party.
   try {
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(API_URL)}`;
     const res = await fetch(proxyUrl, {
@@ -132,14 +137,18 @@ async function fetchGraphQL(query: string, variables?: any) {
     if (res.ok) {
       const json = await res.json();
       if (!json.errors) return json.data;
+      lastErrorDetail = `Proxy GraphQL Error: ${json.errors[0]?.message}`;
+    } else {
+      lastErrorDetail = `Proxy Error: ${res.status} ${res.statusText}`;
     }
   } catch (error) {
+    lastErrorDetail = `Proxy Exception: ${error instanceof Error ? error.message : String(error)}`;
     console.error('All fetch strategies failed:', error);
-    // Throw error so UI can show it
-    throw new Error(error instanceof Error ? error.message : 'Unknown Network Error');
   }
 
-  return null;
+  // If we reach here, ALL strategies failed. 
+  // We throw an error so the UI shows the "Error" state instead of "Empty" state.
+  throw new Error(`Connection failed. Details: ${lastErrorDetail}`);
 }
 
 export async function getNewsPosts(): Promise<Post[]> {
@@ -159,6 +168,7 @@ export async function getNewsPosts(): Promise<Post[]> {
     }
   `;
 
+  // This will now THROW if it fails, which is what we want for debugging.
   const data = await fetchGraphQL(query);
   
   if (data?.posts?.nodes) {

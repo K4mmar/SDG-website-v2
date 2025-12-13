@@ -18,7 +18,7 @@ const NewsGrid: React.FC = () => {
     } catch (e) {
       console.error(e);
       // Capture the actual error message
-      setError(e instanceof Error ? e.message : 'Onbekende fout');
+      setError(e instanceof Error ? e.message : JSON.stringify(e));
     } finally {
       setLoading(false);
     }
@@ -58,15 +58,17 @@ const NewsGrid: React.FC = () => {
         {(posts.length === 0 || error) ? (
           <div className="bg-slate-50 rounded-3xl border border-gray-200 p-12 text-center">
              <Newspaper className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-             <h3 className="text-xl font-bold text-slate-700 mb-2">Geen nieuwsberichten</h3>
+             <h3 className="text-xl font-bold text-slate-700 mb-2">
+                 {error ? 'Verbindingsfout' : 'Geen nieuwsberichten'}
+             </h3>
              <p className="text-slate-500 mb-6">
-               Er konden geen berichten worden opgehaald. Controleer je internetverbinding.
+               {error ? 'Er is iets misgegaan bij het ophalen van het nieuws.' : 'Er zijn geen recente nieuwsberichten gevonden.'}
              </p>
              
              {error && (
-                <div className="mb-6 bg-red-50 border border-red-100 rounded-lg p-3 text-red-600 text-xs font-mono inline-block max-w-md mx-auto break-all">
-                    <div className="flex items-center justify-center gap-2 mb-1 font-bold">
-                        <AlertCircle className="w-3 h-3" /> Foutmelding details:
+                <div className="mb-6 bg-red-50 border border-red-100 rounded-lg p-3 text-red-600 text-xs font-mono inline-block max-w-full md:max-w-md mx-auto break-words text-left">
+                    <div className="flex items-center gap-2 mb-2 font-bold uppercase tracking-wider text-[10px]">
+                        <AlertCircle className="w-3 h-3" /> Technical Details:
                     </div>
                     {error}
                 </div>
