@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Fix for "Not Secure" / Mixed Content: Forces browser to load all HTTP resources as HTTPS -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    
     <title>SDG Sint Jansklooster</title>
     <!-- Updated Tailwind CDN to include the typography plugin -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>

@@ -60,14 +60,26 @@ async function fetchGraphQL(query: string, variables?: any) {
   const headers = { 'Content-Type': 'application/json' };
   const body = JSON.stringify({ query, variables });
 
-  // Helper to parse response
+  // Helper to parse response and sanitize HTTP links to HTTPS
   const parseResponse = async (res: Response) => {
-    const json = await res.json();
-    if (json.errors) {
-      console.warn('GraphQL Query Error:', JSON.stringify(json.errors, null, 2));
+    const text = await res.text();
+    
+    // MIXED CONTENT FIX:
+    // Regex replace all instances of "http://api.sdgsintjansklooster.nl" with "https://..."
+    // This ensures that even if the WP database returns http images, we use https.
+    const cleanText = text.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
+
+    try {
+      const json = JSON.parse(cleanText);
+      if (json.errors) {
+        console.warn('GraphQL Query Error:', JSON.stringify(json.errors, null, 2));
+        return null;
+      }
+      return json.data;
+    } catch (e) {
+      console.error("Failed to parse WP response", e);
       return null;
     }
-    return json.data;
   };
 
   try {
