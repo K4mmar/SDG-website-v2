@@ -3,6 +3,9 @@ const API_URL = (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_WORD
   ? process.env.NEXT_PUBLIC_WORDPRESS_API_URL 
   : 'https://api.sdgsintjansklooster.nl/graphql';
 
+// Fallback Proxy URL to resolve CORS/SSL issues on mobile devices
+const PROXY_BASE = 'https://corsproxy.io/?';
+
 export interface Post {
   id: string;
   title: string;
@@ -51,26 +54,60 @@ export interface LidWordenPageData {
 }
 
 /**
- * Robust fetch wrapper for GraphQL
+ * Robust fetch wrapper for GraphQL with Proxy Fallback
  */
 async function fetchGraphQL(query: string, variables?: any) {
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ query, variables }),
-    });
+  const headers = { 'Content-Type': 'application/json' };
+  const body = JSON.stringify({ query, variables });
 
+  // Helper to parse response
+  const parseResponse = async (res: Response) => {
     const json = await res.json();
     if (json.errors) {
       console.warn('GraphQL Query Error:', JSON.stringify(json.errors, null, 2));
       return null;
     }
     return json.data;
+  };
+
+  try {
+    // Attempt 1: Direct Fetch
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers,
+      body,
+    });
+
+    if (!res.ok) {
+        throw new Error(`Direct fetch failed with status: ${res.status}`);
+    }
+    
+    return await parseResponse(res);
+
   } catch (error) {
-    console.warn('API fetch failed.', error);
-    return null;
+    console.warn('Direct API fetch failed. Retrying with CORS Proxy...', error);
+    
+    try {
+        // Attempt 2: Fetch via Proxy (fixes Mobile/CORS/SSL issues)
+        // We encode the API URL to pass it through the proxy correctly
+        const proxyUrl = `${PROXY_BASE}${encodeURIComponent(API_URL)}`;
+        
+        const res = await fetch(proxyUrl, {
+            method: 'POST',
+            headers,
+            body,
+        });
+
+        if (!res.ok) {
+            throw new Error(`Proxy fetch failed with status: ${res.status}`);
+        }
+
+        return await parseResponse(res);
+
+    } catch (proxyError) {
+        console.error('All API fetch attempts failed.', proxyError);
+        return null;
+    }
   }
 }
 
