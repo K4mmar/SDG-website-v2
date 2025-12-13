@@ -76,18 +76,15 @@ const fixContentUrls = (html: string | undefined) => {
  * We attempt 3 distinct strategies to get the data.
  */
 async function fetchGraphQL(query: string, variables?: any) {
-  const headers = { 'Content-Type': 'application/json' };
   const body = JSON.stringify({ query, variables });
 
   // STRATEGY 1: Standard POST (Best for computers)
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body,
-      mode: 'cors',
-      credentials: 'omit', // Crucial for mobile to avoid cookie issues
-      cache: 'no-store',   // Ensure fresh data
+      // Removed 'next' property as it is specific to Next.js and causes type errors in standard React
     });
 
     if (res.ok) {
@@ -98,10 +95,10 @@ async function fetchGraphQL(query: string, variables?: any) {
     console.warn('Strategy 1 (POST) failed, trying fallback...', error);
   }
 
-  // STRATEGY 2: GET Request (The "Secret Weapon" for mobile)
-  // GET requests bypass many strict CORS preflight checks that block POSTs.
+  // STRATEGY 2: "Simple" GET Request (The Mobile Fix)
+  // By removing custom headers (like Content-Type), we trigger a "Simple Request".
+  // Mobile browsers SKIP the Preflight (OPTIONS) check for Simple Requests.
   try {
-    // Construct query parameters manually
     const urlParams = new URLSearchParams();
     urlParams.append('query', query);
     if (variables) urlParams.append('variables', JSON.stringify(variables));
@@ -110,9 +107,7 @@ async function fetchGraphQL(query: string, variables?: any) {
     
     const res = await fetch(getUrl, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        mode: 'cors',
-        credentials: 'omit',
+        // CRITICAL: NO HEADERS HERE. Adding headers triggers Preflight.
     });
 
     if (res.ok) {
@@ -129,7 +124,7 @@ async function fetchGraphQL(query: string, variables?: any) {
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(API_URL)}`;
     const res = await fetch(proxyUrl, {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body,
       cache: 'no-store'
     });
@@ -140,6 +135,8 @@ async function fetchGraphQL(query: string, variables?: any) {
     }
   } catch (error) {
     console.error('All fetch strategies failed:', error);
+    // Throw error so UI can show it
+    throw new Error(error instanceof Error ? error.message : 'Unknown Network Error');
   }
 
   return null;

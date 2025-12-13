@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getNewsPosts, Post } from '../lib/wordpress';
-import { Calendar, ArrowRight, Newspaper, RefreshCw } from 'lucide-react';
+import { Calendar, ArrowRight, Newspaper, RefreshCw, AlertCircle } from 'lucide-react';
 
 const NewsGrid: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   async function loadData() {
     setLoading(true);
-    setError(false);
+    setError(null);
     try {
       const data = await getNewsPosts();
       setPosts(data);
-      // If we got an array but it's empty, technically it's not an error, just no news.
-      // But if fetch returned 'undefined' due to network error, getNewsPosts returns [].
-      // To differentiate, we rely on the fact that if getNewsPosts returns [], it handled the error internally.
     } catch (e) {
       console.error(e);
-      setError(true);
+      // Capture the actual error message
+      setError(e instanceof Error ? e.message : 'Onbekende fout');
     } finally {
       setLoading(false);
     }
@@ -57,19 +55,31 @@ const NewsGrid: React.FC = () => {
           )}
         </div>
 
-        {posts.length === 0 ? (
+        {(posts.length === 0 || error) ? (
           <div className="bg-slate-50 rounded-3xl border border-gray-200 p-12 text-center">
              <Newspaper className="w-16 h-16 text-slate-300 mx-auto mb-4" />
              <h3 className="text-xl font-bold text-slate-700 mb-2">Geen nieuwsberichten</h3>
              <p className="text-slate-500 mb-6">
                Er konden geen berichten worden opgehaald. Controleer je internetverbinding.
              </p>
-             <button 
-               onClick={loadData}
-               className="inline-flex items-center gap-2 px-6 py-2 bg-white border border-gray-300 rounded-full text-slate-700 font-bold hover:bg-gray-50 transition-colors"
-             >
-               <RefreshCw className="w-4 h-4" /> Probeer opnieuw
-             </button>
+             
+             {error && (
+                <div className="mb-6 bg-red-50 border border-red-100 rounded-lg p-3 text-red-600 text-xs font-mono inline-block max-w-md mx-auto break-all">
+                    <div className="flex items-center justify-center gap-2 mb-1 font-bold">
+                        <AlertCircle className="w-3 h-3" /> Foutmelding details:
+                    </div>
+                    {error}
+                </div>
+             )}
+
+             <div className="block">
+                <button 
+                onClick={loadData}
+                className="inline-flex items-center gap-2 px-6 py-2 bg-white border border-gray-300 rounded-full text-slate-700 font-bold hover:bg-gray-50 transition-colors"
+                >
+                <RefreshCw className="w-4 h-4" /> Probeer opnieuw
+                </button>
+             </div>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
