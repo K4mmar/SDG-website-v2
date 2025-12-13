@@ -73,7 +73,7 @@ const fixContentUrls = (html: string | undefined) => {
 /**
  * ULTRA ROBUST FETCH STRATEGY
  * Mobile devices are extremely strict about CORS and SSL chains.
- * We attempt 4 distinct strategies to get the data.
+ * We attempt 5 distinct strategies to get the data.
  */
 async function fetchGraphQL(query: string, variables?: any) {
   const body = JSON.stringify({ query, variables });
@@ -146,7 +146,32 @@ async function fetchGraphQL(query: string, variables?: any) {
     console.warn('Strategy 3 (CorsProxy) failed:', error);
   }
 
-  // STRATEGY 4: Proxy 2 (AllOrigins) - Often more lenient with SSL than CorsProxy
+  // STRATEGY 4: Proxy 2 (CodeTabs) - Usually very reliable
+  try {
+    const urlParams = new URLSearchParams();
+    urlParams.append('query', query);
+    if (variables) urlParams.append('variables', JSON.stringify(variables));
+    const targetUrl = `${API_URL}?${urlParams.toString()}`;
+    
+    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
+    
+    const res = await fetch(proxyUrl, {
+        method: 'GET',
+    });
+    
+    if (res.ok) {
+        const json = await res.json();
+        if (!json.errors) return json.data;
+        lastErrorDetail = `Proxy 2 (CodeTabs) GraphQL Error: ${json.errors[0]?.message}`;
+    } else {
+        lastErrorDetail = `Proxy 2 (CodeTabs) Error: ${res.status} ${res.statusText}`;
+    }
+  } catch (error) {
+     lastErrorDetail = `Proxy 2 (CodeTabs) Exception: ${error instanceof Error ? error.message : String(error)}`;
+     console.warn('Strategy 4 (CodeTabs) failed:', error);
+  }
+
+  // STRATEGY 5: Proxy 3 (AllOrigins) - Last resort
   try {
     const urlParams = new URLSearchParams();
     urlParams.append('query', query);
@@ -158,19 +183,18 @@ async function fetchGraphQL(query: string, variables?: any) {
     
     const res = await fetch(proxyUrl, {
         method: 'GET',
-        // No headers to stay simple
     });
     
     if (res.ok) {
         const json = await res.json();
         if (!json.errors) return json.data;
-        lastErrorDetail = `Proxy 2 GraphQL Error: ${json.errors[0]?.message}`;
+        lastErrorDetail = `Proxy 3 (AllOrigins) GraphQL Error: ${json.errors[0]?.message}`;
     } else {
-        lastErrorDetail = `Proxy 2 Error: ${res.status} ${res.statusText}`;
+        lastErrorDetail = `Proxy 3 (AllOrigins) Error: ${res.status} ${res.statusText}`;
     }
   } catch (error) {
-     lastErrorDetail = `Proxy 2 Exception: ${error instanceof Error ? error.message : String(error)}`;
-     console.error('Strategy 4 (AllOrigins) failed:', error);
+     lastErrorDetail = `Proxy 3 (AllOrigins) Exception: ${error instanceof Error ? error.message : String(error)}`;
+     console.error('Strategy 5 (AllOrigins) failed:', error);
   }
 
   // If we reach here, ALL strategies failed. 
