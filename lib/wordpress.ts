@@ -50,6 +50,19 @@ export interface LidWordenPageData {
   };
 }
 
+// HELPER: Forces a URL to be HTTPS. 
+// This acts as a safety net if the database still contains http links.
+const ensureHttps = (url: string | undefined) => {
+  if (!url) return undefined;
+  return url.replace('http://', 'https://');
+};
+
+// HELPER: Fixes content strings (HTML) to ensure images inside the text are also HTTPS
+const fixContentUrls = (html: string | undefined) => {
+  if (!html) return '';
+  return html.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
+};
+
 /**
  * Standard Fetch Wrapper for GraphQL
  */
@@ -62,7 +75,6 @@ async function fetchGraphQL(query: string, variables?: any) {
       method: 'POST',
       headers,
       body,
-      // 'credentials': 'include' // Uncomment if you need cookies/auth, usually not for public GET
     });
 
     if (!res.ok) {
@@ -111,7 +123,17 @@ export async function getNewsPosts(): Promise<Post[]> {
       return postDate >= oneYearAgo;
     });
 
-    return filteredPosts.slice(0, 6);
+    // Clean up URLs before returning
+    return filteredPosts.slice(0, 6).map((post: Post) => ({
+      ...post,
+      excerpt: fixContentUrls(post.excerpt) || '',
+      featuredImage: post.featuredImage ? {
+        node: {
+          ...post.featuredImage.node,
+          sourceUrl: ensureHttps(post.featuredImage.node.sourceUrl) || ''
+        }
+      } : undefined
+    }));
   }
   return [];
 }
@@ -134,7 +156,18 @@ export async function getAllPosts(): Promise<Post[]> {
   `;
 
   const data = await fetchGraphQL(query);
-  if (data?.posts?.nodes) return data.posts.nodes;
+  if (data?.posts?.nodes) {
+    return data.posts.nodes.map((post: Post) => ({
+      ...post,
+      excerpt: fixContentUrls(post.excerpt) || '',
+      featuredImage: post.featuredImage ? {
+        node: {
+          ...post.featuredImage.node,
+          sourceUrl: ensureHttps(post.featuredImage.node.sourceUrl) || ''
+        }
+      } : undefined
+    }));
+  }
   return [];
 }
 
@@ -167,7 +200,7 @@ export async function getLidWordenPage(): Promise<LidWordenPageData | null> {
 
   return {
     title: data.page.title,
-    content: data.page.content,
+    content: fixContentUrls(data.page.content) || '',
     lidWordenFields: { faqs: normalizedFaqs }
   };
 }
@@ -186,7 +219,18 @@ export async function getPostBySlug(slug: string) {
 
   const data = await fetchGraphQL(query, { id: slug });
   if (!data || !data.post) return null;
-  return data.post;
+
+  const post = data.post;
+  return {
+    ...post,
+    content: fixContentUrls(post.content),
+    featuredImage: post.featuredImage ? {
+      node: {
+        ...post.featuredImage.node,
+        sourceUrl: ensureHttps(post.featuredImage.node.sourceUrl)
+      }
+    } : undefined
+  };
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
@@ -205,15 +249,31 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
   `;
 
   const data = await fetchGraphQL(queryName, { slug });
+  let pageData = null;
+
   if (data && data.pages && data.pages.nodes && data.pages.nodes.length > 0) {
-    return data.pages.nodes[0];
+    pageData = data.pages.nodes[0];
+  } else {
+    let fallback = await getPageByUriFallback(`/${slug}/`);
+    if (!fallback || fallback.id === 'error-page') {
+        fallback = await getPageByUriFallback(slug);
+    }
+    pageData = fallback;
   }
-  
-  let page = await getPageByUriFallback(`/${slug}/`);
-  if (!page || page.id === 'error-page') {
-      page = await getPageByUriFallback(slug);
+
+  if (pageData) {
+    return {
+      ...pageData,
+      content: fixContentUrls(pageData.content) || '',
+      featuredImage: pageData.featuredImage ? {
+        node: {
+          ...pageData.featuredImage.node,
+          sourceUrl: ensureHttps(pageData.featuredImage.node.sourceUrl) || ''
+        }
+      } : undefined
+    };
   }
-  return page;
+  return null;
 }
 
 async function getPageByUriFallback(uri: string): Promise<Page | null> {
