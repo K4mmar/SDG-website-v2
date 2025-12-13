@@ -61,12 +61,24 @@ const proxyImage = (url?: string) => {
 // HELPER: Fixes content strings (HTML)
 const fixContentUrls = (html: string | undefined) => {
   if (!html) return '';
+  
+  // 1. Ensure all API references are HTTPS
   let clean = html.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
+  
+  // 2. Remove 'srcset' and 'sizes' attributes.
+  // Mobile browsers aggressively use srcset to fetch optimal image sizes directly from the WP server.
+  // This bypasses our proxy, causing SSL/CORS errors and broken images on mobile.
+  // By removing srcset, we force the browser to use our proxied 'src'.
+  clean = clean.replace(/srcset=["'][^"']*["']/g, '');
+  clean = clean.replace(/sizes=["'][^"']*["']/g, '');
+
+  // 3. Proxy the src attributes
   const domainPattern = 'api.sdgsintjansklooster.nl';
   const imgRegex = new RegExp(`src=["'](https?:\\/\\/${domainPattern}[^"']+)["']`, 'g');
   clean = clean.replace(imgRegex, (match, srcUrl) => {
       return `src="${proxyImage(srcUrl)}"`;
   });
+  
   return clean;
 };
 
