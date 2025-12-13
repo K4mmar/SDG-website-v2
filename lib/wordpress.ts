@@ -1,5 +1,7 @@
-// Production API URL
-const API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://api.sdgsintjansklooster.nl/graphql';
+// Production API URL - Safe check for process.env to avoid browser crashes
+const API_URL = (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_WORDPRESS_API_URL) 
+  ? process.env.NEXT_PUBLIC_WORDPRESS_API_URL 
+  : 'https://api.sdgsintjansklooster.nl/graphql';
 
 export interface Post {
   id: string;
@@ -48,42 +50,6 @@ export interface LidWordenPageData {
   };
 }
 
-// Fallback Mock Data (Only used if API is completely unreachable or returns empty lists)
-const MOCK_POSTS: Post[] = [
-  {
-    id: '1',
-    title: 'Groot Voorjaarsconcert 2024',
-    date: '2024-03-15T19:30:00',
-    slug: 'voorjaarsconcert-2024',
-    excerpt: '<p>Kom genieten van ons jaarlijkse voorjaarsconcert in het dorpshuis. Een avond vol prachtige blaasmuziek.</p>',
-    categories: { nodes: [{ name: 'Agenda', slug: 'agenda' }] },
-    featuredImage: { node: { sourceUrl: 'https://picsum.photos/800/600?random=1' } }
-  },
-  {
-    id: '2',
-    title: 'Succesvolle Jeugdwerkactie',
-    date: '2024-02-10T10:00:00',
-    slug: 'jeugdwerkactie-2024',
-    excerpt: '<p>Onze jeugdleden hebben afgelopen zaterdag huis-aan-huis koeken verkocht. De opbrengst gaat naar nieuwe instrumenten.</p>',
-    categories: { nodes: [{ name: 'Nieuws', slug: 'nieuws' }] },
-    featuredImage: { node: { sourceUrl: 'https://picsum.photos/800/600?random=2' } }
-  },
-  {
-    id: '3',
-    title: 'Open Repetitie Avond',
-    date: '2024-04-01T19:00:00',
-    slug: 'open-repetitie',
-    excerpt: '<p>Altijd al eens mee willen spelen? Kom langs op onze open repetitie avond en ervaar de sfeer.</p>',
-    categories: { nodes: [{ name: 'Werving', slug: 'werving' }] },
-    featuredImage: { node: { sourceUrl: 'https://picsum.photos/800/600?random=3' } }
-  }
-];
-
-// MOCK_PAGES is now empty for specific pages to ensure we use the Real API.
-const MOCK_PAGES: Record<string, Page> = {
-  // We removed 'geschiedenis', 'identiteit', etc. so they are fetched from WordPress.
-};
-
 /**
  * Robust fetch wrapper for GraphQL
  */
@@ -98,27 +64,28 @@ async function fetchGraphQL(query: string, variables?: any) {
 
     const json = await res.json();
     if (json.errors) {
-      // Improved logging: Stringify the error object so it's readable in the console
       console.warn('GraphQL Query Error:', JSON.stringify(json.errors, null, 2));
       return null;
     }
     return json.data;
   } catch (error) {
-    console.warn('API fetch failed, utilizing fallback data.', error);
+    console.warn('API fetch failed.', error);
     return null;
   }
 }
 
 export async function getNewsPosts(): Promise<Post[]> {
+  // Fetches recent posts and filters them client-side to strictly show only the last 12 months.
+  // We fetch a bit more (12) to ensure we have enough after filtering.
   const query = `
-    query GetNews {
-      posts(first: 20) {
+    query GetRecentNews {
+      posts(first: 12, where: { orderby: { field: DATE, order: DESC } }) {
         nodes {
           id
           title
           slug
           date
-          excerpt
+          excerpt(format: RENDERED)
           featuredImage { node { sourceUrl } }
           categories { nodes { name } }
         }
@@ -127,25 +94,51 @@ export async function getNewsPosts(): Promise<Post[]> {
   `;
 
   const data = await fetchGraphQL(query);
-  if (data?.posts?.nodes && data.posts.nodes.length > 0) {
-    // Filter out posts older than 1 year
+  
+  if (data?.posts?.nodes) {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    
-    const recentPosts = data.posts.nodes.filter((post: Post) => {
+
+    const filteredPosts = data.posts.nodes.filter((post: Post) => {
       const postDate = new Date(post.date);
       return postDate >= oneYearAgo;
     });
 
-    // Return max 6 most recent valid posts
-    return recentPosts.slice(0, 6);
+    // Return max 6 of the filtered list
+    return filteredPosts.slice(0, 6);
   }
-  return MOCK_POSTS;
+  
+  return [];
+}
+
+export async function getAllPosts(): Promise<Post[]> {
+  // Fetches a larger set of posts for the archive page (e.g. 100).
+  const query = `
+    query GetAllNews {
+      posts(first: 100, where: { orderby: { field: DATE, order: DESC } }) {
+        nodes {
+          id
+          title
+          slug
+          date
+          excerpt(format: RENDERED)
+          featuredImage { node { sourceUrl } }
+          categories { nodes { name } }
+        }
+      }
+    }
+  `;
+
+  const data = await fetchGraphQL(query);
+  
+  if (data?.posts?.nodes) {
+    return data.posts.nodes;
+  }
+  
+  return [];
 }
 
 export async function getLidWordenPage(): Promise<LidWordenPageData | null> {
-  // Updated query to fetch individual group fields (faq1...faq5) instead of a repeater.
-  // We fetch a few extra slots (up to 5) to be future-proof.
   const query = `
     query GetLidWordenPage {
       page(id: "lid-worden", idType: URI) {
@@ -181,11 +174,8 @@ export async function getLidWordenPage(): Promise<LidWordenPageData | null> {
   
   if (!data?.page) return null;
 
-  // Normalization Logic:
-  // 1. Extract the raw field group
   const fields = data.page.lidWordenFields || {};
   
-  // 2. Map individual objects into a single array
   const rawFaqs = [
     fields.faq1, 
     fields.faq2, 
@@ -194,12 +184,10 @@ export async function getLidWordenPage(): Promise<LidWordenPageData | null> {
     fields.faq5
   ];
 
-  // 3. Filter out nulls or items where the question is empty
   const normalizedFaqs: FAQ[] = rawFaqs.filter((item: any) => 
     item && item.vraag && item.vraag.trim().length > 0
   );
 
-  // 4. Return the clean shape that the UI expects (an array of FAQs)
   return {
     title: data.page.title,
     content: data.page.content,
@@ -227,17 +215,11 @@ export async function getPostBySlug(slug: string) {
 
   const data = await fetchGraphQL(query, { id: slug });
   
-  if (!data || !data.post) return { 
-    title: 'Bericht niet gevonden', 
-    date: new Date().toISOString(), 
-    content: '<p>Dit bericht kon niet worden geladen uit de API.</p>',
-    featuredImage: { node: { sourceUrl: 'https://picsum.photos/1200/600?random=error' } }
-  };
+  if (!data || !data.post) return null;
   return data.post;
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
-  // 1. Try to find by NAME (Slug) first
   const queryName = `
     query GetPageByName($slug: String) {
       pages(where: {name: $slug}) {
@@ -256,20 +238,15 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
     }
   `;
 
-  console.log(`Fetching page from API via slug search: ${slug}`);
   const data = await fetchGraphQL(queryName, { slug });
   
   if (data && data.pages && data.pages.nodes && data.pages.nodes.length > 0) {
     return data.pages.nodes[0];
   }
   
-  // 2. If name search failed, try URI with leading/trailing slashes (common WPGraphQL issue)
-  console.log(`Slug fetch failed, trying URI fallback for: /${slug}/`);
   let page = await getPageByUriFallback(`/${slug}/`);
   
-  // 3. If that failed, try just the slug as URI
   if (!page || page.id === 'error-page') {
-      console.log(`URI fetch failed, trying simple URI for: ${slug}`);
       page = await getPageByUriFallback(slug);
   }
 
@@ -295,9 +272,6 @@ async function getPageByUriFallback(uri: string): Promise<Page | null> {
   const data = await fetchGraphQL(query, { id: uri });
   
   if (!data || !data.page) {
-      // Return null here to indicate failure to the caller logic, so it can try the next method
-      // OR return the error object if it's the final attempt. 
-      // For the helper, we just return null if not found.
       return null;
   }
   return data.page;
