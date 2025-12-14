@@ -3,6 +3,73 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPageBySlug, Page } from '../lib/wordpress';
 import { ArrowLeft, Share2 } from 'lucide-react';
 
+// Static content definitions provided by the user
+const STATIC_CONTENT: Record<string, { title: string; content: string; image?: string }> = {
+  'identiteit': {
+    title: 'Identiteit',
+    content: `
+      <p class="lead">Soli Deo Gloria is Latijn voor “Alleen aan God de Eer”. We zijn op aarde om God te leren kennen en Hem te verheerlijken. Het gaat niet om ons maar om Hem.</p>
+      
+      <h3>De Bron</h3>
+      <p>Het evangelie van Christus is de bron. Het is de unieke basis voor al ons doen en laten, ons leren en leven. Dat we alles afstemmen op die bron is bijzonder en toch ook heel gewoon. Dat delen we met elkaar door middel van onze muzikale gave. We geven het inhoud door het muziekrepertoire af te stemmen op die ene bron van ons bestaan.</p>
+      
+      <p>We zijn uniek. In ons doen en laten onvolmaakt. Alleen door Jezus Christus zijn we in staat het goede te doen.</p>
+      
+      <h3>Onze Naam</h3>
+      <p>SOLI DEO GLORIA een rijke naam, passend bij een christelijke muziekvereniging. Al onze inspanningen zijn niet voor niets. Aan Hem brengen we onze dank voor alles wat Hij ons geeft.</p>
+
+      <blockquote>
+        <p><strong>Halleluja!</strong></p>
+        <p>Loof God in zijn heilige woning,<br/>
+        loof hem in zijn machtig gewelf,<br/>
+        loof hem om zijn krachtige daden,<br/>
+        loof hem om zijn oneindige grootheid.</p>
+
+        <p>Loof hem met hoorngeschal,<br/>
+        loof hem met harp en lier,<br/>
+        loof hem met dans en tamboerijn,<br/>
+        loof hem met snaren en fluit.</p>
+
+        <p>Loof hem met klinkende bekkens,<br/>
+        loof hem met slaande cimbalen.<br/>
+        Alles wat adem heeft, loof de Heer.</p>
+
+        <p>Halleluja!</p>
+        <cite>Psalm 150 (NBV)</cite>
+      </blockquote>
+    `
+  },
+  'geschiedenis': {
+    title: 'Geschiedenis',
+    content: `
+      <h3>De Oprichting (1900)</h3>
+      <p>In het jaar 1900 vond er een bespreking plaats tussen het hoofd van onze dorpsschool en enkele vrienden en bekenden om tot oprichting van een muziekvereniging te komen. Onderwijzer van de Meij, die Sint Jansklooster verkoos boven het Friese dorpje Kollem, wist wel iets van blaasmuziek af. Vandaar die bespreking met een paar timmerlieden, een winkelier en enkele landbouwers en… niet zonder resultaat, want op 8 november werd ‘’Soli Deo Gloria’’ officieel opgericht.</p>
+      
+      <p>Het duurde niet zo lang tot er 7 mooie koperen instrumenten kwamen. Verpakt in een grote kist arriveerden ze bij Geert Leeuw aan de Kloosterweg. De eerste instrumentenleverancier was de firma Kessels uit Tilburg.</p>
+      
+      <h3>De Eerste Klanken</h3>
+      <p>Daar men in de persoon van dhr. Van der Meij een dirigent zag, maar er geen grote trommelslager was, moest hij beide functies maar op zich nemen. We kunnen ons dat nu moeilijk voorstellen, maar het ging, want op 2e Pinksterdag van het jaar 1901 vond het eerste optreden plaats van het pas opgerichte S.D.G. Ik noem het maar optreden, want van een concert kon toen nog geen sprake zijn.</p>
+      
+      <p>Als eerste werk werd het koraal Psalm 42 gespeeld. Deze bekende melodie over het hijgend hert, momenteel bekend als moede hinde, werd door bijna de hele bevolking van het Land van Vollenhove met bewondering en ontroering aangehoord. In het verslag van een der oprichters staat: <em>‘’velen, die deze muziek hoorden, kregen tranen in de ogen en vroegen zich af hoe het mogelijk was, dat uit deze instrumenten zulke mooie muziek kon komen.’’</em></p>
+
+      <h3>Groeien en Koninklijk Bezoek</h3>
+      <p>Over de financiële toestand van de beginperiode weten we helaas heel weinig. Wel is bekend, dat er met een contributie van 5 cent per week werd begonnen. Er kwam steeds meer animo voor de vereniging, want omstreeks 1905 was S.D.G. al een korps, dat voor een groepsfoto in aanmerking kwam. Het telde toen 15 leden.</p>
+      
+      <p>In 1921 stond S.D.G. opgesteld aan de Veneweg in afwachting van de koningin, die het gemaal aan de Blokzijlerdijk officieel zou bezoeken. Toen de wagen met onze vorstin in het zicht kwam (in de wagen zaten de Koningin en haar echtgenote Prins Hendrik, en hun dochter Prinses Juliana), werd vol overgave het volkslied gespeeld, maar de koningin reed door en de muzikanten moesten zich haasten om op tijd bij het werkbezoek te kunnen zijn.</p>
+
+      <h3>Oorlogsjaren en Wederopbouw</h3>
+      <p>De eerste gang van S.D.G. naar het concours te Steenwijk vond in 1924 plaats. Na de angstige en spannende mobilisatietijd kwamen de donkere oorlogsjaren 1940-1945. In het jaar 1942 moest een document worden getekend van de Cultuurkamer van de Wehrmacht. Hierin stond, dat uitsluitend voor hen moest worden gewerkt. Hieraan werd geen gehoor gegeven. Een tweede brief volgde, waarin de bezetter de instrumenten opeiste. Zoals zovelen in die tijd ‘’doken’’ ook de instrumenten ‘’onder’’ en tot het voorjaar van 1945 verdween S.D.G. achter de schermen.</p>
+
+      <p>De eerste avond na de bevrijding, waarop weer gemarcheerd werd, kwam Jurrie Weijs behouden terug uit Oostenrijk. Hij stond direct weer in de voorste gelederen als trommelslager.</p>
+
+      <h3>Uniformen en de Toekomst</h3>
+      <p>Nadat begin 1957 de Koninklijke goedkeuring voor onze vereniging verkregen was, werd in dat voorjaar een geheel nieuwe bezetting aangeschaft. Op 22 juni 1964 vond de symbolische overdracht plaats van het eerste uniform, waarbij burgemeester Krol opmerkte, dat kleren nu werkelijk de man maakten.</p>
+      
+      <p>Een echte crisis heeft S.D.G. gelukkig nooit gekend. Natuurlijk waren er ups en downs. We hopen, dat dit ook in de toekomst zo mag blijven. Deze band onderling als korps, maar ook tussen publiek en korps. Toch hopen we ook in de toekomst op uw meeleven en uw belangstelling voor onze vereniging te mogen rekenen.</p>
+    `
+  }
+};
+
 const PageDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [page, setPage] = useState<Page | null>(null);
@@ -10,16 +77,20 @@ const PageDetail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Mapping object for specific frontend routes to WordPress slugs
+  // Mapping object for specific frontend routes to WordPress slugs or Static Keys
   const SLUG_MAPPING: Record<string, string> = {
     'jeugd': 'jeugd-2',
-    'over-ons': 'identiteit',
-    'over-sdg': 'identiteit'
+    'over-ons': 'identiteit', // Default to Identity when clicking "Over ons"
+    'over-sdg': 'identiteit',
+    'identiteit': 'identiteit',
+    'geschiedenis': 'geschiedenis'
   };
 
   useEffect(() => {
     async function loadPage() {
       let requestedSlug = slug;
+      
+      // If no slug param (e.g. top level route like /over-ons), extract from path
       if (!requestedSlug) {
         const pathSegments = location.pathname.split('/').filter(Boolean);
         if (pathSegments.length > 0) {
@@ -27,17 +98,32 @@ const PageDetail: React.FC = () => {
         }
       }
 
-      let actualSlug = requestedSlug;
+      let actualSlug = requestedSlug || '';
       if (requestedSlug && SLUG_MAPPING[requestedSlug]) {
         actualSlug = SLUG_MAPPING[requestedSlug];
       }
 
+      setLoading(true);
+
+      // STRATEGY: Check Static Content First
+      if (STATIC_CONTENT[actualSlug]) {
+        setPage({
+          id: actualSlug,
+          slug: actualSlug,
+          title: STATIC_CONTENT[actualSlug].title,
+          content: STATIC_CONTENT[actualSlug].content,
+          featuredImage: STATIC_CONTENT[actualSlug].image ? { node: { sourceUrl: STATIC_CONTENT[actualSlug].image! } } : undefined
+        });
+        setLoading(false);
+        return;
+      }
+
+      // STRATEGY: Fallback to WordPress
       if (actualSlug) {
-        setLoading(true);
         const data = await getPageBySlug(actualSlug);
         setPage(data);
-        setLoading(false);
       }
+      setLoading(false);
     }
     loadPage();
   }, [slug, location.pathname]);

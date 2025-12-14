@@ -47,7 +47,7 @@ const Recruitment: React.FC = () => {
             desc="Iets te vieren? Een jubileum, opening of verjaardag is niet compleet zonder een muzikale hulde. Vraag een serenade aan."
             icon={<Music />}
             image="https://picsum.photos/600/400?random=20"
-            link="/contact"
+            link="/boek-ons"
             linkText="Vraag aan"
           />
           <Card
@@ -63,8 +63,8 @@ const Recruitment: React.FC = () => {
             desc="Vele handen maken licht werk. Bekijk het oud papier rooster of meld je aan als vrijwilliger bij onze evenementen."
             icon={<Recycle />}
             image="https://picsum.photos/600/400?random=22"
-            link="/oud-papier"
-            linkText="Bekijk rooster"
+            link="/doe-mee"
+            linkText="Meld je aan"
           />
         </div>
       </div>
