@@ -1,16 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Music, Heart, Recycle } from 'lucide-react';
+import { getRecruitmentPagesImages } from '../lib/wordpress';
 
-const Card: React.FC<{ title: string; desc: string; icon: React.ReactNode; image: string; link: string; linkText: string }> = ({ title, desc, icon, image, link, linkText }) => {
+// Explicitly typed Card component with robust fallback handling
+const Card: React.FC<{ 
+    title: string; 
+    desc: string; 
+    icon: React.ReactNode; 
+    image?: string; 
+    fallback: string; 
+    link: string; 
+    linkText: string 
+}> = ({ title, desc, icon, image, fallback, link, linkText }) => {
   const navigate = useNavigate();
+  // Start with WP image if available, else fallback
+  const [currentImage, setCurrentImage] = useState(image || fallback);
+
+  // If the 'image' prop updates (e.g. after fetch), update the state
+  useEffect(() => {
+    if (image) {
+        setCurrentImage(image);
+    }
+  }, [image]);
+
   return (
     <div 
       onClick={() => navigate(link)}
       className="group relative overflow-hidden rounded-3xl shadow-lg bg-white hover:shadow-2xl transition-all duration-300 border border-gray-100 h-full flex flex-col transform hover:-translate-y-1 cursor-pointer"
     >
       <div className="h-56 overflow-hidden relative">
-        <img src={image} alt={title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+        <img 
+          src={currentImage} 
+          alt={title} 
+          // CRITICAL: If image fails to load (broken path/404), switch to fallback
+          onError={() => {
+              if (currentImage !== fallback) {
+                  setCurrentImage(fallback);
+              }
+          }}
+          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" 
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
           <div className="text-white p-3 bg-sdg-red rounded-xl shadow-md absolute top-4 right-4 group-hover:bg-white group-hover:text-sdg-red transition-colors">
             {icon}
@@ -29,6 +59,23 @@ const Card: React.FC<{ title: string; desc: string; icon: React.ReactNode; image
 };
 
 const Recruitment: React.FC = () => {
+  // FALLBACK IMAGES (Passende stockfoto's van Unsplash)
+  const FALLBACKS = {
+    'boek-ons': 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800&auto=format&fit=crop', // Music/Band Celebration
+    'steun-ons': 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=800&auto=format&fit=crop', // Community/Crowd/Support
+    'doe-mee': 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=800&auto=format&fit=crop', // Group/Teamwork
+  };
+
+  const [wpImages, setWpImages] = useState<Record<string, string | undefined>>({});
+
+  useEffect(() => {
+    async function loadImages() {
+      const images = await getRecruitmentPagesImages();
+      setWpImages(images);
+    }
+    loadImages();
+  }, []);
+
   return (
     <section className="py-24 bg-slate-50 relative">
       <div className="container mx-auto px-6">
@@ -46,7 +93,8 @@ const Recruitment: React.FC = () => {
             title="Boek ons"
             desc="Iets te vieren? Een jubileum, opening of verjaardag is niet compleet zonder een muzikale hulde. Vraag een serenade aan."
             icon={<Music />}
-            image="https://picsum.photos/600/400?random=20"
+            image={wpImages['boek-ons']}
+            fallback={FALLBACKS['boek-ons']}
             link="/boek-ons"
             linkText="Vraag aan"
           />
@@ -54,7 +102,8 @@ const Recruitment: React.FC = () => {
             title="Steun ons"
             desc="Draag bij aan de toekomst van de muziek in Sint Jansklooster. Word 'Vriend van SDG' of sponsor onze vereniging."
             icon={<Heart />}
-            image="https://picsum.photos/600/400?random=21"
+            image={wpImages['steun-ons']}
+            fallback={FALLBACKS['steun-ons']}
             link="/steun-ons"
             linkText="Word vriend"
           />
@@ -62,7 +111,8 @@ const Recruitment: React.FC = () => {
             title="Doe mee"
             desc="Vele handen maken licht werk. Bekijk het oud papier rooster of meld je aan als vrijwilliger bij onze evenementen."
             icon={<Recycle />}
-            image="https://picsum.photos/600/400?random=22"
+            image={wpImages['doe-mee']}
+            fallback={FALLBACKS['doe-mee']}
             link="/doe-mee"
             linkText="Meld je aan"
           />

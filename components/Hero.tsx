@@ -123,21 +123,29 @@ const Hero: React.FC = () => {
          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}>
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
-          <div className="flex flex-wrap justify-center md:justify-between items-center gap-4 md:gap-6 text-xs md:text-base text-gray-300 font-medium tracking-wide uppercase font-sans">
-             <div className="hidden md:block">
-               <span className="text-sdg-gold mr-2">Est.</span> 19XX
-             </div>
+          <div className="flex flex-wrap justify-center items-center relative text-xs md:text-base text-gray-300 font-medium tracking-wide uppercase font-sans">
              
-             {/* Mobile optimized pillars list */}
-             <div className="flex flex-wrap justify-center gap-3 md:gap-16 items-center w-full md:w-auto">
-               <span className="hover:text-white transition-colors cursor-default whitespace-nowrap">Fanfare</span>
+             {/* Mobile optimized pillars list - Linked to Pages - Centered */}
+             <div className="flex flex-wrap justify-center gap-3 md:gap-16 items-center">
+               <button onClick={() => navigate('/groepen/fanfare')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+                 Fanfare
+               </button>
+               
                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-sdg-red"></span>
-               <span className="hover:text-white transition-colors cursor-default whitespace-nowrap">Malletband</span>
+               
+               <button onClick={() => navigate('/groepen/malletband')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+                 Malletband
+               </button>
+               
                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-sdg-red"></span>
-               <span className="hover:text-white transition-colors cursor-default whitespace-nowrap">Jeugdopleidingen</span>
+               
+               <button onClick={() => navigate('/jeugd')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+                 Jeugdopleidingen
+               </button>
              </div>
 
-             <div className="hidden md:flex items-center gap-2 animate-bounce opacity-70">
+             {/* Arrow Icon - Positioned absolute right to not disturb centering */}
+             <div className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 items-center gap-2 animate-bounce opacity-70">
                <ArrowDown size={16} />
              </div>
           </div>

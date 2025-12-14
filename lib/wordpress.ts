@@ -45,17 +45,34 @@ export interface FAQ {
 export interface LidWordenPageData {
   title: string;
   content: string;
-  lidWordenFields?: {
-    faqs?: FAQ[];
-  };
+  debugInfo?: string; // Added for diagnostics
 }
 
 // HELPER: Proxies an image URL through Weserv.
 const proxyImage = (url?: string) => {
-  if (!url) return undefined;
-  if (url.startsWith('data:') || url.includes('images.weserv.nl')) return url;
-  const cleanUrl = url.replace(/^https?:\/\//, '');
-  return `https://images.weserv.nl/?url=${cleanUrl}&output=webp&q=80`;
+  if (!url || typeof url !== 'string') return undefined;
+  
+  let cleanUrl = url.trim();
+  
+  // Reject local development URLs that might leak into production data
+  if (cleanUrl.includes('localhost') || cleanUrl.includes('.local')) {
+    return undefined;
+  }
+
+  // If already proxied or data, return as is
+  if (cleanUrl.startsWith('data:') || cleanUrl.includes('images.weserv.nl')) return cleanUrl;
+  
+  // Ensure we have an absolute URL for the source
+  if (cleanUrl.startsWith('/')) {
+    cleanUrl = `https://api.sdgsintjansklooster.nl${cleanUrl}`;
+  } else if (!cleanUrl.startsWith('http')) {
+     // Handle cases where protocol might be missing
+     cleanUrl = `https://${cleanUrl}`;
+  }
+
+  // Pass the FULL URL to Weserv to avoid protocol ambiguity. 
+  // Weserv handles encoded full URLs perfectly.
+  return `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&output=webp&q=80`;
 };
 
 // HELPER: Fixes content strings (HTML)
@@ -66,9 +83,6 @@ const fixContentUrls = (html: string | undefined) => {
   let clean = html.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
   
   // 2. Remove 'srcset' and 'sizes' attributes.
-  // Mobile browsers aggressively use srcset to fetch optimal image sizes directly from the WP server.
-  // This bypasses our proxy, causing SSL/CORS errors and broken images on mobile.
-  // By removing srcset, we force the browser to use our proxied 'src'.
   clean = clean.replace(/srcset=["'][^"']*["']/g, '');
   clean = clean.replace(/sizes=["'][^"']*["']/g, '');
 
@@ -76,141 +90,159 @@ const fixContentUrls = (html: string | undefined) => {
   const domainPattern = 'api.sdgsintjansklooster.nl';
   const imgRegex = new RegExp(`src=["'](https?:\\/\\/${domainPattern}[^"']+)["']`, 'g');
   clean = clean.replace(imgRegex, (match, srcUrl) => {
-      return `src="${proxyImage(srcUrl)}"`;
+      const proxied = proxyImage(srcUrl);
+      return proxied ? `src="${proxied}"` : match;
   });
   
   return clean;
 };
 
+// HELPER: Minify GraphQL Query to reduce URL length for GET requests
+const minifyQuery = (query: string) => {
+  return query.replace(/\s+/g, ' ').trim();
+};
+
 /**
  * ULTRA ROBUST FETCH STRATEGY
- * Mobile devices are extremely strict about CORS and SSL chains.
- * We attempt 5 distinct strategies to get the data.
+ * Attempts multiple methods to fetch data, prioritizing direct connection
+ * and falling back to various proxies.
  */
 async function fetchGraphQL(query: string, variables?: any) {
-  const body = JSON.stringify({ query, variables });
-  let lastErrorDetail = '';
+  const minifiedQuery = minifyQuery(query);
+  const body = JSON.stringify({ query: minifiedQuery, variables });
+  const errors: string[] = [];
+  
+  // CACHE BUSTING:
+  // Add a unique timestamp to requests to force proxies/browsers to fetch fresh data.
+  // This is critical for the "Lid worden" page updates to show up immediately.
+  const t = Date.now();
 
-  // STRATEGY 1: Standard POST (Best for computers)
+  // --- STRATEGY 1: Direct POST ---
+  // Ideal for modern browsers and servers with proper CORS.
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
+      cache: 'no-store', // Disable browser caching
     });
-
     if (res.ok) {
       const json = await res.json();
       if (!json.errors) return json.data;
-      lastErrorDetail = `GraphQL Error: ${json.errors[0]?.message}`;
+      errors.push(`Direct POST GraphQL Error: ${json.errors[0]?.message}`);
     } else {
-      lastErrorDetail = `POST Error: ${res.status} ${res.statusText}`;
+      // If 400, it might be a schema validation error (querying fields that don't exist)
+      const text = await res.text();
+      errors.push(`Direct POST Error: ${res.status} ${res.statusText} - ${text.substring(0, 100)}`);
     }
-  } catch (error) {
-    lastErrorDetail = `POST Exception: ${error instanceof Error ? error.message : String(error)}`;
-    console.warn('Strategy 1 (POST) failed:', error);
+  } catch (e) {
+    errors.push(`Direct POST Exception: ${e instanceof Error ? e.message : String(e)}`);
   }
 
-  // STRATEGY 2: "Simple" GET Request (The Mobile Fix)
+  // --- STRATEGY 2: Direct GET ---
+  // Avoids preflight OPTIONS requests in some cases.
   try {
     const urlParams = new URLSearchParams();
-    urlParams.append('query', query);
+    urlParams.append('query', minifiedQuery);
     if (variables) urlParams.append('variables', JSON.stringify(variables));
-
+    // Append cache buster
+    urlParams.append('t', String(t));
+    
     const getUrl = `${API_URL}?${urlParams.toString()}`;
     
-    const res = await fetch(getUrl, {
-        method: 'GET',
-        // CRITICAL: NO HEADERS HERE. Adding headers triggers Preflight.
-    });
-
+    const res = await fetch(getUrl, { method: 'GET' });
     if (res.ok) {
         const json = await res.json();
         if (!json.errors) return json.data;
-        lastErrorDetail = `GET GraphQL Error: ${json.errors[0]?.message}`;
+        errors.push(`Direct GET GraphQL Error: ${json.errors[0]?.message}`);
     } else {
-        lastErrorDetail = `GET Error: ${res.status} ${res.statusText}`;
+        errors.push(`Direct GET Error: ${res.status} ${res.statusText}`);
     }
-  } catch (error) {
-    lastErrorDetail = `GET Exception: ${error instanceof Error ? error.message : String(error)}`;
-    console.warn('Strategy 2 (GET) failed:', error);
+  } catch (e) {
+    errors.push(`Direct GET Exception: ${e instanceof Error ? e.message : String(e)}`);
   }
 
-  // STRATEGY 3: Proxy 1 (CorsProxy.io)
+  // --- STRATEGY 3: CorsProxy.io (POST) ---
+  // High performance proxy.
   try {
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(API_URL)}`;
+    // Append cache buster to the destination URL so the proxy treats it as a new resource
+    // (Most GraphQL servers ignore extra query params like ?t=...)
+    const destUrl = `${API_URL}?t=${t}`;
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(destUrl)}`;
+    
     const res = await fetch(proxyUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
-      cache: 'no-store'
     });
-
     if (res.ok) {
       const json = await res.json();
       if (!json.errors) return json.data;
-      lastErrorDetail = `Proxy 1 GraphQL Error: ${json.errors[0]?.message}`;
+      errors.push(`CorsProxy POST GraphQL Error: ${json.errors[0]?.message}`);
     } else {
-      lastErrorDetail = `Proxy 1 Error: ${res.status} ${res.statusText}`;
+      errors.push(`CorsProxy POST Error: ${res.status} ${res.statusText}`);
     }
-  } catch (error) {
-    lastErrorDetail = `Proxy 1 Exception: ${error instanceof Error ? error.message : String(error)}`;
-    console.warn('Strategy 3 (CorsProxy) failed:', error);
+  } catch (e) {
+    errors.push(`CorsProxy POST Exception: ${e instanceof Error ? e.message : String(e)}`);
   }
 
-  // STRATEGY 4: Proxy 2 (CodeTabs) - Usually very reliable
+  // --- STRATEGY 4: CodeTabs (GET) ---
+  // Reliable GET proxy.
   try {
     const urlParams = new URLSearchParams();
-    urlParams.append('query', query);
+    urlParams.append('query', minifiedQuery);
     if (variables) urlParams.append('variables', JSON.stringify(variables));
-    const targetUrl = `${API_URL}?${urlParams.toString()}`;
+    urlParams.append('t', String(t)); // Cache buster
     
+    const targetUrl = `${API_URL}?${urlParams.toString()}`;
     const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
     
-    const res = await fetch(proxyUrl, {
-        method: 'GET',
-    });
-    
+    const res = await fetch(proxyUrl, { method: 'GET' });
     if (res.ok) {
         const json = await res.json();
         if (!json.errors) return json.data;
-        lastErrorDetail = `Proxy 2 (CodeTabs) GraphQL Error: ${json.errors[0]?.message}`;
+        errors.push(`CodeTabs GET GraphQL Error: ${json.errors[0]?.message}`);
     } else {
-        lastErrorDetail = `Proxy 2 (CodeTabs) Error: ${res.status} ${res.statusText}`;
+        errors.push(`CodeTabs GET Error: ${res.status} ${res.statusText}`);
     }
-  } catch (error) {
-     lastErrorDetail = `Proxy 2 (CodeTabs) Exception: ${error instanceof Error ? error.message : String(error)}`;
-     console.warn('Strategy 4 (CodeTabs) failed:', error);
+  } catch (e) {
+     errors.push(`CodeTabs GET Exception: ${e instanceof Error ? e.message : String(e)}`);
   }
 
-  // STRATEGY 5: Proxy 3 (AllOrigins) - Last resort
+  // --- STRATEGY 5: AllOrigins (JSON Wrapper) ---
+  // Uses /get?url=... which returns a JSON with { contents: "..." }
+  // This is often more reliable than /raw for certain content types/headers.
   try {
     const urlParams = new URLSearchParams();
-    urlParams.append('query', query);
+    urlParams.append('query', minifiedQuery);
     if (variables) urlParams.append('variables', JSON.stringify(variables));
+    urlParams.append('t', String(t)); // Cache buster
+    
     const targetUrl = `${API_URL}?${urlParams.toString()}`;
+    // Add cache buster to the proxy URL itself as well
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&rand=${t}`;
     
-    // We use the raw endpoint of allorigins to get the JSON directly
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-    
-    const res = await fetch(proxyUrl, {
-        method: 'GET',
-    });
-    
+    const res = await fetch(proxyUrl, { method: 'GET' });
     if (res.ok) {
-        const json = await res.json();
-        if (!json.errors) return json.data;
-        lastErrorDetail = `Proxy 3 (AllOrigins) GraphQL Error: ${json.errors[0]?.message}`;
+        const wrapper = await res.json();
+        if (wrapper && wrapper.contents) {
+            const json = JSON.parse(wrapper.contents);
+            if (!json.errors) return json.data;
+            errors.push(`AllOrigins JSON GraphQL Error: ${json.errors[0]?.message}`);
+        } else {
+            errors.push(`AllOrigins JSON Error: Empty contents`);
+        }
     } else {
-        lastErrorDetail = `Proxy 3 (AllOrigins) Error: ${res.status} ${res.statusText}`;
+        errors.push(`AllOrigins JSON Error: ${res.status} ${res.statusText}`);
     }
-  } catch (error) {
-     lastErrorDetail = `Proxy 3 (AllOrigins) Exception: ${error instanceof Error ? error.message : String(error)}`;
-     console.error('Strategy 5 (AllOrigins) failed:', error);
+  } catch (e) {
+     errors.push(`AllOrigins JSON Exception: ${e instanceof Error ? e.message : String(e)}`);
   }
 
-  // If we reach here, ALL strategies failed. 
-  throw new Error(`Connection failed. Details: ${lastErrorDetail}`);
+  // If we get here, all strategies failed.
+  // Log all errors for debugging
+  console.warn("All fetch strategies failed. Diagnostic info:", errors);
+  throw new Error(`Unable to connect to content server (Strategies exhausted). Last error: ${errors[errors.length - 1]}`);
 }
 
 export async function getNewsPosts(): Promise<Post[]> {
@@ -230,30 +262,34 @@ export async function getNewsPosts(): Promise<Post[]> {
     }
   `;
 
-  // This will now THROW if it fails, which is what we want for debugging.
-  const data = await fetchGraphQL(query);
-  
-  if (data?.posts?.nodes) {
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  try {
+      const data = await fetchGraphQL(query);
+      
+      if (data?.posts?.nodes) {
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-    const filteredPosts = data.posts.nodes.filter((post: Post) => {
-      const postDate = new Date(post.date);
-      return postDate >= oneYearAgo;
-    });
+        const filteredPosts = data.posts.nodes.filter((post: Post) => {
+          const postDate = new Date(post.date);
+          return postDate >= oneYearAgo;
+        });
 
-    return filteredPosts.slice(0, 6).map((post: Post) => ({
-      ...post,
-      excerpt: fixContentUrls(post.excerpt) || '',
-      featuredImage: post.featuredImage ? {
-        node: {
-          ...post.featuredImage.node,
-          sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || ''
-        }
-      } : undefined
-    }));
+        return filteredPosts.slice(0, 6).map((post: Post) => ({
+          ...post,
+          excerpt: fixContentUrls(post.excerpt) || '',
+          featuredImage: post.featuredImage ? {
+            node: {
+              ...post.featuredImage.node,
+              sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || ''
+            }
+          } : undefined
+        }));
+      }
+      return [];
+  } catch (error) {
+      console.error("Failed to load news posts:", error);
+      throw error; // Re-throw to let the component handle the error state
   }
-  return [];
 }
 
 export async function getAllPosts(): Promise<Post[]> {
@@ -273,54 +309,88 @@ export async function getAllPosts(): Promise<Post[]> {
     }
   `;
 
-  const data = await fetchGraphQL(query);
-  if (data?.posts?.nodes) {
-    return data.posts.nodes.map((post: Post) => ({
-      ...post,
-      excerpt: fixContentUrls(post.excerpt) || '',
-      featuredImage: post.featuredImage ? {
-        node: {
-          ...post.featuredImage.node,
-          sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || ''
-        }
-      } : undefined
-    }));
+  try {
+    const data = await fetchGraphQL(query);
+    if (data?.posts?.nodes) {
+      return data.posts.nodes.map((post: Post) => ({
+        ...post,
+        excerpt: fixContentUrls(post.excerpt) || '',
+        featuredImage: post.featuredImage ? {
+          node: {
+            ...post.featuredImage.node,
+            sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || ''
+          }
+        } : undefined
+      }));
+    }
+    return [];
+  } catch (error) {
+      console.error("Failed to load all posts:", error);
+      return [];
   }
-  return [];
 }
 
 export async function getLidWordenPage(): Promise<LidWordenPageData | null> {
+  // REVISED STRATEGY: 
+  // Instead of guessing the slug/ID, fetch all pages and filter in JS.
+  // This is much more reliable against slug mismatches (e.g. /lid-worden vs /lid-worden-2).
   const query = `
-    query GetLidWordenPage {
-      page(id: "lid-worden", idType: URI) {
-        title
-        content(format: RENDERED)
-        lidWordenFields {
-          faq1 { vraag antwoord }
-          faq2 { vraag antwoord }
-          faq3 { vraag antwoord }
-          faq4 { vraag antwoord }
-          faq5 { vraag antwoord }
+    query GetAllPagesForLidWorden {
+      pages(first: 100) {
+        nodes {
+          id
+          title
+          slug
+          content(format: RENDERED)
         }
       }
     }
   `;
 
-  const data = await fetchGraphQL(query);
-  if (!data?.page) return null;
+  let debugLog: string[] = [];
 
-  const fields = data.page.lidWordenFields || {};
-  const rawFaqs = [fields.faq1, fields.faq2, fields.faq3, fields.faq4, fields.faq5];
-  
-  const normalizedFaqs: FAQ[] = rawFaqs.filter((item: any) => 
-    item && item.vraag && item.vraag.trim().length > 0
-  );
+  try {
+    const data = await fetchGraphQL(query);
+    const pages = data?.pages?.nodes || [];
+    debugLog.push(`Fetched ${pages.length} pages.`);
+    debugLog.push(`Slugs found: ${pages.map((p:any) => p.slug).join(', ')}`);
 
-  return {
-    title: data.page.title,
-    content: fixContentUrls(data.page.content) || '',
-    lidWordenFields: { faqs: normalizedFaqs }
-  };
+    // Priority 1: Exact slug match
+    let match = pages.find((p: any) => p.slug === 'lid-worden');
+
+    // Priority 2: Fuzzy title match
+    if (!match) {
+        match = pages.find((p: any) => p.title.toLowerCase().includes('lid worden'));
+    }
+
+    // Priority 3: Fuzzy slug match
+    if (!match) {
+         match = pages.find((p: any) => p.slug.includes('lid-worden') || p.slug.includes('aanmelden'));
+    }
+
+    if (match) {
+        return {
+            title: match.title,
+            content: fixContentUrls(match.content),
+            debugInfo: debugLog.join('\n')
+        };
+    } else {
+        // Return a dummy object with debug info so the frontend can show what went wrong
+         return {
+            title: "Error: Page Not Found",
+            content: "",
+            debugInfo: `COULD NOT FIND PAGE. \n${debugLog.join('\n')}`
+        };
+    }
+
+  } catch (e) {
+      console.error("Failed to fetch Lid Worden page via list:", e);
+      return {
+          title: "Connection Error",
+          content: "",
+          debugInfo: `Fetch error: ${e instanceof Error ? e.message : String(e)}`
+      };
+  }
 }
 
 export async function getPostBySlug(slug: string) {
@@ -335,20 +405,25 @@ export async function getPostBySlug(slug: string) {
     }
   `;
 
-  const data = await fetchGraphQL(query, { id: slug });
-  if (!data || !data.post) return null;
+  try {
+    const data = await fetchGraphQL(query, { id: slug });
+    if (!data || !data.post) return null;
 
-  const post = data.post;
-  return {
-    ...post,
-    content: fixContentUrls(post.content),
-    featuredImage: post.featuredImage ? {
-      node: {
-        ...post.featuredImage.node,
-        sourceUrl: proxyImage(post.featuredImage.node.sourceUrl)
-      }
-    } : undefined
-  };
+    const post = data.post;
+    return {
+      ...post,
+      content: fixContentUrls(post.content),
+      featuredImage: post.featuredImage ? {
+        node: {
+          ...post.featuredImage.node,
+          sourceUrl: proxyImage(post.featuredImage.node.sourceUrl)
+        }
+      } : undefined
+    };
+  } catch (error) {
+      console.warn(`Failed to load post ${slug}:`, error);
+      return null;
+  }
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
@@ -366,32 +441,37 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
     }
   `;
 
-  const data = await fetchGraphQL(queryName, { slug });
-  let pageData = null;
+  try {
+    const data = await fetchGraphQL(queryName, { slug });
+    let pageData = null;
 
-  if (data && data.pages && data.pages.nodes && data.pages.nodes.length > 0) {
-    pageData = data.pages.nodes[0];
-  } else {
-    let fallback = await getPageByUriFallback(`/${slug}/`);
-    if (!fallback || fallback.id === 'error-page') {
-        fallback = await getPageByUriFallback(slug);
+    if (data && data.pages && data.pages.nodes && data.pages.nodes.length > 0) {
+      pageData = data.pages.nodes[0];
+    } else {
+      let fallback = await getPageByUriFallback(`/${slug}/`);
+      if (!fallback || fallback.id === 'error-page') {
+          fallback = await getPageByUriFallback(slug);
+      }
+      pageData = fallback;
     }
-    pageData = fallback;
-  }
 
-  if (pageData) {
-    return {
-      ...pageData,
-      content: fixContentUrls(pageData.content) || '',
-      featuredImage: pageData.featuredImage ? {
-        node: {
-          ...pageData.featuredImage.node,
-          sourceUrl: proxyImage(pageData.featuredImage.node.sourceUrl) || ''
-        }
-      } : undefined
-    };
+    if (pageData) {
+      return {
+        ...pageData,
+        content: fixContentUrls(pageData.content) || '',
+        featuredImage: pageData.featuredImage ? {
+          node: {
+            ...pageData.featuredImage.node,
+            sourceUrl: proxyImage(pageData.featuredImage.node.sourceUrl) || ''
+          }
+        } : undefined
+      };
+    }
+    return null;
+  } catch (error) {
+      console.warn(`Failed to load page ${slug}:`, error);
+      return null;
   }
-  return null;
 }
 
 async function getPageByUriFallback(uri: string): Promise<Page | null> {
@@ -406,7 +486,51 @@ async function getPageByUriFallback(uri: string): Promise<Page | null> {
       }
     }
   `;
-  const data = await fetchGraphQL(query, { id: uri });
-  if (!data || !data.page) return null;
-  return data.page;
+  try {
+    const data = await fetchGraphQL(query, { id: uri });
+    if (!data || !data.page) return null;
+    return data.page;
+  } catch (e) {
+      return null;
+  }
+}
+
+/**
+ * Fetch featured images for the recruitment cards.
+ * Returns a map of slug -> imageUrl.
+ * Uses 'nameIn' which finds pages by slug regardless of their hierarchy/path.
+ */
+export async function getRecruitmentPagesImages(): Promise<Record<string, string | undefined>> {
+  const query = `
+    query GetRecruitmentImages {
+      pages(where: {nameIn: ["boek-ons", "steun-ons", "doe-mee"]}) {
+        nodes {
+          slug
+          featuredImage {
+            node {
+              sourceUrl
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  try {
+    const data = await fetchGraphQL(query);
+    const resultMap: Record<string, string | undefined> = {};
+    
+    if (data?.pages?.nodes) {
+      data.pages.nodes.forEach((page: any) => {
+        if (page.slug && page.featuredImage?.node?.sourceUrl) {
+          resultMap[page.slug] = proxyImage(page.featuredImage.node.sourceUrl);
+        }
+      });
+    }
+
+    return resultMap;
+  } catch (e) {
+    console.warn("Failed to fetch recruitment images", e);
+    return {};
+  }
 }

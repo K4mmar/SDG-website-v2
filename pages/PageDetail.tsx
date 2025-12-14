@@ -83,7 +83,8 @@ const PageDetail: React.FC = () => {
     'over-ons': 'identiteit', // Default to Identity when clicking "Over ons"
     'over-sdg': 'identiteit',
     'identiteit': 'identiteit',
-    'geschiedenis': 'geschiedenis'
+    'geschiedenis': 'geschiedenis',
+    'privacy': 'privacy-policy-2'
   };
 
   useEffect(() => {

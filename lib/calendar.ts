@@ -1,8 +1,5 @@
 import ICAL from 'ical.js';
 
-// Using a CORS proxy is necessary because Google Calendar does not send CORS headers for browser-based fetches.
-const PROXY_URL = 'https://corsproxy.io/?';
-// Note: We use the plain '@' here. The code below will handle the necessary encoding.
 const CALENDAR_URL = 'https://calendar.google.com/calendar/ical/webmaster@sdgsintjansklooster.nl/public/basic.ics';
 
 export interface CalendarEvent {
@@ -16,20 +13,55 @@ export interface CalendarEvent {
   isRecurring?: boolean;
 }
 
+/**
+ * Robust fetch strategy for the ICS file using multiple proxies.
+ * Mobile networks and browser security settings often block simple CORS requests.
+ */
+async function fetchICS(url: string): Promise<string> {
+  const urlWithCache = `${url}?nocache=${Date.now()}`;
+  let lastError;
+
+  // STRATEGY 1: CorsProxy.io
+  // Usually the fastest. Note: Requires encoded URL.
+  try {
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithCache)}`;
+    const res = await fetch(proxyUrl);
+    if (res.ok) return await res.text();
+    lastError = `CorsProxy failed: ${res.status} ${res.statusText}`;
+  } catch (e) {
+    lastError = `CorsProxy error: ${e}`;
+  }
+
+  // STRATEGY 2: AllOrigins
+  // Very reliable backup.
+  try {
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlWithCache)}`;
+    const res = await fetch(proxyUrl);
+    if (res.ok) return await res.text();
+    lastError = `AllOrigins failed: ${res.status} ${res.statusText}`;
+  } catch (e) {
+    lastError = `AllOrigins error: ${e}`;
+  }
+
+  // STRATEGY 3: CodeTabs
+  // Another fallback.
+  try {
+    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlWithCache)}`;
+    const res = await fetch(proxyUrl);
+    if (res.ok) return await res.text();
+    lastError = `CodeTabs failed: ${res.status} ${res.statusText}`;
+  } catch (e) {
+    lastError = `CodeTabs error: ${e}`;
+  }
+
+  throw new Error(`Unable to fetch calendar data. All proxies failed. Last error: ${lastError}`);
+}
+
 export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
   try {
-    // Add a cache-busting timestamp to the target URL to ensure we get fresh data
-    const urlWithCacheBuster = `${CALENDAR_URL}?nocache=${Date.now()}`;
-    const encodedUrl = encodeURIComponent(urlWithCacheBuster);
+    const icsData = await fetchICS(CALENDAR_URL);
     
-    // Fetch via Proxy
-    const response = await fetch(`${PROXY_URL}${encodedUrl}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch calendar: ${response.statusText}`);
-    }
-
-    const icsData = await response.text();
+    // Parse the ICS data
     const jcalData = ICAL.parse(icsData);
     const comp = new ICAL.Component(jcalData);
     const vevents = comp.getAllSubcomponents('vevent');
@@ -48,6 +80,9 @@ export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
       const summary = event.summary;
       const description = event.description;
       const location = event.location;
+      
+      if (!event.startDate) return;
+
       const allDay = event.startDate.isDate; 
 
       if (event.isRecurring()) {
@@ -93,22 +128,20 @@ export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
 
       } else {
         // Handle Single (Non-Recurring) Events
-        if (event.startDate) {
-          const start = event.startDate.toJSDate();
-          const end = event.endDate ? event.endDate.toJSDate() : start;
-          
-          if (end >= now && start <= futureLimit) {
-              events.push({
-                  uid: event.uid,
-                  title: summary,
-                  description,
-                  location,
-                  start,
-                  end,
-                  allDay,
-                  isRecurring: false
-              });
-          }
+        const start = event.startDate.toJSDate();
+        const end = event.endDate ? event.endDate.toJSDate() : start;
+        
+        if (end >= now && start <= futureLimit) {
+            events.push({
+                uid: event.uid,
+                title: summary,
+                description,
+                location,
+                start,
+                end,
+                allDay,
+                isRecurring: false
+            });
         }
       }
     });
