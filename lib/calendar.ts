@@ -13,48 +13,89 @@ export interface CalendarEvent {
   isRecurring?: boolean;
 }
 
+// Helper to simulate Promise.any behavior since it might not be available in the TS target
+function promiseAny<T>(promises: Promise<T>[]): Promise<T> {
+  return new Promise((resolve, reject) => {
+    let errors: any[] = [];
+    let pending = promises.length;
+
+    if (pending === 0) {
+      reject(new Error("No promises passed"));
+      return;
+    }
+
+    promises.forEach((promise, index) => {
+      Promise.resolve(promise).then(
+        (value) => {
+          resolve(value);
+        },
+        (error) => {
+          errors[index] = error;
+          pending--;
+          if (pending === 0) {
+            reject(new Error(`All promises rejected: ${errors.map(e => String(e)).join(', ')}`));
+          }
+        }
+      );
+    });
+  });
+}
+
 /**
- * Robust fetch strategy for the ICS file using multiple proxies.
- * Mobile networks and browser security settings often block simple CORS requests.
+ * Robust fetch strategy for the ICS file using PARALLEL proxies.
+ * Instead of waiting for one to fail before trying the next, we race them.
+ * The first one to return 200 OK wins.
  */
 async function fetchICS(url: string): Promise<string> {
-  const urlWithCache = `${url}?nocache=${Date.now()}`;
-  let lastError;
+  // CACHE STRATEGY: 
+  // Instead of Date.now() (which forces a new fetch every ms), 
+  // we round to the nearest 10 minutes. This allows proxies to cache the result 
+  // for a short time, making subsequent loads instant for other users.
+  const cacheWindow = 600000; // 10 minutes in ms
+  const timestamp = Math.floor(Date.now() / cacheWindow); 
+  const urlWithCache = `${url}?t=${timestamp}`;
 
-  // STRATEGY 1: CorsProxy.io
-  // Usually the fastest. Note: Requires encoded URL.
+  // Define the proxy strategies
+  const strategies = [
+    // 1. CorsProxy.io (Usually fast)
+    {
+      name: 'CorsProxy',
+      url: `https://corsproxy.io/?${encodeURIComponent(urlWithCache)}`
+    },
+    // 2. AllOrigins (Reliable backup)
+    {
+      name: 'AllOrigins',
+      url: `https://api.allorigins.win/raw?url=${encodeURIComponent(urlWithCache)}`
+    },
+    // 3. CodeTabs (Fallback)
+    {
+      name: 'CodeTabs',
+      url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlWithCache)}`
+    }
+  ];
+
+  // Map strategies to fetch promises
+  const promises = strategies.map(async (strategy) => {
+    try {
+      const res = await fetch(strategy.url);
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const text = await res.text();
+      if (!text.includes('BEGIN:VCALENDAR')) throw new Error('Invalid ICS data');
+      return text;
+    } catch (e) {
+      // Re-throw so our polyfill knows this specific one failed
+      throw new Error(`${strategy.name} failed: ${e}`);
+    }
+  });
+
   try {
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithCache)}`;
-    const res = await fetch(proxyUrl);
-    if (res.ok) return await res.text();
-    lastError = `CorsProxy failed: ${res.status} ${res.statusText}`;
-  } catch (e) {
-    lastError = `CorsProxy error: ${e}`;
+    // Promise.any waits for the FIRST successful promise.
+    // using custom implementation to avoid TS lib issues
+    return await promiseAny(promises);
+  } catch (error) {
+    console.error("All calendar proxies failed.", error);
+    throw new Error("Kan agenda niet ophalen via beschikbare verbindingen.");
   }
-
-  // STRATEGY 2: AllOrigins
-  // Very reliable backup.
-  try {
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlWithCache)}`;
-    const res = await fetch(proxyUrl);
-    if (res.ok) return await res.text();
-    lastError = `AllOrigins failed: ${res.status} ${res.statusText}`;
-  } catch (e) {
-    lastError = `AllOrigins error: ${e}`;
-  }
-
-  // STRATEGY 3: CodeTabs
-  // Another fallback.
-  try {
-    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlWithCache)}`;
-    const res = await fetch(proxyUrl);
-    if (res.ok) return await res.text();
-    lastError = `CodeTabs failed: ${res.status} ${res.statusText}`;
-  } catch (e) {
-    lastError = `CodeTabs error: ${e}`;
-  }
-
-  throw new Error(`Unable to fetch calendar data. All proxies failed. Last error: ${lastError}`);
 }
 
 export async function getUpcomingEvents(): Promise<CalendarEvent[]> {

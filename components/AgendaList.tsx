@@ -2,19 +2,34 @@ import React, { useEffect, useState } from 'react';
 import { getUpcomingEvents, CalendarEvent } from '../lib/calendar';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { MapPin, Clock, CalendarDays, ExternalLink } from 'lucide-react';
+import { MapPin, Clock, CalendarDays, ExternalLink, Calendar, Loader2 } from 'lucide-react';
 
 const AgendaList: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [longLoading, setLongLoading] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+    
+    // Set a timeout to show a "taking longer than usual" message after 3 seconds
+    const timer = setTimeout(() => {
+      if (isMounted && loading) setLongLoading(true);
+    }, 3000);
+
     async function loadEvents() {
       const data = await getUpcomingEvents();
-      setEvents(data);
-      setLoading(false);
+      if (isMounted) {
+        setEvents(data);
+        setLoading(false);
+      }
     }
     loadEvents();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, []);
 
   // Helper to extract a link from the description if present
@@ -37,10 +52,23 @@ const AgendaList: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex flex-col gap-4">
-             {[1, 2, 3].map((i) => (
-               <div key={i} className="bg-white rounded-2xl h-32 animate-pulse shadow-sm border border-gray-100"></div>
-             ))}
+          <div className="bg-white rounded-3xl p-12 border border-gray-200 text-center flex flex-col items-center justify-center min-h-[300px]">
+             <div className="relative mb-6">
+                <Calendar className="w-16 h-16 text-slate-200" />
+                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm">
+                  <Loader2 className="w-8 h-8 text-sdg-red animate-spin" />
+                </div>
+             </div>
+             
+             <h3 className="text-xl font-bold text-slate-700 mb-2">Agenda ophalen...</h3>
+             <p className="text-slate-500 max-w-md mx-auto">
+               Even geduld, we halen de laatste activiteiten op uit de Google Agenda van SDG.
+             </p>
+             
+             {/* Show this message only if it takes longer than 3 seconds */}
+             <div className={`mt-4 px-4 py-2 bg-yellow-50 text-yellow-700 text-sm rounded-lg border border-yellow-100 transition-opacity duration-500 ${longLoading ? 'opacity-100' : 'opacity-0'}`}>
+                Dit duurt iets langer dan normaal. We maken verbinding...
+             </div>
           </div>
         ) : events.length === 0 ? (
           <div className="bg-white p-10 rounded-3xl border border-gray-200 text-center">
