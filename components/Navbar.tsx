@@ -146,10 +146,10 @@ const Navbar: React.FC = () => {
                 Over SDG
             </button>
 
-            {/* CTA Button: Speel Mee (Was Kom Spelen) */}
+            {/* CTA Button: Speel Mee (Was Kom Spelen) - Updated to Gold Style */}
             <button
               onClick={() => handleNavClick(null, '/lid-worden')}
-              className="bg-sdg-red text-white px-7 py-3 rounded-full font-bold uppercase tracking-wide text-xs hover:bg-red-800 transition-all transform hover:scale-105 shadow-lg shadow-sdg-red/30"
+              className="bg-gradient-to-r from-sdg-gold to-amber-500 text-white px-7 py-3 rounded-full font-bold uppercase tracking-wide text-xs hover:shadow-xl hover:scale-105 transition-all shadow-lg shadow-sdg-gold/30"
             >
               Speel Mee
             </button>
@@ -215,9 +215,10 @@ const Navbar: React.FC = () => {
                 Over SDG
             </button>
 
+            {/* Mobile CTA - Gold */}
             <button
               onClick={() => handleNavClick(null, '/lid-worden')}
-              className="bg-sdg-red text-white text-center py-4 rounded-xl font-bold uppercase tracking-widest mt-8 shadow-lg shadow-sdg-red/20"
+              className="bg-gradient-to-r from-sdg-gold to-amber-500 text-white text-center py-4 rounded-xl font-bold uppercase tracking-widest mt-8 shadow-lg shadow-sdg-gold/20"
             >
               Speel Mee
             </button>

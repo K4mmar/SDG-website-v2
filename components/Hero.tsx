@@ -98,10 +98,10 @@ const Hero: React.FC = () => {
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            {/* Primary Action: Speel Mee */}
+            {/* Primary Action: Speel Mee - Gold Gradient Style */}
             <button
               onClick={() => navigate('/lid-worden')}
-              className="group relative w-full sm:w-auto px-10 py-4 bg-sdg-red text-white rounded-full font-bold overflow-hidden shadow-lg shadow-sdg-red/20 transition-all hover:scale-105 hover:shadow-sdg-red/40"
+              className="group relative w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-sdg-gold to-amber-500 text-white rounded-full font-bold overflow-hidden shadow-lg shadow-sdg-gold/30 transition-all hover:scale-105 hover:shadow-sdg-gold/50"
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
               <span className="relative flex items-center justify-center gap-2 font-sans tracking-wide">
