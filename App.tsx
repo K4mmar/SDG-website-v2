@@ -4,7 +4,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import JoinUs from './pages/JoinUs';
-import Education from './pages/Education'; // Imported the new page
+import Education from './pages/Education'; 
+import About from './pages/About'; // Imported new About page
 import PostDetail from './pages/PostDetail';
 import PageDetail from './pages/PageDetail';
 import NewsArchive from './pages/NewsArchive';
@@ -22,8 +23,6 @@ const ScrollToTop = () => {
 };
 
 // Main App Component simulating Layout
-// Note: Using MemoryRouter to ensure compatibility with restricted preview environments (blob origins).
-// For production on Netlify, you can switch this back to HashRouter or BrowserRouter.
 const App: React.FC = () => {
   return (
     <Router>
@@ -43,13 +42,13 @@ const App: React.FC = () => {
             <Route path="/jeugd" element={<Education />} />
             <Route path="/opleiding" element={<Education />} />
 
-            {/* Top Level Pages - Explicitly defined for clarity */}
-            <Route path="/over-ons" element={<PageDetail />} />
+            {/* NEW: Dedicated Scrollytelling Page for Over Ons */}
+            <Route path="/over-ons" element={<About />} />
 
             {/* Structure for Groups (Fanfare, Malletband) */}
             <Route path="/groepen/:slug" element={<PageDetail />} />
             
-            {/* Structure for Subpages of Over SDG */}
+            {/* Catch-all for other subpages (like privacy) */}
             <Route path="/over-ons/:slug" element={<PageDetail />} />
             
             {/* Catch-all for other top-level pages */}

@@ -90,11 +90,6 @@ const PARENT_BENEFITS = [
     icon: <GraduationCap className="w-6 h-6 text-blue-600" />,
     title: "Erkende Kwaliteit",
     desc: "Je krijgt les van gediplomeerde docenten volgens officiële muziekexamens."
-  },
-  {
-    icon: <Users className="w-6 h-6 text-orange-600" />,
-    title: "Snel Samen Spelen",
-    desc: "Muziek maken doe je niet alleen. Je speelt al snel mee in de groepsrepetities."
   }
 ];
 
@@ -461,7 +456,8 @@ const Education: React.FC = () => {
       {/* 5. PARENT ZONE */}
       <section className="py-20 bg-white border-t border-gray-100">
         <div className="container mx-auto px-6">
-           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {/* Changed from lg:grid-cols-4 to lg:grid-cols-3 to center the 3 items nicely */}
+           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {PARENT_BENEFITS.map((benefit, idx) => (
                 <div key={idx} className="flex flex-col items-start p-6 bg-slate-50 rounded-2xl shadow-sm h-full border border-slate-100 hover:bg-white hover:shadow-md transition-all">
                   <div className="mb-4 p-3 bg-white rounded-xl shadow-sm">

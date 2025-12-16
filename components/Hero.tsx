@@ -20,7 +20,7 @@ const Hero: React.FC = () => {
   };
 
   // Updated background image via weserv for optimization (using the new compressed source)
-  const bgImage = "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/SDG-s1-1.jpg&output=webp&q=80&w=1600";
+  const bgImage = "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/DSC06776.jpg&output=webp&q=80&w=1600";
 
   return (
     <div className="relative h-screen min-h-[600px] flex flex-col justify-center overflow-hidden bg-slate-900">
