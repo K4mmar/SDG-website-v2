@@ -1,21 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Send, CheckCircle, Music, HelpCircle, AlertTriangle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Send, CheckCircle, Music, HelpCircle, AlertTriangle, Star, UserPlus, Users } from 'lucide-react';
 import { getLidWordenPage, FAQ } from '../lib/wordpress';
-
-// -----------------------------------------------------------------------------
-// INSTRUCTIE VOOR WORDPRESS BEHEER:
-// -----------------------------------------------------------------------------
-// Deze pagina haalt de tekst op van de pagina met slug 'lid-worden'.
-//
-// FAQ Functionaliteit (Veelgestelde vragen):
-// De code scant automatisch de inhoud van de pagina.
-// 1. Elke "Koptekst" (H2, H3, of H4) wordt gezien als een nieuwe VRAAG.
-// 2. Alle tekst/paragrafen onder die kop worden het ANTWOORD.
-//
-// Introductie:
-// Alles wat je BOVEN de allereerste Koptekst zet, verschijnt bovenaan de pagina
-// als introductietekst.
-// -----------------------------------------------------------------------------
+import { useNavigate } from 'react-router-dom';
 
 // CONFIGURATIE:
 const FORM_ENDPOINT = "https://formspree.io/f/xjknjogr";
@@ -40,20 +26,63 @@ const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, ans
   );
 };
 
+const TargetGroupCard: React.FC<{ 
+  title: string; 
+  subtitle: string; 
+  description: string; 
+  icon: React.ReactNode; 
+  primary: boolean; 
+  onClick: () => void 
+}> = ({ title, subtitle, description, icon, primary, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`group relative p-8 rounded-3xl transition-all duration-300 cursor-pointer border hover:-translate-y-1 h-full flex flex-col ${
+      primary 
+        ? 'bg-gradient-to-br from-slate-900 to-slate-800 text-white border-slate-700 shadow-xl' 
+        : 'bg-white text-slate-800 border-gray-100 shadow-lg hover:shadow-xl hover:border-sdg-red/20'
+    }`}
+  >
+    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm ${
+      primary ? 'bg-sdg-gold text-slate-900' : 'bg-slate-50 text-sdg-red border border-slate-100'
+    }`}>
+      {icon}
+    </div>
+    <h3 className={`text-2xl font-serif font-bold mb-1 ${primary ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
+    <p className={`text-sm font-bold uppercase tracking-wider mb-4 ${primary ? 'text-sdg-gold' : 'text-sdg-red'}`}>{subtitle}</p>
+    <p className={`leading-relaxed mb-6 font-light ${primary ? 'text-slate-300' : 'text-slate-600'}`}>
+      {description}
+    </p>
+    <div className="mt-auto flex items-center font-bold text-sm uppercase tracking-wide gap-2">
+      Meld je aan <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
+    </div>
+  </div>
+);
+
 const JoinUs: React.FC = () => {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [introContent, setIntroContent] = useState<string>('');
-  const [fullRawContent, setFullRawContent] = useState<string>(''); // For debugging
+  const [fullRawContent, setFullRawContent] = useState<string>('');
   const [pageTitle, setPageTitle] = useState<string>('');
-  const [debugInfo, setDebugInfo] = useState<string>(''); // For advanced debugging
+  const [debugInfo, setDebugInfo] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [prefillOpmerking, setPrefillOpmerking] = useState('');
+  
+  const navigate = useNavigate();
 
-  // LINEAR PARSER:
-  // Iterates through nodes linearly. 
-  // - Before first header -> Intro
-  // - Header found -> Start new Question
-  // - Content after header -> Append to current Answer
+  // Scroll to form helper
+  const scrollToForm = (type: string) => {
+    const formElement = document.getElementById('signup-form');
+    if (formElement) {
+      if (type === 'adult') {
+        setPrefillOpmerking("Ik ben een ervaren muzikant / herintreder en wil graag eens sfeer proeven.");
+      } else {
+        setPrefillOpmerking("Ik wil graag informatie over muziekles voor beginners/jeugd.");
+      }
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const parseContent = (html: string) => {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
@@ -64,12 +93,9 @@ const JoinUs: React.FC = () => {
     let introHtml = '';
     let foundFirstHeader = false;
 
-    // Helper to check if a node is a header
     const isHeaderTag = (tagName: string) => ['H2', 'H3', 'H4', 'H5'].includes(tagName.toUpperCase());
 
-    // Iterate over all child nodes
     Array.from(tempDiv.childNodes).forEach((node) => {
-      // Get HTML of the node (element) or text content (text node)
       let nodeContent = '';
       let tagName = '';
 
@@ -78,42 +104,30 @@ const JoinUs: React.FC = () => {
         tagName = el.tagName;
         nodeContent = el.outerHTML;
       } else if (node.nodeType === Node.TEXT_NODE) {
-        // Skip empty text nodes (whitespace) usually found between blocks
         if (!node.textContent?.trim()) return;
         nodeContent = node.textContent || '';
       }
 
       if (isHeaderTag(tagName)) {
-        // --- WE FOUND A HEADER ---
-        
-        // 1. Save previous question if exists
         if (currentQuestion) {
           newFaqs.push({ vraag: currentQuestion, antwoord: currentAnswer });
         }
-        
-        // 2. Start new question
         foundFirstHeader = true;
-        currentQuestion = node.textContent || ''; // Header text is the question
-        currentAnswer = ''; // Reset answer bucket
+        currentQuestion = node.textContent || '';
+        currentAnswer = '';
       } else {
-        // --- WE FOUND CONTENT ---
-        
         if (!foundFirstHeader) {
-          // Still in introduction area
           introHtml += nodeContent;
         } else {
-          // Belongs to the current question being built
           currentAnswer += nodeContent;
         }
       }
     });
 
-    // Don't forget to push the very last question loop
     if (currentQuestion) {
       newFaqs.push({ vraag: currentQuestion, antwoord: currentAnswer || '<p><em>(Nog geen antwoord ingevuld)</em></p>' });
     }
 
-    // Fallback: If no headers were found at all, treat everything as Intro
     if (!foundFirstHeader && !introHtml) {
         introHtml = html;
     }
@@ -142,14 +156,11 @@ const JoinUs: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
     if (FORM_ENDPOINT.includes("PLAATS_JOUW_ID_HIER")) {
-        alert("LET OP: De formulier endpoint is nog niet ingesteld in de code (JoinUs.tsx).");
+        alert("LET OP: De formulier endpoint is nog niet ingesteld.");
         return;
     }
-
     setFormStatus('submitting');
-    
     const myForm = e.currentTarget;
     const formData = new FormData(myForm);
     const data = Object.fromEntries(formData.entries());
@@ -157,10 +168,7 @@ const JoinUs: React.FC = () => {
     try {
       const response = await fetch(FORM_ENDPOINT, {
         method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -171,7 +179,6 @@ const JoinUs: React.FC = () => {
         setFormStatus('error');
       }
     } catch (error) {
-      console.error("Form error:", error);
       setFormStatus('error');
     }
   };
@@ -185,17 +192,43 @@ const JoinUs: React.FC = () => {
           <h1 className="text-5xl md:text-7xl font-serif font-bold text-slate-900 mb-6 tracking-tight">
             Word lid van <span className="text-sdg-red italic">SDG</span>
           </h1>
-          <div className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light">
-            {loading ? (
-              <div className="h-6 bg-gray-200 rounded w-2/3 mx-auto animate-pulse"></div>
-            ) : (
-               introContent ? <div dangerouslySetInnerHTML={{ __html: introContent }} /> : 
-               <p>Muziek maken is het leukste wat er is. Of je nu beginner bent of gevorderd, bij SDG ben je van harte welkom!</p>
-            )}
-          </div>
+          <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light">
+             Muziek maken is voor alle leeftijden. Of je nu je eerste noot blaast of al jaren ervaring hebt: 
+             er is altijd een plek voor jou.
+          </p>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        {/* --- SEGMENTATION CARDS (NEW) --- */}
+        <div className="grid md:grid-cols-2 gap-6 lg:gap-8 mb-16 max-w-5xl mx-auto">
+          {/* Card 1: Jeugd / Opleiding */}
+          <TargetGroupCard 
+            title="Starten met Muziek"
+            subtitle="Opleiding & Jeugd"
+            description="Wil jij of je kind een instrument leren bespelen? Bij onze Music Kids opleiding leer je spelenderwijs muziek maken. Gratis instrument in bruikleen en les van professionals."
+            icon={<Star className="w-8 h-8" />}
+            primary={false}
+            onClick={() => scrollToForm('youth')}
+          />
+
+          {/* Card 2: Volwassenen / Herintreders */}
+          <TargetGroupCard 
+            title="Ervaren Muzikant"
+            subtitle="Volwassenen & Herintreders"
+            description="Heb je vroeger gespeeld en kriebelt het weer? Of zoek je een nieuwe uitdaging? Kom vrijblijvend sfeer proeven tijdens een repetitie. Je hoeft geen auditie te doen, plezier staat voorop."
+            icon={<UserPlus className="w-8 h-8" />}
+            primary={true}
+            onClick={() => scrollToForm('adult')}
+          />
+        </div>
+
+        {/* Dynamic Intro Content from WordPress (if exists) */}
+        {!loading && introContent && (
+           <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm mb-12 max-w-4xl mx-auto prose prose-slate">
+              <div dangerouslySetInnerHTML={{ __html: introContent }} />
+           </div>
+        )}
+
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start" id="signup-form">
           
           {/* COLUMN 1: Inschrijfformulier */}
           <div className="lg:col-span-7 order-1">
@@ -208,7 +241,7 @@ const JoinUs: React.FC = () => {
                   Meld je direct aan
                 </h2>
                 <p className="text-slate-500 mt-2 font-light text-lg">
-                  Vul onderstaand formulier in. We nemen zo snel mogelijk contact met je op.
+                  Vul het formulier in. We nemen contact op om te kijken wat bij je past.
                 </p>
               </div>
 
@@ -219,18 +252,14 @@ const JoinUs: React.FC = () => {
                   </div>
                   <h3 className="text-3xl font-serif font-bold text-green-800 mb-4">Bedankt!</h3>
                   <p className="text-green-700 text-lg">
-                    We hebben je gegevens ontvangen. Eén van onze bestuursleden neemt binnenkort contact met je op.
+                    We hebben je bericht ontvangen. Eén van onze bestuursleden neemt binnenkort contact met je op.
                   </p>
-                  <button 
-                    onClick={() => setFormStatus('idle')}
-                    className="mt-8 text-sm font-bold uppercase tracking-wider text-green-700 hover:text-green-900 underline"
-                  >
+                  <button onClick={() => setFormStatus('idle')} className="mt-8 text-sm font-bold uppercase tracking-wider text-green-700 hover:text-green-900 underline">
                     Nog een aanmelding versturen
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Form Fields (kept same as before) */}
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label htmlFor="name" className="text-sm font-bold uppercase tracking-wide text-slate-500 ml-1">Naam *</label>
@@ -249,12 +278,19 @@ const JoinUs: React.FC = () => {
 
                   <div className="space-y-2">
                      <label htmlFor="instrument" className="text-sm font-bold uppercase tracking-wide text-slate-500 ml-1">Welk instrument?</label>
-                     <input type="text" id="instrument" name="instrument" className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-sdg-red focus:border-sdg-red outline-none transition-all bg-slate-50 focus:bg-white shadow-sm" placeholder="Bijv. Trompet, Slagwerk, of 'Geen idee'" />
+                     <input type="text" id="instrument" name="instrument" className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-sdg-red focus:border-sdg-red outline-none transition-all bg-slate-50 focus:bg-white shadow-sm" placeholder="Bijv. Trompet, Slagwerk, of 'Nog geen keuze'" />
                   </div>
 
                   <div className="space-y-2">
                     <label htmlFor="remarks" className="text-sm font-bold uppercase tracking-wide text-slate-500 ml-1">Opmerkingen / Vragen</label>
-                    <textarea id="remarks" name="opmerkingen" rows={4} className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-sdg-red focus:border-sdg-red outline-none transition-all bg-slate-50 focus:bg-white shadow-sm resize-none" placeholder="Heb je ervaring? Wil je eerst een proefles? Laat het ons weten."></textarea>
+                    <textarea 
+                      id="remarks" 
+                      name="opmerkingen" 
+                      rows={4} 
+                      defaultValue={prefillOpmerking}
+                      className="w-full px-5 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-sdg-red focus:border-sdg-red outline-none transition-all bg-slate-50 focus:bg-white shadow-sm resize-none" 
+                      placeholder="Vertel iets over je ervaring of je vraag."
+                    ></textarea>
                   </div>
 
                   {formStatus === 'error' && (
@@ -287,7 +323,7 @@ const JoinUs: React.FC = () => {
                 Veelgestelde vragen
               </h2>
               <p className="text-slate-500 mt-2 font-light">
-                Alles wat je moet weten over lid worden.
+                Alles wat je moet weten over contributie, instrumenten en lessen.
               </p>
             </div>
 
@@ -304,44 +340,28 @@ const JoinUs: React.FC = () => {
                 ) : (
                   <div className="bg-white p-6 rounded-2xl border border-gray-200 text-center text-slate-500 italic">
                     <p className="mb-2">Geen vragen gevonden.</p>
-                    <p className="text-xs">Gebruik Koptekst (H2/H3/H4) voor vragen.</p>
                   </div>
                 )
               )}
             </div>
 
-            {/* DIAGNOSE BLOK (Alleen zichtbaar als er geen FAQs zijn en niet aan het laden) */}
-            {!loading && faqs.length === 0 && (
-                <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-xs text-yellow-800 font-mono break-all">
-                    <div className="flex items-center gap-2 font-bold mb-2 uppercase">
-                        <AlertTriangle className="w-4 h-4" /> Diagnose Info
-                    </div>
-                    <p className="mb-2"><strong>Pagina Titel:</strong> {pageTitle}</p>
-                    <p className="mb-2"><strong>Lengte inhoud:</strong> {fullRawContent.length} tekens</p>
-                    
-                    {/* ADDED DEBUG INFO DISPLAY */}
-                    {debugInfo && (
-                         <div className="mb-2 p-2 bg-yellow-100 rounded border border-yellow-200 whitespace-pre-wrap">
-                            <strong>Systeem Log:</strong><br/>
-                            {debugInfo}
-                         </div>
-                    )}
-
-                    <p className="mb-1"><strong>Raw HTML (eerste 500 tekens):</strong></p>
-                    <div className="bg-white p-2 border border-yellow-200 rounded h-32 overflow-y-auto">
-                        {fullRawContent || "Geen inhoud."}
-                    </div>
-                </div>
-            )}
-
             {/* Extra Info Box */}
             <div className="mt-10 bg-slate-900 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden group">
                <div className="absolute top-0 right-0 w-32 h-32 bg-sdg-gold rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
                <h3 className="font-serif font-bold text-2xl mb-4 text-sdg-gold">Waarom SDG?</h3>
-               <ul className="space-y-3 text-slate-300">
-                 <li className="flex gap-3 items-center"><div className="w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs">✓</div> Gratis instrument in bruikleen</li>
-                 <li className="flex gap-3 items-center"><div className="w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs">✓</div> Professionele dirigenten</li>
-                 <li className="flex gap-3 items-center"><div className="w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs">✓</div> Gezellige activiteiten</li>
+               <ul className="space-y-4 text-slate-300">
+                 <li className="flex gap-3 items-start">
+                    <div className="w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs mt-0.5 shrink-0">✓</div> 
+                    <span><strong>Gratis Instrument:</strong> Wij zorgen voor een goed instrument in bruikleen.</span>
+                 </li>
+                 <li className="flex gap-3 items-start">
+                    <div className="w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs mt-0.5 shrink-0">✓</div> 
+                    <span><strong>Professionele Leiding:</strong> Kwaliteit staat voorop bij onze dirigenten en docenten.</span>
+                 </li>
+                 <li className="flex gap-3 items-start">
+                    <div className="w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs mt-0.5 shrink-0">✓</div> 
+                    <span><strong>Sociaal & Gezellig:</strong> Na de repetitie is de 'derde helft' net zo belangrijk.</span>
+                 </li>
                </ul>
             </div>
           </div>

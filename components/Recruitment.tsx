@@ -17,12 +17,17 @@ const Card: React.FC<{
   // Start with WP image if available, else fallback
   const [currentImage, setCurrentImage] = useState(image || fallback);
 
-  // If the 'image' prop updates (e.g. after fetch), update the state
+  // Sync state with props: if image prop changes (e.g. loads from API), update currentImage
+  // If image is undefined, revert to fallback
   useEffect(() => {
-    if (image) {
-        setCurrentImage(image);
+    setCurrentImage(image || fallback);
+  }, [image, fallback]);
+
+  const handleImageError = () => {
+    if (currentImage !== fallback) {
+      setCurrentImage(fallback);
     }
-  }, [image]);
+  };
 
   return (
     <div 
@@ -33,12 +38,7 @@ const Card: React.FC<{
         <img 
           src={currentImage} 
           alt={title} 
-          // CRITICAL: If image fails to load (broken path/404), switch to fallback
-          onError={() => {
-              if (currentImage !== fallback) {
-                  setCurrentImage(fallback);
-              }
-          }}
+          onError={handleImageError}
           className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">

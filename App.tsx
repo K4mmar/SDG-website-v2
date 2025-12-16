@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import JoinUs from './pages/JoinUs';
+import Education from './pages/Education'; // Imported the new page
 import PostDetail from './pages/PostDetail';
 import PageDetail from './pages/PageDetail';
 import NewsArchive from './pages/NewsArchive';
@@ -38,9 +39,12 @@ const App: React.FC = () => {
             <Route path="/nieuws" element={<NewsArchive />} />
             <Route path="/nieuws/:slug" element={<PostDetail />} />
             
+            {/* Custom Education Page (Opleiding/Jeugd) */}
+            <Route path="/jeugd" element={<Education />} />
+            <Route path="/opleiding" element={<Education />} />
+
             {/* Top Level Pages - Explicitly defined for clarity */}
             <Route path="/over-ons" element={<PageDetail />} />
-            <Route path="/jeugd" element={<PageDetail />} />
 
             {/* Structure for Groups (Fanfare, Malletband) */}
             <Route path="/groepen/:slug" element={<PageDetail />} />

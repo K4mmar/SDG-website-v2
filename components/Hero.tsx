@@ -19,7 +19,8 @@ const Hero: React.FC = () => {
     }
   };
 
-  const bgImage = "https://images.pubble.cloud/worker/webp/default/1440/590863/39aff116/content/2025/3/afda3c2b-3422-460c-bde8-49b484dc60b7";
+  // Updated background image via weserv for optimization (using the new compressed source)
+  const bgImage = "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/SDG-s1-1.jpg&output=webp&q=80&w=1600";
 
   return (
     <div className="relative h-screen min-h-[600px] flex flex-col justify-center overflow-hidden bg-slate-900">
@@ -97,13 +98,14 @@ const Hero: React.FC = () => {
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
+            {/* Primary Action: Speel Mee */}
             <button
               onClick={() => navigate('/lid-worden')}
               className="group relative w-full sm:w-auto px-10 py-4 bg-sdg-red text-white rounded-full font-bold overflow-hidden shadow-lg shadow-sdg-red/20 transition-all hover:scale-105 hover:shadow-sdg-red/40"
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
               <span className="relative flex items-center justify-center gap-2 font-sans tracking-wide">
-                Word Lid
+                Speel Mee
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </span>
             </button>
@@ -140,7 +142,7 @@ const Hero: React.FC = () => {
                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-sdg-red"></span>
                
                <button onClick={() => navigate('/jeugd')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
-                 Jeugdopleidingen
+                 Opleiding
                </button>
              </div>
 

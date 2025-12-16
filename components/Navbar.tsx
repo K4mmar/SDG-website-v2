@@ -95,14 +95,14 @@ const Navbar: React.FC = () => {
                 Agenda
             </button>
 
-            {/* Jeugd */}
+            {/* Opleiding (Was Jeugd) */}
             <button
                 onClick={(e) => handleNavClick(e, '/jeugd')}
                 className={`text-sm font-bold uppercase tracking-wider hover:text-sdg-gold transition-colors bg-transparent border-none cursor-pointer ${
                   showSolidNavbar ? 'text-slate-800' : 'text-white/95'
                 }`}
             >
-                Jeugd
+                Opleiding
             </button>
 
             {/* Onze Groepen Dropdown */}
@@ -146,12 +146,12 @@ const Navbar: React.FC = () => {
                 Over SDG
             </button>
 
-            {/* CTA Button: Kom Spelen */}
+            {/* CTA Button: Speel Mee (Was Kom Spelen) */}
             <button
               onClick={() => handleNavClick(null, '/lid-worden')}
               className="bg-sdg-red text-white px-7 py-3 rounded-full font-bold uppercase tracking-wide text-xs hover:bg-red-800 transition-all transform hover:scale-105 shadow-lg shadow-sdg-red/30"
             >
-              Kom Spelen!
+              Speel Mee
             </button>
           </div>
 
@@ -181,7 +181,7 @@ const Navbar: React.FC = () => {
                 onClick={(e) => handleNavClick(e, '/jeugd')}
                 className="text-lg font-bold text-slate-800 hover:text-sdg-red border-b border-gray-100 py-3 text-left"
             >
-                Jeugd
+                Opleiding
             </button>
 
             {/* Mobile Groepen Accordion */}
@@ -219,7 +219,7 @@ const Navbar: React.FC = () => {
               onClick={() => handleNavClick(null, '/lid-worden')}
               className="bg-sdg-red text-white text-center py-4 rounded-xl font-bold uppercase tracking-widest mt-8 shadow-lg shadow-sdg-red/20"
             >
-              Kom Spelen!
+              Speel Mee
             </button>
           </div>
         </div>
