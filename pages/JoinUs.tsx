@@ -1,10 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Send, CheckCircle, Music, HelpCircle, Star, UserPlus, Sparkles, Loader2 } from 'lucide-react';
-import { getLidWordenPage, FAQ } from '../lib/wordpress';
 import { useNavigate } from 'react-router-dom';
 import { GoogleGenAI } from "@google/genai";
 
 const FORM_ENDPOINT = "https://formspree.io/f/xjknjogr";
+
+const DUMMY_FAQS = [
+  {
+    vraag: "Wat kost het lidmaatschap bij SDG?",
+    antwoord: "<p>De contributie wordt per kwartaal geïnd. Voor jeugdleden tot 18 jaar hanteren wij een gereduceerd tarief. Neem contact met ons op voor de actuele bedragen en de mogelijkheden voor gezinskorting.</p>"
+  },
+  {
+    vraag: "Krijg ik een instrument van de vereniging?",
+    antwoord: "<p>Ja! Bij SDG geloven we dat muziek voor iedereen toegankelijk moet zijn. Daarom krijg je als lid een instrument van de vereniging in bruikleen, inclusief een koffer en de nodige accessoires. Je hoeft dus zelf niet direct een grote investering te doen.</p>"
+  },
+  {
+    vraag: "Wanneer en waar zijn de repetities?",
+    antwoord: "<p>Onze groepen repeteren op vaste avonden in het Dorpshuis van Sint Jansklooster. De Malletband repeteert op de dinsdagavond en de Fanfare op de vrijdagavond. Je bent altijd welkom om eens binnen te lopen en te luisteren!</p>"
+  }
+];
 
 const FAQItem: React.FC<{ id: string; question: string; answer: string }> = ({ id, question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,7 +30,7 @@ const FAQItem: React.FC<{ id: string; question: string; answer: string }> = ({ i
         aria-controls={`faq-content-${id}`}
         className="w-full flex justify-between items-center p-5 text-left focus:outline-none hover:bg-slate-50 transition-colors"
       >
-        <span className="font-semibold text-slate-800 font-serif text-lg" dangerouslySetInnerHTML={{ __html: question }}></span>
+        <span className="font-semibold text-slate-800 font-serif text-lg">{question}</span>
         {isOpen ? <ChevronUp className="text-sdg-red shrink-0 ml-4 w-5 h-5" /> : <ChevronDown className="text-slate-400 shrink-0 ml-4 w-5 h-5" />}
       </button>
       <div 
@@ -40,7 +54,6 @@ const MusicalAdvisor: React.FC = () => {
     setAdvice('');
     
     try {
-      // Create instance inside handler as per best practices for injected keys
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
@@ -74,7 +87,7 @@ const MusicalAdvisor: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Bijv: 'Ik hou van stevige ritmes en ben graag fysiek bezig' of 'Ik hou van warme, zachte klanken'..."
-          className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-sdg-gold transition-all resize-none"
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-sdg-gold transition-all resize-none"
           rows={3}
         />
         <button 
@@ -127,12 +140,8 @@ const TargetGroupCard: React.FC<{
 );
 
 const JoinUs: React.FC = () => {
-  const [faqs, setFaqs] = useState<FAQ[]>([]);
-  const [introContent, setIntroContent] = useState<string>('');
-  const [loading, setLoading] = useState(true);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [prefillOpmerking, setPrefillOpmerking] = useState('');
-  const navigate = useNavigate();
 
   const scrollToForm = (type: string) => {
     const formElement = document.getElementById('signup-form');
@@ -145,70 +154,6 @@ const JoinUs: React.FC = () => {
       formElement.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  const parseContent = (html: string) => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    const newFaqs: FAQ[] = [];
-    let currentQuestion = '';
-    let currentAnswer = '';
-    let introHtml = '';
-    let foundFirstHeader = false;
-    const isHeaderTag = (tagName: string) => ['H2', 'H3', 'H4', 'H5'].includes(tagName.toUpperCase());
-    
-    Array.from(tempDiv.childNodes).forEach((node) => {
-      let nodeContent = '';
-      let tagName = '';
-      
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        tagName = el.tagName;
-        nodeContent = el.outerHTML;
-      } else if (node.nodeType === Node.TEXT_NODE) {
-        if (!node.textContent?.trim()) return;
-        nodeContent = node.textContent || '';
-      }
-
-      if (isHeaderTag(tagName)) {
-        if (currentQuestion) {
-          newFaqs.push({ vraag: currentQuestion, antwoord: currentAnswer });
-        }
-        foundFirstHeader = true;
-        currentQuestion = node.textContent || '';
-        currentAnswer = '';
-      } else {
-        if (!foundFirstHeader) {
-          introHtml += nodeContent;
-        } else {
-          currentAnswer += nodeContent;
-        }
-      }
-    });
-
-    if (currentQuestion) {
-      newFaqs.push({ vraag: currentQuestion, antwoord: currentAnswer || '<p><em>(Nog geen antwoord)</em></p>' });
-    }
-    
-    return { intro: introHtml || html, faqs: newFaqs };
-  };
-
-  useEffect(() => {
-    async function loadPageData() {
-      try {
-        const data = await getLidWordenPage();
-        if (data && data.content) {
-            const { intro, faqs } = parseContent(data.content);
-            setIntroContent(intro);
-            setFaqs(faqs);
-        }
-      } catch (err) {
-        console.error('Error loading page data:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadPageData();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -238,6 +183,7 @@ const JoinUs: React.FC = () => {
              er is altijd een plek voor jou.
           </p>
         </div>
+
         <div className="grid md:grid-cols-2 gap-6 lg:gap-8 mb-16 max-w-5xl mx-auto">
           <TargetGroupCard 
             title="Starten met Muziek"
@@ -291,7 +237,7 @@ const JoinUs: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="remarks" className="text-sm font-bold uppercase tracking-wide text-slate-500 ml-1">Opmerkingen / Vragen</label>
-                    <textarea id="remarks" name="opmerkingen" rows={4} defaultValue={prefillOpmerking} className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all bg-slate-50 focus:bg-white shadow-sm resize-none" placeholder="Vertel iets over je ervaring of je vraag."></textarea>
+                    <textarea id="remarks" name="opmerkingen" rows={4} value={prefillOpmerking} onChange={(e) => setPrefillOpmerking(e.target.value)} className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all bg-slate-50 focus:bg-white shadow-sm resize-none" placeholder="Vertel iets over je ervaring of je vraag."></textarea>
                   </div>
                   <button type="submit" disabled={formStatus === 'submitting'} className="w-full bg-sdg-red text-white font-bold text-lg py-4 rounded-xl hover:bg-red-800 transition-all transform hover:-translate-y-1 shadow-lg shadow-sdg-red/20 flex items-center justify-center gap-3">
                     {formStatus === 'submitting' ? <>Versturen...</> : <><Send className="w-5 h-5" /> Verstuur Aanmelding</>}
@@ -300,12 +246,17 @@ const JoinUs: React.FC = () => {
               )}
             </div>
             
-            {!loading && introContent && (
-              <div className="mt-12 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm prose prose-slate max-w-none">
-                 <div dangerouslySetInnerHTML={{ __html: introContent }} />
-              </div>
-            )}
+            <div className="mt-12 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm prose prose-slate max-w-none">
+                <h2>Waarom kiezen voor SDG?</h2>
+                <p>Bij SDG Sint Jansklooster draait het om meer dan alleen muziek. We zijn een hechte vereniging waar jong en oud samenkomen. Onze leden genieten van professionele begeleiding, gezellige repetities en unieke optredens in en buiten het dorp.</p>
+                <ul>
+                    <li><strong>Toegankelijkheid:</strong> Je krijgt een instrument in bruikleen.</li>
+                    <li><strong>Kwaliteit:</strong> Lessen via gediplomeerde docenten van Blink.</li>
+                    <li><strong>Gezelligheid:</strong> Een warme community waar iedereen welkom is.</li>
+                </ul>
+            </div>
           </div>
+
           <div className="lg:col-span-5 order-2 lg:sticky lg:top-28">
             <MusicalAdvisor />
             
@@ -313,14 +264,11 @@ const JoinUs: React.FC = () => {
               <h2 className="text-3xl font-serif font-bold text-slate-900 flex items-center gap-2"><HelpCircle className="text-sdg-gold" />Veelgestelde vragen</h2>
               <p className="text-slate-500 mt-2 font-light">Alles wat je moet weten over contributie, instrumenten en lessen.</p>
             </div>
-            <div className="space-y-2">
-              {loading ? (
-                <div className="space-y-4">
-                  {[1,2,3].map(i => <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>)}
-                </div>
-              ) : (
-                faqs.map((faq, index) => <FAQItem key={index} id={`faq-${index}`} question={faq.vraag} answer={faq.antwoord} />)
-              )}
+            
+            <div className="space-y-2 mb-12">
+              {DUMMY_FAQS.map((faq, index) => (
+                <FAQItem key={index} id={`faq-${index}`} question={faq.vraag} answer={faq.antwoord} />
+              ))}
             </div>
           </div>
         </div>

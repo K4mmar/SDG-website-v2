@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Quote, MessageCircle, Coffee, Music, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +25,7 @@ const QuoteCard: React.FC<{
         <div className="flex items-center gap-2 mb-4 opacity-60">
           {icons[type]}
           <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
-            {type === 'skill' ? 'Over het niveau' : type === 'social' ? 'Over de sfeer' : 'Voor de ouders'}
+            {type === 'skill' ? 'Over de vereniging' : type === 'social' ? 'Over de sfeer' : 'Voor de ouders'}
           </span>
         </div>
         <p className="text-slate-700 italic font-serif text-xl leading-relaxed">
@@ -62,9 +63,9 @@ const Testimonials: React.FC = () => {
       <div className="grid md:grid-cols-3 gap-8 mb-20">
         <QuoteCard 
           type="skill"
-          text="Ik had al 10 jaar geen instrument aangeraakt en was bang dat ik het niveau niet aan zou kunnen. Niets was minder waar; de begeleiding is top en je groeit vanzelf mee."
-          author="Jan-Willem"
-          role="Herintreder (Trombone)"
+          text="Ik had al 10 jaar geen instrument aangeraakt en was bang dat ik het niveau niet aan zou kunnen. Niets was minder waar; de fanfare is erg toegankelijk en er is veel aandacht voor nieuwe leden."
+          author="Mark"
+          role="Herintreder (Saxofoon)"
         />
         <QuoteCard 
           type="social"

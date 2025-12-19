@@ -1,18 +1,7 @@
-// Volledig veilige detectie van de API URL zonder afhankelijkheid van process
-const getApiUrl = (): string => {
-  try {
-    // Check global scope directly for env vars
-    const env = (window as any).process?.env || (typeof process !== 'undefined' ? process.env : {});
-    if (env?.NEXT_PUBLIC_WORDPRESS_API_URL) {
-      return env.NEXT_PUBLIC_WORDPRESS_API_URL;
-    }
-  } catch (e) {
-    console.warn("WordPress API URL detection warning:", e);
-  }
-  return 'https://api.sdgsintjansklooster.nl/graphql';
-};
 
-const API_URL = getApiUrl();
+const BASE_DOMAIN = 'https://api.sdgsintjansklooster.nl';
+const GRAPHQL_URL = `${BASE_DOMAIN}/graphql`;
+const PROXY_URL = 'https://api.allorigins.win/raw?url=';
 
 export interface Post {
   id: string;
@@ -48,145 +37,178 @@ export interface Page {
   };
 }
 
-export interface FAQ {
-  vraag: string;
-  antwoord: string;
-}
+async function fetchFromWP(url: string, isGraphQL: boolean = false, query?: string) {
+  const targetUrl = isGraphQL ? GRAPHQL_URL : url;
+  const options: RequestInit = isGraphQL ? {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query })
+  } : { method: 'GET' };
 
-export interface LidWordenPageData {
-  title: string;
-  content: string;
-  debugInfo?: string;
+  try {
+    const directResponse = await fetch(targetUrl, options);
+    if (directResponse.ok) return await directResponse.json();
+    throw new Error('CORS');
+  } catch (e) {
+    const finalUrl = `${PROXY_URL}${encodeURIComponent(targetUrl)}`;
+    const proxyResponse = await fetch(finalUrl, options);
+    if (!proxyResponse.ok) throw new Error(`Status: ${proxyResponse.status}`);
+    return await proxyResponse.json();
+  }
 }
 
 const proxyImage = (url?: string) => {
-  if (!url || typeof url !== 'string') return undefined;
+  if (!url) return undefined;
   let cleanUrl = url.trim();
-  if (cleanUrl.includes('localhost') || cleanUrl.includes('.local')) return undefined;
-  if (cleanUrl.startsWith('data:') || cleanUrl.includes('images.weserv.nl')) return cleanUrl;
-  if (cleanUrl.startsWith('/')) {
-    cleanUrl = `https://api.sdgsintjansklooster.nl${cleanUrl}`;
-  } else if (!cleanUrl.startsWith('http')) {
-     cleanUrl = `https://${cleanUrl}`;
-  }
+  if (cleanUrl.startsWith('/')) cleanUrl = `${BASE_DOMAIN}${cleanUrl}`;
   return `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&output=webp&q=80`;
 };
 
 const fixContentUrls = (html: string | undefined) => {
   if (!html) return '';
   let clean = html.replace(/http:\/\/api\.sdgsintjansklooster\.nl/g, 'https://api.sdgsintjansklooster.nl');
-  clean = clean.replace(/srcset=["'][^"']*["']/g, '');
-  clean = clean.replace(/sizes=["'][^"']*["']/g, '');
   const domainPattern = 'api.sdgsintjansklooster.nl';
   const imgRegex = new RegExp(`src=["'](https?:\\/\\/${domainPattern}[^"']+)["']`, 'g');
-  clean = clean.replace(imgRegex, (match, srcUrl) => {
+  return clean.replace(imgRegex, (match, srcUrl) => {
       const proxied = proxyImage(srcUrl);
       return proxied ? `src="${proxied}"` : match;
   });
-  return clean;
 };
 
-const minifyQuery = (query: string) => query.replace(/\s+/g, ' ').trim();
-
-async function fetchGraphQL(query: string, variables?: any) {
-  const minifiedQuery = minifyQuery(query);
-  const body = JSON.stringify({ query: minifiedQuery, variables });
-  const t = Date.now();
-
-  try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (!json.errors) return json.data;
-    }
-  } catch (e) {
-    console.warn("GraphQL POST failed, trying GET fallback...");
-  }
-
-  // Fallback GET
-  try {
-    const urlParams = new URLSearchParams();
-    urlParams.append('query', minifiedQuery);
-    if (variables) urlParams.append('variables', JSON.stringify(variables));
-    urlParams.append('t', String(t));
-    const res = await fetch(`${API_URL}?${urlParams.toString()}`, { method: 'GET' });
-    if (res.ok) {
-        const json = await res.json();
-        if (!json.errors) return json.data;
-    }
-  } catch (e) {}
-
-  return null;
-}
-
 export async function getNewsPosts(): Promise<Post[]> {
-  const query = `query GetRecentNews { posts(first: 6, where: { orderby: { field: DATE, order: DESC } }) { nodes { id title slug date excerpt(format: RENDERED) featuredImage { node { sourceUrl } } categories { nodes { name } } } } }`;
-  const data = await fetchGraphQL(query);
-  return data?.posts?.nodes?.map((post: Post) => ({
-    ...post,
-    excerpt: fixContentUrls(post.excerpt) || '',
-    featuredImage: post.featuredImage ? { node: { sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || '' } } : undefined
-  })) || [];
+  const query = `
+    query GetRecentNews {
+      posts(first: 20, where: { orderby: { field: DATE, order: DESC } }) {
+        nodes {
+          id
+          title
+          slug
+          date
+          excerpt(format: RENDERED)
+          featuredImage {
+            node {
+              sourceUrl
+            }
+          }
+        }
+      }
+    }
+  `;
+  try {
+    const result = await fetchFromWP('', true, query);
+    const nodes = result?.data?.posts?.nodes || [];
+    return nodes.map((post: any) => ({
+      ...post,
+      excerpt: fixContentUrls(post.excerpt),
+      featuredImage: post.featuredImage ? { node: { sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || '' } } : undefined
+    }));
+  } catch (e) {
+    const restUrl = `${BASE_DOMAIN}/wp-json/wp/v2/posts?_embed&per_page=20`;
+    const posts = await fetchFromWP(restUrl);
+    return posts.map((p: any) => ({
+      id: p.id.toString(),
+      title: p.title.rendered,
+      slug: p.slug,
+      date: p.date,
+      excerpt: p.excerpt.rendered,
+      featuredImage: p._embedded?.['wp:featuredmedia']?.[0]?.source_url 
+        ? { node: { sourceUrl: proxyImage(p._embedded['wp:featuredmedia'][0].source_url) } }
+        : undefined
+    }));
+  }
 }
 
 export async function getAllPosts(): Promise<Post[]> {
-  const query = `query GetAllNews { posts(first: 50, where: { orderby: { field: DATE, order: DESC } }) { nodes { id title slug date excerpt(format: RENDERED) featuredImage { node { sourceUrl } } categories { nodes { name } } } } }`;
-  const data = await fetchGraphQL(query);
-  return data?.posts?.nodes?.map((post: Post) => ({
-    ...post,
-    excerpt: fixContentUrls(post.excerpt) || '',
-    featuredImage: post.featuredImage ? { node: { sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || '' } } : undefined
-  })) || [];
-}
-
-export async function getLidWordenPage(): Promise<LidWordenPageData | null> {
-  const query = `query GetAllPagesForLidWorden { pages(first: 100) { nodes { id title slug content(format: RENDERED) } } }`;
-  const data = await fetchGraphQL(query);
-  const pages = data?.pages?.nodes || [];
-  let match = pages.find((p: any) => p.slug === 'lid-worden') || pages.find((p: any) => p.title.toLowerCase().includes('lid worden'));
-  if (match) {
-      return { title: match.title, content: fixContentUrls(match.content) };
-  }
-  return null;
+  const restUrl = `${BASE_DOMAIN}/wp-json/wp/v2/posts?per_page=100`;
+  try {
+    const posts = await fetchFromWP(restUrl);
+    return posts.map((p: any) => ({
+      id: p.id.toString(),
+      title: p.title.rendered,
+      slug: p.slug,
+      date: p.date,
+      excerpt: p.excerpt.rendered
+    }));
+  } catch (e) { return []; }
 }
 
 export async function getPostBySlug(slug: string) {
-  const query = `query GetPostBySlug($id: ID!) { post(id: $id, idType: SLUG) { title date content(format: RENDERED) featuredImage { node { sourceUrl } } } }`;
-  const data = await fetchGraphQL(query, { id: slug });
-  if (!data || !data.post) return null;
-  return {
-    ...data.post,
-    content: fixContentUrls(data.post.content),
-    featuredImage: data.post.featuredImage ? { node: { sourceUrl: proxyImage(data.post.featuredImage.node.sourceUrl) } } : undefined
-  };
+  const restUrl = `${BASE_DOMAIN}/wp-json/wp/v2/posts?slug=${slug}&_embed`;
+  try {
+    const posts = await fetchFromWP(restUrl);
+    if (!posts || posts.length === 0) return null;
+    const p = posts[0];
+    return {
+      title: p.title.rendered,
+      date: p.date,
+      content: fixContentUrls(p.content.rendered),
+      featuredImage: p._embedded?.['wp:featuredmedia']?.[0]?.source_url 
+        ? { node: { sourceUrl: proxyImage(p._embedded['wp:featuredmedia'][0].source_url) } }
+        : undefined
+    };
+  } catch (e) { return null; }
 }
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
-  const query = `query GetPageByName($slug: String) { pages(where: {name: $slug}) { nodes { id title slug content(format: RENDERED) featuredImage { node { sourceUrl } } } } }`;
-  const data = await fetchGraphQL(query, { slug });
-  const pageData = data?.pages?.nodes?.[0];
-  if (pageData) {
+  const restUrl = `${BASE_DOMAIN}/wp-json/wp/v2/pages?slug=${slug}&_embed`;
+  try {
+    const pages = await fetchFromWP(restUrl);
+    if (!pages || pages.length === 0) return null;
+    const p = pages[0];
     return {
-      ...pageData,
-      content: fixContentUrls(pageData.content) || '',
-      featuredImage: pageData.featuredImage ? { node: { sourceUrl: proxyImage(pageData.featuredImage.node.sourceUrl) || '' } } : undefined
+      id: p.id.toString(),
+      title: p.title.rendered,
+      slug: p.slug,
+      content: fixContentUrls(p.content.rendered),
+      featuredImage: p._embedded?.['wp:featuredmedia']?.[0]?.source_url 
+        ? { node: { sourceUrl: proxyImage(p._embedded['wp:featuredmedia'][0].source_url) } }
+        : undefined
     };
-  }
-  return null;
+  } catch (e) { return null; }
 }
 
 export async function getRecruitmentPagesImages(): Promise<Record<string, string | undefined>> {
-  const query = `query GetRecruitmentImages { pages(where: {nameIn: ["boek-ons", "steun-ons", "doe-mee"]}) { nodes { slug featuredImage { node { sourceUrl } } } } }`;
-  const data = await fetchGraphQL(query);
-  const resultMap: Record<string, string | undefined> = {};
-  data?.pages?.nodes?.forEach((page: any) => {
-    if (page.slug && page.featuredImage?.node?.sourceUrl) {
-      resultMap[page.slug] = proxyImage(page.featuredImage.node.sourceUrl);
+  const slugs = ['boek-ons', 'steun-ons', 'doe-mee'];
+  const results: Record<string, string | undefined> = {};
+
+  try {
+    // Probeer eerst via GraphQL voor de drie specifieke slugs
+    const query = `
+      query GetRecruitmentImages {
+        pages(where: { nameIn: ["boek-ons", "steun-ons", "doe-mee"] }) {
+          nodes {
+            slug
+            featuredImage {
+              node {
+                sourceUrl
+              }
+            }
+          }
+        }
+      }
+    `;
+    const data = await fetchFromWP('', true, query);
+    const pages = data?.data?.pages?.nodes || [];
+    
+    pages.forEach((page: any) => {
+      if (page.featuredImage?.node?.sourceUrl) {
+        results[page.slug] = proxyImage(page.featuredImage.node.sourceUrl);
+      }
+    });
+
+    // Fallback: Als GraphQL iets mist, probeer per stuk via REST
+    for (const slug of slugs) {
+      if (!results[slug]) {
+        const page = await getPageBySlug(slug);
+        if (page?.featuredImage?.node?.sourceUrl) {
+          // De getPageBySlug proxied de URL al, dus we kunnen hem direct toekennen
+          results[slug] = page.featuredImage.node.sourceUrl;
+        }
+      }
     }
-  });
-  return resultMap;
+  } catch (e) {
+    console.error("SDG-Master: Fout bij ophalen recruitment images:", e);
+  }
+
+  return results;
 }

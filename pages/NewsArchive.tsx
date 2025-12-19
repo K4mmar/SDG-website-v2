@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPosts, Post } from '../lib/wordpress';
@@ -8,7 +9,7 @@ const NewsArchive: React.FC = () => {
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [years, setYears] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
+  const [selectedYear, setSelectedYear] = useState<number | 'all' | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,12 +17,16 @@ const NewsArchive: React.FC = () => {
       const data = await getAllPosts();
       setAllPosts(data);
       
-      // Extract unique years from posts
+      // Extract unieke jaren
       const uniqueYears = Array.from(new Set(data.map(post => new Date(post.date).getFullYear()))).sort((a, b) => b - a);
       setYears(uniqueYears);
       
-      // Default to showing all
-      setFilteredPosts(data);
+      // STAP: Zet de default op het nieuwste jaar (meestal het huidige jaar)
+      if (uniqueYears.length > 0) {
+        setSelectedYear(uniqueYears[0]);
+      } else {
+        setSelectedYear('all');
+      }
       
       setLoading(false);
     }
@@ -31,7 +36,7 @@ const NewsArchive: React.FC = () => {
   useEffect(() => {
     if (selectedYear === 'all') {
       setFilteredPosts(allPosts);
-    } else {
+    } else if (selectedYear !== null) {
       setFilteredPosts(allPosts.filter(post => new Date(post.date).getFullYear() === selectedYear));
     }
   }, [selectedYear, allPosts]);
@@ -39,7 +44,7 @@ const NewsArchive: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       
-      {/* Simple Header */}
+      {/* Header */}
       <div className="bg-white border-b border-gray-200 pt-28 pb-10">
         <div className="container mx-auto px-6">
           
@@ -59,18 +64,8 @@ const NewsArchive: React.FC = () => {
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-6">Nieuwsoverzicht</h1>
           
-          {/* Year Filter Controls */}
+          {/* Jaren Filter */}
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedYear('all')}
-              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                selectedYear === 'all' 
-                ? 'bg-sdg-red text-white shadow-md' 
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              Alles
-            </button>
             {years.map(year => (
               <button
                 key={year}
@@ -84,6 +79,16 @@ const NewsArchive: React.FC = () => {
                 {year}
               </button>
             ))}
+            <button
+              onClick={() => setSelectedYear('all')}
+              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                selectedYear === 'all' 
+                ? 'bg-slate-900 text-white shadow-md' 
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Bekijk Alles
+            </button>
           </div>
         </div>
       </div>
@@ -114,13 +119,11 @@ const NewsArchive: React.FC = () => {
                      onClick={() => navigate(`/nieuws/${post.slug}`, { state: { origin: 'archive' } })}
                      className="group p-6 hover:bg-slate-50 cursor-pointer transition-colors flex flex-col md:flex-row gap-4 items-start md:items-center"
                    >
-                      {/* Simple Date Column */}
                       <div className="flex items-center gap-2 text-slate-400 text-sm font-medium min-w-[140px] shrink-0">
                          <Calendar className="w-4 h-4" />
                          {dateStr}
                       </div>
 
-                      {/* Content */}
                       <div className="flex-grow">
                          <h3 className="text-lg font-bold text-slate-800 group-hover:text-sdg-red transition-colors mb-1">
                            {post.title}
@@ -131,7 +134,6 @@ const NewsArchive: React.FC = () => {
                          />
                       </div>
 
-                      {/* Arrow */}
                       <div className="hidden md:block text-slate-300 group-hover:text-sdg-red transition-colors">
                         <ChevronRight className="w-5 h-5" />
                       </div>

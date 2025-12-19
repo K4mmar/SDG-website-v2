@@ -1,12 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Music, Heart, Recycle } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [groepenDropdownOpen, setGroepenDropdownOpen] = useState(false);
+  const [communityDropdownOpen, setCommunityDropdownOpen] = useState(false);
   const [mobileGroepenOpen, setMobileGroepenOpen] = useState(false);
+  const [mobileCommunityOpen, setMobileCommunityOpen] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -24,6 +27,7 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     setIsOpen(false);
     setGroepenDropdownOpen(false);
+    setCommunityDropdownOpen(false);
   }, [location]);
 
   const isHeroPage = location.pathname === '/' || location.pathname.startsWith('/nieuws/') || location.pathname.startsWith('/groepen/') || location.pathname.startsWith('/over-ons/');
@@ -32,6 +36,12 @@ const Navbar: React.FC = () => {
   const groepenLinks = [
     { name: 'Fanfare', path: '/groepen/fanfare' },
     { name: 'Malletband', path: '/groepen/malletband' },
+  ];
+
+  const communityLinks = [
+    { name: 'Boek ons', path: '/boek-ons', icon: <Music size={16} /> },
+    { name: 'Steun ons', path: '/steun-ons', icon: <Heart size={16} /> },
+    { name: 'Doe mee', path: '/doe-mee', icon: <Recycle size={16} /> },
   ];
 
   const handleNavClick = (e: React.MouseEvent | null, path: string) => {
@@ -93,6 +103,7 @@ const Navbar: React.FC = () => {
                 Opleiding
             </button>
 
+            {/* Groepen Dropdown */}
             <div 
               className="relative group h-full flex items-center"
               onMouseEnter={() => setGroepenDropdownOpen(true)}
@@ -104,7 +115,6 @@ const Navbar: React.FC = () => {
                  className={`flex items-center text-sm font-bold uppercase tracking-wider hover:text-sdg-gold transition-colors bg-transparent border-none cursor-pointer ${
                    showSolidNavbar ? 'text-slate-800' : 'text-white/95'
                  }`}
-                 onClick={() => setGroepenDropdownOpen(!groepenDropdownOpen)}
                >
                  Onze Groepen
                  <ChevronDown className="ml-1 w-4 h-4" />
@@ -125,6 +135,51 @@ const Navbar: React.FC = () => {
                        {subLink.name}
                      </button>
                    ))}
+                 </div>
+               </div>
+            </div>
+
+            {/* Steun & Boek Dropdown */}
+            <div 
+              className="relative group h-full flex items-center"
+              onMouseEnter={() => setCommunityDropdownOpen(true)}
+              onMouseLeave={() => setCommunityDropdownOpen(false)}
+            >
+               <button
+                 aria-expanded={communityDropdownOpen}
+                 aria-haspopup="true"
+                 className={`flex items-center text-sm font-bold uppercase tracking-wider hover:text-sdg-gold transition-colors bg-transparent border-none cursor-pointer ${
+                   showSolidNavbar ? 'text-slate-800' : 'text-white/95'
+                 }`}
+               >
+                 Steun & Boek
+                 <ChevronDown className="ml-1 w-4 h-4" />
+               </button>
+               
+               <div 
+                className={`absolute left-0 top-full pt-4 w-56 transition-all duration-200 origin-top-left ${communityDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                role="menu"
+               >
+                 <div className="bg-white rounded-2xl shadow-xl py-3 border border-gray-100 overflow-hidden">
+                   {communityLinks.map((subLink) => (
+                     <button
+                       key={subLink.name}
+                       role="menuitem"
+                       onClick={() => handleNavClick(null, subLink.path)}
+                       className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sdg-red transition-colors"
+                     >
+                       <span className="text-sdg-gold">{subLink.icon}</span>
+                       {subLink.name}
+                     </button>
+                   ))}
+                   <div className="border-t border-gray-50 mt-2 pt-2 px-5 pb-2">
+                      <button 
+                        onClick={(e) => handleNavClick(e, '/#community')}
+                        className="text-[10px] uppercase tracking-widest font-bold text-slate-400 hover:text-sdg-red transition-colors"
+                      >
+                        Bekijk overzicht
+                      </button>
+                   </div>
                  </div>
                </div>
             </div>
@@ -173,10 +228,11 @@ const Navbar: React.FC = () => {
             >
                 Opleiding
             </button>
+            
+            {/* Mobile Groepen */}
             <div className="border-b border-gray-100 py-3">
               <button 
                 onClick={() => setMobileGroepenOpen(!mobileGroepenOpen)}
-                aria-expanded={mobileGroepenOpen}
                 className="flex w-full justify-between items-center text-lg font-bold text-slate-800 hover:text-sdg-red text-left"
               >
                 Onze Groepen
@@ -196,6 +252,32 @@ const Navbar: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Mobile Community */}
+            <div className="border-b border-gray-100 py-3">
+              <button 
+                onClick={() => setMobileCommunityOpen(!mobileCommunityOpen)}
+                className="flex w-full justify-between items-center text-lg font-bold text-slate-800 hover:text-sdg-red text-left"
+              >
+                Steun & Boek
+                <ChevronDown className={`w-5 h-5 transition-transform ${mobileCommunityOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileCommunityOpen && (
+                <div className="pl-4 mt-2 space-y-2 border-l-2 border-sdg-gold/30 ml-1 py-1">
+                  {communityLinks.map((subLink) => (
+                    <button
+                      key={subLink.name}
+                      onClick={() => handleNavClick(null, subLink.path)}
+                      className="flex items-center gap-3 w-full text-left text-base font-medium text-slate-600 hover:text-sdg-red py-1"
+                    >
+                      <span className="text-sdg-gold">{subLink.icon}</span>
+                      {subLink.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button
                 onClick={(e) => handleNavClick(e, '/over-ons')}
                 className="text-lg font-bold text-slate-800 hover:text-sdg-red border-b border-gray-100 py-3 text-left"
