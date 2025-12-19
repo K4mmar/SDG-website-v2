@@ -3,569 +3,75 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Fix for "Not Secure" / Mixed Content: Forces browser to load all HTTP resources as HTTPS -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     
-    <title>SDG Sint Jansklooster</title>
-    <!-- Updated Tailwind CDN to include the typography plugin -->
+    <title>SDG Sint Jansklooster | Christelijke Muziekvereniging</title>
+    
+    <script>
+      // 1. Pre-emptive process shim
+      window.process = { 
+        env: { 
+          NODE_ENV: 'production',
+          API_KEY: '' 
+        } 
+      };
+    </script>
+
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              'sdg-red': '#8B0000', // Deep warm red
+              'sdg-red': '#8B0000',
               'sdg-red-light': '#a52a2a',
-              'sdg-gold': '#D4AF37', // Gold accent
+              'sdg-gold': '#D4AF37',
               'sdg-dark': '#1a1a1a',
               'sdg-gray': '#f4f4f4',
             },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'], // Added for headings
+              serif: ['Playfair Display', 'serif'],
             },
-            borderRadius: {
-              'xl': '1rem',
-              '2xl': '1.5rem',
-              '3xl': '2rem',
-            }
           },
         },
       };
     </script>
-    <!-- Added Playfair Display -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #fafafa; /* Slightly warmer than pure white/gray */
-      }
-      h1, h2, h3, h4, h5, h6 {
-        font-family: 'Playfair Display', serif;
-      }
-      /* Custom scrollbar for webkit */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f1f1f1; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #888; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #555; 
-      }
-      
-      /* --- TYPOGRAPHY / PROSE OVERRIDES FOR EDITORIAL LOOK --- */
-      .prose p {
-        font-weight: 300; /* Lighter body text */
-        line-height: 1.8;
-      }
-      .prose p:empty {
-        min-height: 1em;
-      }
-      
-      /* Headings */
-      .prose h1, .prose h2, .prose h3, .prose h4 {
-        font-family: 'Playfair Display', serif;
-        color: #1a1a1a;
-        font-weight: 700;
-      }
-      .prose h2 {
-        margin-top: 2.5em;
-        margin-bottom: 1em;
-        font-size: 2rem;
-        position: relative;
-        display: inline-block;
-      }
-      /* Gold underline for H2 */
-      .prose h2::after {
-        content: '';
-        display: block;
-        width: 40px;
-        height: 3px;
-        background-color: #D4AF37;
-        margin-top: 0.5rem;
-        border-radius: 2px;
-      }
-
-      .prose a {
-        color: #8B0000;
-        text-decoration: none;
-        border-bottom: 1px solid rgba(139, 0, 0, 0.3);
-        transition: all 0.2s;
-        font-weight: 500;
-      }
-      .prose a:hover {
-        border-bottom-color: #8B0000;
-        background-color: rgba(139, 0, 0, 0.05);
-      }
-
-      /* Quotes */
-      .prose blockquote {
-        border-left-color: #D4AF37;
-        font-style: italic;
-        color: #4b5563;
-        background: #fdfbf7; /* Very subtle gold tint */
-        padding: 1.5rem 2rem;
-        border-radius: 0 1rem 1rem 0;
-      }
-
-      /* --- WORDPRESS BLOCK SUPPORT (EXTENDED) --- */
-
-      /* 1. Layout & Columns & Flex/Grid Containers */
-      
-      /* GRID LAYOUT SUPPORT (Newer WP Versions) - Fixes screenshot issue */
-      .is-layout-grid {
-        display: grid;
-        gap: 1.5rem;
-        width: 100%;
-        margin-bottom: 2rem;
-      }
-      
-      /* Responsive Grid Behavior: 
-         On Desktop: Try to fit columns side-by-side (min 300px wide). 
-         If 2 items (Image + List), this puts them side-by-side. 
-      */
-      @media (min-width: 768px) {
-        .is-layout-grid {
-          grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-          align-items: start; /* Align items to top */
-        }
-      }
-      
-      @media (max-width: 767px) {
-        .is-layout-grid {
-          grid-template-columns: 1fr !important;
-        }
-      }
-
-      /* Generic Flex Layouts (Group Rows/Stacks) */
-      .is-layout-flex {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem; 
-      }
-      .is-layout-flex.is-vertical {
-        flex-direction: column;
-      }
-      .is-layout-flex.is-nowrap {
-        flex-wrap: nowrap;
-      }
-      
-      /* Columns Block Specifics */
-      .wp-block-columns {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 2rem;
-        margin-bottom: 2rem;
-        box-sizing: border-box;
-      }
-      .wp-block-columns.is-not-stacked-on-mobile {
-        flex-wrap: nowrap !important;
-      }
-      
-      .wp-block-column {
-        flex-grow: 1;
-        min-width: 0; /* Prevent overflow */
-        word-break: break-word; /* Prevent long text breaking layout */
-      }
-
-      /* 2. List Block Support (.wp-block-list) - Fixes missing bullets */
-      ul.wp-block-list {
-        list-style-type: disc !important;
-        padding-left: 1.5rem !important;
-        margin-bottom: 1.5rem;
-      }
-      ol.wp-block-list {
-        list-style-type: decimal !important;
-        padding-left: 1.5rem !important;
-        margin-bottom: 1.5rem;
-      }
-      .wp-block-list li {
-        margin-bottom: 0.5rem;
-      }
-      /* Also fix lists inside columns/media-text generally */
-      .wp-block-column ul, .wp-block-media-text__content ul, .is-layout-grid ul {
-        list-style-type: disc;
-        padding-left: 1.5rem;
-        margin-bottom: 1rem;
-      }
-      .wp-block-column ol, .wp-block-media-text__content ol, .is-layout-grid ol {
-        list-style-type: decimal;
-        padding-left: 1.5rem;
-        margin-bottom: 1rem;
-      }
-
-      /* 3. Alignment Utilities */
-      .is-content-justification-center { justify-content: center; }
-      .is-content-justification-right { justify-content: flex-end; }
-      .is-content-justification-space-between { justify-content: space-between; }
-      .is-content-justification-left { justify-content: flex-start; }
-      
-      .is-vertically-aligned-top { align-items: flex-start; }
-      .is-vertically-aligned-center { align-items: center; }
-      .is-vertically-aligned-bottom { align-items: flex-end; }
-      .is-vertically-aligned-stretch { align-items: stretch; }
-      
-      /* Self Alignment (for items inside flex containers) */
-      .is-vertically-aligned-center .wp-block-column,
-      .wp-block-column.is-vertically-aligned-center {
-        align-self: center;
-      }
-      .is-vertically-aligned-bottom .wp-block-column,
-      .wp-block-column.is-vertically-aligned-bottom {
-        align-self: flex-end;
-      }
-
-      /* Mobile Responsiveness for Columns */
-      @media (max-width: 768px) {
-        /* Stack columns unless specifically told not to */
-        .wp-block-columns:not(.is-not-stacked-on-mobile) {
-          flex-direction: column;
-        }
-        /* Force full width on mobile for stacked columns */
-        .wp-block-columns:not(.is-not-stacked-on-mobile) > .wp-block-column {
-          flex-basis: 100% !important;
-          max-width: 100% !important;
-          margin-left: 0 !important;
-          margin-right: 0 !important;
-        }
-      }
-
-      /* 4. Groups & Containers (Kaders) */
-      .wp-block-group {
-        margin-bottom: 1.5rem;
-      }
-      .wp-block-group.has-background {
-        padding: 2rem;
-        border-radius: 1.5rem; /* Matches '2xl' tailwind config */
-      }
-
-      /* 5. Media & Text (Afbeelding naast tekst) */
-      .wp-block-media-text {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
-        align-items: center;
-      }
-      .wp-block-media-text__media img {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-        border-radius: 1rem;
-      }
-      .wp-block-media-text__content {
-        padding: 1rem;
-      }
-      
-      @media (min-width: 768px) {
-        .wp-block-media-text {
-          grid-template-columns: 1fr 1fr; /* Default 50/50 */
-        }
-        .wp-block-media-text.has-media-on-the-right {
-          direction: rtl; 
-        }
-        .wp-block-media-text.has-media-on-the-right > * {
-          direction: ltr;
-        }
-      }
-      
-      /* 6. Cover (Omslagafbeelding) */
-      .wp-block-cover {
-        position: relative;
-        min-height: 350px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-size: cover;
-        background-position: center;
-        overflow: hidden;
-        border-radius: 1.5rem;
-        margin-bottom: 2rem;
-        color: white;
-        text-align: center;
-        padding: 2rem;
-      }
-      .wp-block-cover::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-color: rgba(0,0,0,0.5); 
-        z-index: 1;
-      }
-      .wp-block-cover__inner-container {
-        position: relative;
-        z-index: 2;
-        width: 100%;
-      }
-      .wp-block-cover p, .wp-block-cover h1, .wp-block-cover h2 {
-        color: white !important;
-      }
-
-      /* 7. Images & Gallery */
-      .wp-block-image {
-        margin-bottom: 2rem;
-      }
-      /* Ensure images inside grids take full width */
-      .is-layout-grid .wp-block-image {
-        margin-bottom: 0;
-        width: 100%;
-      }
-      .wp-block-image img {
-        height: auto;
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        width: 100%; /* Fix for size-full */
-      }
-      .wp-block-image figcaption {
-        font-size: 0.875rem;
-        color: #6b7280;
-        text-align: center;
-        margin-top: 0.5rem;
-        font-style: italic;
-      }
-      
-      .wp-block-gallery {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        padding-left: 0;
-      }
-      .wp-block-gallery .wp-block-image {
-        flex-grow: 1;
-        flex-basis: calc(33.333% - 1rem); 
-        margin-bottom: 0;
-        min-width: 200px;
-      }
-      .wp-block-gallery .wp-block-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        aspect-ratio: 4/3; 
-      }
-
-      /* 8. Quotes & Pullquotes */
-      .wp-block-quote {
-        border-left: 4px solid #D4AF37; 
-        padding-left: 1.5rem;
-        font-style: italic;
-        margin: 2rem 0;
-        color: #1a1a1a;
-      }
-      .wp-block-quote cite {
-        display: block;
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin-top: 0.5rem;
-        font-style: normal;
-        font-weight: bold;
-      }
-      .wp-block-pullquote {
-        border-top: 2px solid #8B0000;
-        border-bottom: 2px solid #8B0000;
-        padding: 2rem 0;
-        text-align: center;
-        font-size: 1.5rem;
-        font-family: 'Playfair Display', serif;
-        color: #8B0000;
-        margin: 3rem 0;
-      }
-
-      /* 9. Tables */
-      .wp-block-table {
-        overflow-x: auto;
-        margin-bottom: 2rem;
-      }
-      .wp-block-table table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .wp-block-table td, .wp-block-table th {
-        padding: 0.75rem;
-        border: 1px solid #e5e7eb;
-      }
-      .wp-block-table th {
-        background-color: #f9fafb;
-        font-weight: 600;
-        text-align: left;
-      }
-      .is-style-stripes tbody tr:nth-child(odd) {
-        background-color: #f9fafb;
-      }
-
-      /* 10. Files (Bestand) */
-      .wp-block-file {
-        background: #f3f4f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.5rem;
-      }
-      .wp-block-file a.wp-block-file__button {
-        background-color: #8B0000;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: bold;
-      }
-      
-      /* 11. Video & Audio & Embeds */
-      .wp-block-video video, .wp-block-audio audio {
-        width: 100%;
-        border-radius: 1rem;
-        margin-bottom: 1.5rem;
-      }
-      .wp-block-embed-youtube iframe {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 16/9;
-        border-radius: 1rem;
-        margin-bottom: 1.5rem;
-      }
-
-      /* 12. Details (Uitklapbaar) */
-      .wp-block-details {
-        margin-bottom: 1.5rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 0.75rem;
-        overflow: hidden;
-      }
-      .wp-block-details summary {
-        background-color: #f9fafb;
-        padding: 1rem;
-        cursor: pointer;
-        font-weight: 600;
-        list-style: none; 
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      .wp-block-details summary::after {
-        content: '+';
-        margin-left: auto;
-        font-size: 1.25rem;
-        color: #8B0000;
-      }
-      .wp-block-details[open] summary::after {
-        content: '-';
-      }
-      .wp-block-details__content {
-        padding: 1rem;
-        background: white;
-      }
-
-      /* 13. Buttons */
-      .wp-block-buttons {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-bottom: 1.5rem;
-      }
-      .wp-block-button__link {
-        display: inline-block;
-        padding: 0.75rem 1.5rem;
-        border-radius: 9999px;
-        font-weight: 700;
-        text-decoration: none;
-        transition: all 0.2s;
-        background-color: #8B0000; 
-        color: white;
-        border: 2px solid transparent;
-      }
-      .wp-block-button__link:hover {
-        background-color: #6b0000;
-        transform: scale(1.05);
-      }
-      .is-style-outline .wp-block-button__link {
-        background-color: transparent;
-        border: 2px solid #8B0000;
-        color: #8B0000;
-      }
-      .is-style-outline .wp-block-button__link:hover {
-        background-color: #8B0000;
-        color: white;
-      }
-
-      /* 14. Separators */
-      hr.wp-block-separator {
-        border: 0;
-        border-top: 2px solid #e5e7eb;
-        margin: 3rem auto;
-        width: 100px; 
-      }
-      hr.wp-block-separator.is-style-wide {
-        width: 100%;
-      }
-      hr.wp-block-separator.is-style-dots {
-        border: none;
-        text-align: center;
-        height: auto;
-      }
-      hr.wp-block-separator.is-style-dots::before {
-        content: '...';
-        font-size: 2rem;
-        letter-spacing: 1rem;
-        color: #8B0000;
-      }
-
-      /* --- COLOR UTILITIES (Matches WP slugs) --- */
-      /* Backgrounds */
-      .has-sdg-red-background-color, .has-red-background-color { background-color: #8B0000 !important; color: white !important; }
-      .has-sdg-red-light-background-color { background-color: #a52a2a !important; color: white !important; }
-      .has-sdg-gold-background-color, .has-gold-background-color { background-color: #D4AF37 !important; color: #1a1a1a !important; }
-      .has-sdg-dark-background-color, .has-black-background-color { background-color: #1a1a1a !important; color: white !important; }
-      .has-sdg-gray-background-color, .has-gray-background-color { background-color: #f4f4f4 !important; color: #1a1a1a !important; }
-      .has-white-background-color { background-color: #ffffff !important; color: #1a1a1a !important; }
-      .has-pale-pink-background-color { background-color: #f78da7 !important; color: #1a1a1a !important; } 
-      
-      /* Fix for links on dark backgrounds */
-      .has-sdg-red-background-color a, 
-      .has-sdg-dark-background-color a, 
-      .has-black-background-color a {
-        color: white;
-        text-decoration: underline;
-      }
-
-      /* Text Colors */
-      .has-sdg-red-color, .has-red-color { color: #8B0000 !important; }
-      .has-sdg-gold-color, .has-gold-color { color: #D4AF37 !important; }
-      .has-white-color { color: #ffffff !important; }
-      .has-black-color { color: #1a1a1a !important; }
-      
-      /* Alignments */
-      .aligncenter { text-align: center; margin-left: auto; margin-right: auto; }
-      .alignright { text-align: right; }
-      .alignleft { text-align: left; }
-      
-    </style>
-  <script type="importmap">
+    
+    <script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.10.1",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "react-router-dom": "https://esm.sh/react-router-dom@7.1.3?deps=react@19.0.0,react-dom@19.0.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.474.0?deps=react@19.0.0",
     "ical.js": "https://esm.sh/ical.js@1.5.0",
-    "date-fns": "https://esm.sh/date-fns@3.3.1",
-    "date-fns/locale": "https://esm.sh/date-fns@3.3.1/locale",
+    "date-fns": "https://esm.sh/date-fns@4.1.0",
+    "date-fns/locale": "https://esm.sh/date-fns@4.1.0/locale",
+    "@google/genai": "https://esm.sh/@google/genai",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
     "date-fns/": "https://esm.sh/date-fns@^4.1.0/"
   }
 }
 </script>
-</head>
+    <style>
+      #root:empty::before {
+        content: "SDG Website wordt geladen...";
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: 'Inter', sans-serif;
+        color: #8B0000;
+        font-weight: 600;
+      }
+    </style>
+  </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

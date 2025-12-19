@@ -108,31 +108,31 @@ const Home: React.FC = () => {
                  </div>
               </div>
 
-              {/* USP List - Replaces long text blocks */}
+              {/* USP List - Defined by the "Who is SDG" pillars */}
               <div className="space-y-4">
-                 <h3 className="font-bold text-xl text-slate-900 mb-2">Waarom SDG?</h3>
+                 <h3 className="font-bold text-xl text-slate-900 mb-2">Wie is SDG?</h3>
                  
                  <div className="flex gap-4 items-start">
                     <CheckCircle className="w-6 h-6 text-sdg-red shrink-0 mt-0.5" />
                     <div>
-                       <strong className="block text-slate-900">Muziek & Gezelligheid</strong>
-                       <p className="text-slate-600 text-sm">We gaan voor goud op concoursen, maar de sfeer in de 'derde helft' is net zo belangrijk.</p>
+                       <strong className="block text-slate-900">Soli Deo Gloria: Alleen aan God de Eer</strong>
+                       <p className="text-slate-600 text-sm">Onze christelijke identiteit is de bron van waaruit we met passie muziek maken en met elkaar omgaan.</p>
                     </div>
                  </div>
 
                  <div className="flex gap-4 items-start">
                     <CheckCircle className="w-6 h-6 text-sdg-red shrink-0 mt-0.5" />
                     <div>
-                       <strong className="block text-slate-900">Lokaal Betrokken</strong>
-                       <p className="text-slate-600 text-sm">Van aubade tot kerkdienst: wij zijn het kloppend hart van Sint Jansklooster.</p>
+                       <strong className="block text-slate-900">Het muzikale hart van Sint Jansklooster</strong>
+                       <p className="text-slate-600 text-sm">Wij verbinden het dorp tijdens belangrijke momenten, van sfeervolle kerstnachten tot feestelijke dorpsmomenten en tradities.</p>
                     </div>
                  </div>
 
                  <div className="flex gap-4 items-start">
                     <CheckCircle className="w-6 h-6 text-sdg-red shrink-0 mt-0.5" />
                     <div>
-                       <strong className="block text-slate-900">Voor Iedereen</strong>
-                       <p className="text-slate-600 text-sm">Jong talent (gratis opleiding!) of ervaren muzikant? De deur staat open.</p>
+                       <strong className="block text-slate-900">Investeren in de toekomst</strong>
+                       <p className="text-slate-600 text-sm">Door onze jeugdopleiding te stimuleren en te subsidiëren, bouwen we samen aan een vitale vereniging voor jong en oud.</p>
                     </div>
                  </div>
               </div>
@@ -143,7 +143,7 @@ const Home: React.FC = () => {
                    onClick={() => navigate('/over-ons')}
                    className="group flex items-center text-sdg-red font-bold uppercase tracking-wider hover:text-red-900 transition-colors"
                  >
-                    Lees ons volledige verhaal <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    Ontdek onze volledige identiteit <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                  </button>
               </div>
 

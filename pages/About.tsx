@@ -59,7 +59,7 @@ const TIMELINE_EVENTS = [
     year: '1960',
     title: 'Groei & Bloei',
     subtitle: '60 Jaar Jubileum',
-    desc: 'Het korps groeit gestaag. Viering van het 60-jarig jubileum met een grootse optocht door het dorp. De vereniging is niet meer weg te denken uit het dorpsleven.',
+    desc: 'Het korps groeit gestag. Viering van het 60-jarig jubileum met een grootse optocht door het dorp. De vereniging is niet meer weg te denken uit het dorpsleven.',
     image: 'https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/2.-1960_60_jarig_jubileum.jpg&output=webp&q=80&w=600'
   },
   {
