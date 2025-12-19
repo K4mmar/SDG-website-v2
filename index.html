@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="nl">
   <head>
@@ -67,6 +68,66 @@
         font-family: 'Inter', sans-serif;
         color: #8B0000;
         font-weight: 600;
+      }
+
+      /* WordPress Gutenberg Block Support */
+      .prose .wp-block-columns {
+        display: flex !important;
+        flex-wrap: nowrap !important; /* Dwingt naast elkaar op desktop */
+        gap: 2.5rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        width: 100%;
+        max-width: none; /* Overschrijft Tailwind prose max-width */
+      }
+
+      .prose .wp-block-column {
+        flex: 1 1 0% !important; /* Verdeelt de ruimte exact gelijk */
+        min-width: 0; /* Voorkomt dat content de kolom uitdrukt */
+        margin: 0 !important;
+      }
+
+      @media (max-width: 781px) {
+        .prose .wp-block-columns {
+          flex-wrap: wrap !important;
+          flex-direction: column !important;
+          gap: 1.5rem;
+        }
+        .prose .wp-block-column {
+          flex-basis: 100% !important;
+          width: 100% !important;
+        }
+      }
+
+      /* Afbeeldingen in kolommen */
+      .prose .wp-block-column img {
+        margin: 0 !important;
+        width: 100%;
+        height: auto;
+      }
+
+      /* Fix voor 'Buttons' block in Gutenberg */
+      .prose .wp-block-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin: 2rem 0;
+      }
+
+      .prose .wp-block-button__link {
+        background-color: #8B0000;
+        color: white !important;
+        padding: 0.75rem 1.5rem;
+        border-radius: 9999px;
+        text-decoration: none !important;
+        font-weight: bold;
+        display: inline-block;
+        transition: all 0.2s;
+      }
+
+      .prose .wp-block-button__link:hover {
+        background-color: #a52a2a;
+        transform: translateY(-2px);
       }
     </style>
   </head>
