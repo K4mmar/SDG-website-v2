@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Hero from '../components/Hero';
@@ -5,9 +6,9 @@ import Recruitment from '../components/Recruitment';
 import NewsGrid from '../components/NewsGrid';
 import AgendaList from '../components/AgendaList';
 import Testimonials from '../components/Testimonials';
+import SponsorGrid from '../components/SponsorGrid';
 import { Crown, CheckCircle, ArrowRight } from 'lucide-react';
 
-// Historical images ordered by number (1 to 6)
 const HISTORY_IMAGES = [
   "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/1.-1905_met_oprichter_en_dirigent_van_der_mey.jpg&output=webp&q=80&w=800",
   "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/2.-1960_60_jarig_jubileum.jpg&output=webp&q=80&w=800",
@@ -23,11 +24,9 @@ const Home: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    // Check if there is a scrollTo ID in the location state
     if (location.state && location.state.scrollTo) {
       const element = document.getElementById(location.state.scrollTo);
       if (element) {
-        // Small timeout to ensure DOM is ready/rendered
         setTimeout(() => {
           element.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -35,12 +34,10 @@ const Home: React.FC = () => {
     }
   }, [location]);
 
-  // Slideshow timer
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % HISTORY_IMAGES.length);
-    }, 6000); // Switch every 6 seconds for a calm tempo
-
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
@@ -48,17 +45,13 @@ const Home: React.FC = () => {
     <>
       <Hero />
       
-      {/* Intro Section - Compact & Sales Oriented */}
       <section id="over-ons" className="py-20 bg-white relative overflow-hidden">
-        {/* Decorative Background Watermark */}
         <div className="absolute top-0 right-0 -mr-32 -mt-32 opacity-[0.03] pointer-events-none select-none z-0">
           <span className="text-[20rem] font-serif font-bold text-slate-900 leading-none">1900</span>
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-            
-            {/* Left Column: Headlines & Visuals */}
             <div className="max-w-xl relative">
               <div className="flex items-center gap-4 mb-6">
                 <span className="h-[2px] w-12 bg-sdg-gold"></span>
@@ -76,7 +69,6 @@ const Home: React.FC = () => {
                 </span>
               </h2>
               
-              {/* Historical Slideshow Card */}
               <div className="mt-8 hidden lg:block relative h-64 w-full rounded-2xl shadow-lg border-4 border-white rotate-2 hover:rotate-0 transition-transform duration-500 overflow-hidden bg-slate-100">
                  {HISTORY_IMAGES.map((img, index) => (
                    <img 
@@ -92,10 +84,7 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: Key Selling Points (Scannable) */}
             <div className="space-y-8">
-              
-              {/* FEATURED: Erepenning Badge - Compact version */}
               <div className="relative group rounded-2xl p-5 bg-gradient-to-br from-amber-50 to-white border border-amber-100 shadow-sm hover:shadow-md transition-all duration-300 flex gap-4 items-center">
                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sdg-gold to-yellow-600 text-white flex items-center justify-center shadow-md shrink-0">
                     <Crown className="w-6 h-6" />
@@ -108,10 +97,8 @@ const Home: React.FC = () => {
                  </div>
               </div>
 
-              {/* USP List - Defined by the "Who is SDG" pillars */}
               <div className="space-y-4">
                  <h3 className="font-bold text-xl text-slate-900 mb-2">Wie is SDG?</h3>
-                 
                  <div className="flex gap-4 items-start">
                     <CheckCircle className="w-6 h-6 text-sdg-red shrink-0 mt-0.5" />
                     <div>
@@ -119,7 +106,6 @@ const Home: React.FC = () => {
                        <p className="text-slate-600 text-sm">Onze christelijke identiteit is de bron van waaruit we met passie muziek maken en met elkaar omgaan.</p>
                     </div>
                  </div>
-
                  <div className="flex gap-4 items-start">
                     <CheckCircle className="w-6 h-6 text-sdg-red shrink-0 mt-0.5" />
                     <div>
@@ -127,7 +113,6 @@ const Home: React.FC = () => {
                        <p className="text-slate-600 text-sm">Wij verbinden het dorp tijdens belangrijke momenten, van sfeervolle kerstnachten tot feestelijke dorpsmomenten en tradities.</p>
                     </div>
                  </div>
-
                  <div className="flex gap-4 items-start">
                     <CheckCircle className="w-6 h-6 text-sdg-red shrink-0 mt-0.5" />
                     <div>
@@ -137,7 +122,6 @@ const Home: React.FC = () => {
                  </div>
               </div>
 
-              {/* Action Button */}
               <div className="pt-2">
                  <button 
                    onClick={() => navigate('/over-ons')}
@@ -146,13 +130,11 @@ const Home: React.FC = () => {
                     Ontdek onze volledige identiteit <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                  </button>
               </div>
-
             </div>
           </div>
         </div>
       </section>
 
-      {/* Social Proof Section - Moved to separate band for better flow */}
       <section className="bg-slate-50 py-16 border-y border-slate-100">
          <div className="container mx-auto px-6">
             <Testimonials />
@@ -163,7 +145,9 @@ const Home: React.FC = () => {
       <NewsGrid />
       <Recruitment />
       
-      {/* Contact anchor */}
+      {/* Sponsor Banner op Home met vriendelijke titel */}
+      <SponsorGrid variant="monochrome" title="Samen voor SDG: Onze Sponsoren" />
+
       <div id="contact"></div>
     </>
   );
