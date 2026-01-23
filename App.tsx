@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { MemoryRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -27,15 +28,22 @@ const App: React.FC = () => {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
+            
+            {/* Functionele Pagina's */}
             <Route path="/lid-worden" element={<JoinUs />} />
             <Route path="/nieuws" element={<NewsArchive />} />
             <Route path="/nieuws/:slug" element={<PostDetail />} />
             <Route path="/jeugd" element={<Education />} />
             <Route path="/opleiding" element={<Education />} />
+            
+            {/* Specifieke landingspagina voor Over Ons (overzicht) */}
             <Route path="/over-ons" element={<About />} />
-            <Route path="/groepen/:slug" element={<PageDetail />} />
-            <Route path="/over-ons/:slug" element={<PageDetail />} />
+
+            {/* Catch-all voor content pagina's (Fanfare, Malletband, Geschiedenis, Steun-ons etc.) */}
+            {/* Dit zorgt voor mooie platte URL's zoals sdg.nl/fanfare */}
             <Route path="/:slug" element={<PageDetail />} />
+            
+            {/* Fallback */}
             <Route path="*" element={<Home />} />
           </Routes>
         </main>

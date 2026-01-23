@@ -30,12 +30,13 @@ const Navbar: React.FC = () => {
     setCommunityDropdownOpen(false);
   }, [location]);
 
-  const isHeroPage = location.pathname === '/' || location.pathname.startsWith('/nieuws/') || location.pathname.startsWith('/groepen/') || location.pathname.startsWith('/over-ons/');
+  const isHeroPage = location.pathname === '/' || location.pathname.startsWith('/nieuws/');
   const showSolidNavbar = scrolled || !isHeroPage;
 
+  // Aangepast naar korte URL's
   const groepenLinks = [
-    { name: 'Fanfare', path: '/groepen/fanfare' },
-    { name: 'Malletband', path: '/groepen/malletband' },
+    { name: 'Fanfare', path: '/fanfare' },
+    { name: 'Malletband', path: '/malletband' },
   ];
 
   const communityLinks = [

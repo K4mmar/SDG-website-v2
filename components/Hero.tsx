@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ArrowDown } from 'lucide-react';
@@ -129,13 +130,13 @@ const Hero: React.FC = () => {
              
              {/* Mobile optimized pillars list - Linked to Pages - Centered */}
              <div className="flex flex-wrap justify-center gap-3 md:gap-16 items-center">
-               <button onClick={() => navigate('/groepen/fanfare')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+               <button onClick={() => navigate('/fanfare')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
                  Fanfare
                </button>
                
                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-sdg-red"></span>
                
-               <button onClick={() => navigate('/groepen/malletband')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+               <button onClick={() => navigate('/malletband')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
                  Malletband
                </button>
                
