@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ChevronRight, ArrowDown } from 'lucide-react';
 
 const Hero: React.FC = () => {
@@ -100,23 +100,24 @@ const Hero: React.FC = () => {
             }`}
           >
             {/* Primary Action: Speel Mee - Gold Gradient Style */}
-            <button
-              onClick={() => navigate('/lid-worden')}
-              className="group relative w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-sdg-gold to-amber-500 text-white rounded-full font-bold overflow-hidden shadow-lg shadow-sdg-gold/30 transition-all hover:scale-105 hover:shadow-sdg-gold/50"
+            <Link
+              to="/lid-worden"
+              className="group relative w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-sdg-gold to-amber-500 text-white rounded-full font-bold overflow-hidden shadow-lg shadow-sdg-gold/30 transition-all hover:scale-105 hover:shadow-sdg-gold/50 flex items-center justify-center"
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
               <span className="relative flex items-center justify-center gap-2 font-sans tracking-wide">
                 Speel Mee
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </span>
-            </button>
+            </Link>
             
-            <button
+            <a
+              href="#agenda"
               onClick={scrollToAgenda}
-              className="w-full sm:w-auto px-10 py-4 rounded-full font-bold text-white border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-sm font-sans tracking-wide"
+              className="w-full sm:w-auto px-10 py-4 rounded-full font-bold text-white border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-sm font-sans tracking-wide flex items-center justify-center"
             >
               Bekijk Agenda
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -130,21 +131,21 @@ const Hero: React.FC = () => {
              
              {/* Mobile optimized pillars list - Linked to Pages - Centered */}
              <div className="flex flex-wrap justify-center gap-3 md:gap-16 items-center">
-               <button onClick={() => navigate('/fanfare')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+               <Link to="/fanfare" className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
                  Fanfare
-               </button>
+               </Link>
                
                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-sdg-red"></span>
                
-               <button onClick={() => navigate('/malletband')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+               <Link to="/malletband" className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
                  Malletband
-               </button>
+               </Link>
                
                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-sdg-red"></span>
                
-               <button onClick={() => navigate('/jeugd')} className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+               <Link to="/jeugd" className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
                  Opleiding
-               </button>
+               </Link>
              </div>
 
              {/* Arrow Icon - Positioned absolute right to not disturb centering */}
