@@ -1,43 +1,42 @@
+
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Send, CheckCircle, Music, HelpCircle, Star, UserPlus, Sparkles, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { 
+  CheckCircle, Music, Send, Sparkles, 
+  ChevronDown, ChevronUp, User, Star, HelpCircle, Loader2 
+} from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
 const FORM_ENDPOINT = "https://formspree.io/f/xjknjogr";
 
-const DUMMY_FAQS = [
-  {
-    vraag: "Wat kost het lidmaatschap bij SDG?",
-    antwoord: "<p>De contributie wordt per kwartaal geïnd. Voor jeugdleden tot 18 jaar hanteren wij een gereduceerd tarief. Neem contact met ons op voor de actuele bedragen en de mogelijkheden voor gezinskorting.</p>"
-  },
-  {
-    vraag: "Krijg ik een instrument van de vereniging?",
-    antwoord: "<p>Ja! Bij SDG geloven we dat muziek voor iedereen toegankelijk moet zijn. Daarom krijg je als lid een instrument van de vereniging in bruikleen, inclusief een koffer en de nodige accessoires. Je hoeft dus zelf niet direct een grote investering te doen.</p>"
-  },
-  {
-    vraag: "Wanneer en waar zijn de repetities?",
-    antwoord: "<p>Onze groepen repeteren op vaste avonden in het Dorpshuis van Sint Jansklooster. De Malletband repeteert op de dinsdagavond en de Fanfare op de vrijdagavond. Je bent altijd welkom om eens binnen te lopen en te luisteren!</p>"
-  }
-];
+// --- COMPONENTS ---
 
-const FAQItem: React.FC<{ id: string; question: string; answer: string }> = ({ id, question, answer }) => {
+const FeaturePoint: React.FC<{ title: string; desc: string }> = ({ title, desc }) => (
+  <div className="flex gap-4 items-start">
+    <div className="w-10 h-10 rounded-full bg-sdg-gold/10 flex items-center justify-center shrink-0 mt-1">
+      <CheckCircle className="w-5 h-5 text-sdg-gold" />
+    </div>
+    <div>
+      <h4 className="font-bold text-slate-900 text-lg">{title}</h4>
+      <p className="text-slate-500 font-light leading-relaxed">{desc}</p>
+    </div>
+  </div>
+);
+
+const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border border-gray-100 rounded-2xl mb-4 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="border-b border-gray-100 last:border-0">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-controls={`faq-content-${id}`}
-        className="w-full flex justify-between items-center p-5 text-left focus:outline-none hover:bg-slate-50 transition-colors"
+        className="w-full flex justify-between items-center py-4 text-left group hover:text-sdg-red transition-colors"
       >
-        <span className="font-semibold text-slate-800 font-serif text-lg">{question}</span>
-        {isOpen ? <ChevronUp className="text-sdg-red shrink-0 ml-4 w-5 h-5" /> : <ChevronDown className="text-slate-400 shrink-0 ml-4 w-5 h-5" />}
+        <span className="font-serif font-bold text-slate-700 text-lg">{question}</span>
+        {isOpen ? <ChevronUp className="w-5 h-5 text-sdg-gold" /> : <ChevronDown className="w-5 h-5 text-gray-300 group-hover:text-sdg-red" />}
       </button>
       <div 
-        id={`faq-content-${id}`}
-        className={`transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}
       >
-        <div className="p-5 pt-0 prose prose-slate text-slate-600 max-w-none font-light leading-relaxed" dangerouslySetInnerHTML={{ __html: answer }} />
+        <p className="text-slate-500 font-light leading-relaxed pr-8">{answer}</p>
       </div>
     </div>
   );
@@ -57,103 +56,61 @@ const MusicalAdvisor: React.FC = () => {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: `De gebruiker vraagt om advies voor het kiezen van een instrument bij muziekvereniging SDG Sint Jansklooster. 
-                   De vereniging heeft een Fanfare (koperblazers zoals trompet, bugel, trombone, bas en saxofoons) en een Malletband (slagwerk, marimba, drums).
-                   Geef een kort, enthousiast en persoonlijk advies in het Nederlands van maximaal 60 woorden op basis van deze input: "${input}". 
-                   Sluit af met een aanmoediging om contact op te nemen voor een proefles.`,
+        contents: `De gebruiker twijfelt over welk instrument bij hem/haar past bij muziekvereniging SDG. 
+                   Opties: Fanfare (trompet, bugel, sax, etc.) of Malletband (slagwerk).
+                   Geef kort, vriendelijk advies (max 40 woorden) op basis van: "${input}".`,
       });
-      setAdvice(response.text || 'Oeps, de adviseur is even de maat kwijt. Probeer het later nog eens!');
+      setAdvice(response.text || 'Geen zorgen, kom gewoon eens proberen!');
     } catch (error) {
       console.error('Gemini API Error:', error);
-      setAdvice('De adviseur is even niet bereikbaar. Probeer het straks nog eens.');
+      setAdvice('Kom gerust eens langs op de repetitie, dan kijken we samen!');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white p-8 rounded-3xl shadow-xl border border-sdg-gold/20 relative overflow-hidden mb-8">
-      <div className="absolute top-0 right-0 p-4 opacity-10">
-        <Sparkles className="w-12 h-12 text-sdg-gold" />
+    <div className="bg-gradient-to-br from-slate-50 to-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
+      <div className="absolute top-0 right-0 p-3 opacity-5">
+        <Sparkles className="w-24 h-24" />
       </div>
-      <h3 className="text-xl font-serif font-bold text-slate-900 mb-4 flex items-center gap-2">
-        <Sparkles className="text-sdg-gold w-5 h-5" /> Muzikale Keuzehulp
-      </h3>
-      <p className="text-sm text-slate-500 mb-6 font-light">
-        Twijfel je welk instrument bij je past? Vertel wat over je karakter of muzieksmaak en onze AI-adviseur helpt je op weg!
-      </p>
-      <div className="space-y-4">
-        <textarea 
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Bijv: 'Ik hou van stevige ritmes en ben graag fysiek bezig' of 'Ik hou van warme, zachte klanken'..."
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-slate-50 text-sm outline-none focus:ring-2 focus:ring-sdg-gold transition-all resize-none"
-          rows={3}
-        />
-        <button 
-          onClick={getAdvice}
-          disabled={loading || !input.trim()}
-          className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-sdg-gold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Krijg Advies'}
-        </button>
-      </div>
-      {advice && (
-        <div className="mt-6 p-4 bg-sdg-gold/5 border border-sdg-gold/10 rounded-xl animate-fade-in">
-          <p className="text-slate-700 text-sm italic leading-relaxed">"{advice}"</p>
+      <div className="relative z-10">
+        <h4 className="font-serif font-bold text-slate-900 mb-2 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-sdg-gold" /> Twijfel je over het instrument?
+        </h4>
+        <p className="text-xs text-slate-500 mb-4">Vertel kort wat je leuk vindt (bijv. "Ik hou van ritme" of "Ik wil een warme klank"), onze AI helpt je.</p>
+        
+        <div className="flex gap-2 mb-4">
+          <input 
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Jouw voorkeur..."
+            className="flex-grow px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-1 focus:ring-sdg-gold outline-none"
+          />
+          <button 
+            onClick={getAdvice}
+            disabled={loading || !input.trim()}
+            className="bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-sdg-red transition-colors disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Check'}
+          </button>
         </div>
-      )}
+        
+        {advice && (
+          <div className="bg-sdg-gold/10 p-3 rounded-lg border border-sdg-gold/20 animate-fade-in">
+            <p className="text-slate-800 text-xs italic">"{advice}"</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-const TargetGroupCard: React.FC<{ 
-  title: string; 
-  subtitle: string; 
-  description: string; 
-  icon: React.ReactNode; 
-  primary: boolean; 
-  onClick: () => void 
-}> = ({ title, subtitle, description, icon, primary, onClick }) => (
-  <div 
-    onClick={onClick}
-    className={`group relative p-8 rounded-3xl transition-all duration-300 cursor-pointer border hover:-translate-y-1 h-full flex flex-col ${
-      primary 
-        ? 'bg-gradient-to-br from-slate-900 to-slate-800 text-white border-slate-700 shadow-xl' 
-        : 'bg-white text-slate-800 border-gray-100 shadow-lg hover:shadow-xl hover:border-sdg-red/20'
-    }`}
-  >
-    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm ${
-      primary ? 'bg-sdg-gold text-slate-900' : 'bg-slate-50 text-sdg-red border border-slate-100'
-    }`}>
-      {icon}
-    </div>
-    <h3 className={`text-2xl font-serif font-bold mb-1 ${primary ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
-    <p className={`text-sm font-bold uppercase tracking-wider mb-4 ${primary ? 'text-sdg-gold' : 'text-sdg-red'}`}>{subtitle}</p>
-    <p className={`leading-relaxed mb-6 font-light ${primary ? 'text-slate-300' : 'text-slate-600'}`}>
-      {description}
-    </p>
-    <div className="mt-auto flex items-center font-bold text-sm uppercase tracking-wide gap-2">
-      Meld je aan <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
-    </div>
-  </div>
-);
+// --- MAIN PAGE ---
 
 const JoinUs: React.FC = () => {
-  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-  const [prefillOpmerking, setPrefillOpmerking] = useState('');
-
-  const scrollToForm = (type: string) => {
-    const formElement = document.getElementById('signup-form');
-    if (formElement) {
-      if (type === 'adult') {
-        setPrefillOpmerking("Ik ben een ervaren muzikant / herintreder en wil graag eens sfeer proeven.");
-      } else {
-        setPrefillOpmerking("Ik wil graag informatie over muziekles voor beginners/jeugd via Blink kunstcollectief.");
-      }
-      formElement.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [intent, setIntent] = useState<'open' | 'youth' | 'adult'>('open');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -161,118 +118,224 @@ const JoinUs: React.FC = () => {
     const myForm = e.currentTarget;
     const formData = new FormData(myForm);
     const data = Object.fromEntries(formData.entries());
+    
     try {
       const response = await fetch(FORM_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(data),
       });
-      if (response.ok) { setFormStatus('success'); myForm.reset(); } else { setFormStatus('error'); }
-    } catch (error) { setFormStatus('error'); }
+      if (response.ok) { setFormStatus('success'); myForm.reset(); } 
+      else { setFormStatus('idle'); alert("Er ging iets mis. Probeer het later nog eens."); }
+    } catch (error) { setFormStatus('idle'); alert("Er ging iets mis."); }
   };
 
   return (
-    <div className="pt-28 pb-20 bg-slate-50 min-h-screen">
-      <div className="container mx-auto px-6 max-w-7xl">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-serif font-bold text-slate-900 mb-6 tracking-tight">
-            Word lid van <span className="text-sdg-red italic">SDG</span>
-          </h1>
-          <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-light">
-             Muziek maken is voor alle leeftijden. Of je nu je eerste noot blaast of al jaren ervaring hebt: 
-             er is altijd een plek voor jou.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8 mb-16 max-w-5xl mx-auto">
-          <TargetGroupCard 
-            title="Starten met Muziek"
-            subtitle="Opleiding & Jeugd"
-            description="Wil jij of je kind een instrument leren bespelen? In samenwerking met Blink kunstcollectief bieden we een professionele leerlijn aan. Gratis instrument in bruikleen en les van vakdocenten."
-            icon={<Star className="w-8 h-8" />}
-            primary={false}
-            onClick={() => scrollToForm('youth')}
-          />
-          <TargetGroupCard 
-            title="Ervaren Muzikant"
-            subtitle="Volwassenen & Herintreders"
-            description="Heb je vroeger gespeeld en kriebelt het weer? Of zoek je een nieuwe uitdaging? Kom vrijblijvend sfeer proeven tijdens een repetitie. Je hoeft geen auditie te doen, plezier staat voorop."
-            icon={<UserPlus className="w-8 h-8" />}
-            primary={true}
-            onClick={() => scrollToForm('adult')}
-          />
+    <div className="bg-white min-h-screen pt-20">
+      
+      {/* 1. HERO: Clean & Welcoming */}
+      <section className="relative py-20 lg:py-28 overflow-hidden bg-slate-50">
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
+            <span className="inline-block py-1 px-3 rounded-full bg-white border border-gray-200 text-sdg-red text-xs font-bold uppercase tracking-widest mb-6 shadow-sm">
+              Lid worden van SDG
+            </span>
+            <h1 className="text-5xl md:text-7xl font-serif font-bold text-slate-900 mb-8 leading-tight">
+              Maak muziek <br/>
+              <span className="italic text-slate-500">met elkaar.</span>
+            </h1>
+            <p className="text-lg md:text-xl text-slate-600 font-light leading-relaxed mb-10 max-w-2xl mx-auto">
+              Of je nu beginner bent of gevorderd, jong of oud: bij ons vind je een warm welkom, 
+              goede begeleiding en bovenal veel plezier.
+            </p>
+            <button 
+              onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+              className="bg-sdg-red text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-red-800 transition-all shadow-lg hover:shadow-sdg-red/30 hover:-translate-y-1"
+            >
+              Kom kennismaken
+            </button>
+          </div>
         </div>
         
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start" id="signup-form">
-          <div className="lg:col-span-7 order-1">
-            <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-gray-100 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-sdg-red to-sdg-gold"></div>
-              <div className="mb-8">
-                <h2 className="text-3xl font-serif font-bold text-slate-900 flex items-center gap-3">
-                  <Music className="text-sdg-red w-8 h-8" /> Meld je direct aan
-                </h2>
-                <p className="text-slate-500 mt-2 font-light text-lg">Vul het formulier in. We nemen contact op om te kijken wat bij je past.</p>
-              </div>
-              {formStatus === 'success' ? (
-                <div className="bg-green-50 border border-green-200 rounded-3xl p-10 text-center animate-fade-in">
-                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><CheckCircle size={40} /></div>
-                  <h3 className="text-3xl font-serif font-bold text-green-800 mb-4">Bedankt!</h3>
-                  <p className="text-green-700 text-lg">We hebben je bericht ontvangen. Eén van onze bestuursleden neemt binnenkort contact met je op.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label htmlFor="name" className="text-sm font-bold uppercase tracking-wide text-slate-500 ml-1">Naam *</label>
-                      <input type="text" id="name" name="name" required className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all bg-slate-50 focus:bg-white shadow-sm" placeholder="Voor- en achternaam" />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="phone" className="text-sm font-bold uppercase tracking-wide text-slate-500 ml-1">Telefoonnummer</label>
-                      <input type="tel" id="phone" name="telefoon" className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all bg-slate-50 focus:bg-white shadow-sm" placeholder="06 12345678" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                     <label htmlFor="email" className="text-sm font-bold uppercase tracking-wide text-slate-500 ml-1">Emailadres *</label>
-                     <input type="email" id="email" name="email" required className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all bg-slate-50 focus:bg-white shadow-sm" placeholder="jouw@email.nl" />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="remarks" className="text-sm font-bold uppercase tracking-wide text-slate-500 ml-1">Opmerkingen / Vragen</label>
-                    <textarea id="remarks" name="opmerkingen" rows={4} value={prefillOpmerking} onChange={(e) => setPrefillOpmerking(e.target.value)} className="w-full px-5 py-4 rounded-xl border border-gray-200 outline-none transition-all bg-slate-50 focus:bg-white shadow-sm resize-none" placeholder="Vertel iets over je ervaring of je vraag."></textarea>
-                  </div>
-                  <button type="submit" disabled={formStatus === 'submitting'} className="w-full bg-sdg-red text-white font-bold text-lg py-4 rounded-xl hover:bg-red-800 transition-all transform hover:-translate-y-1 shadow-lg shadow-sdg-red/20 flex items-center justify-center gap-3">
-                    {formStatus === 'submitting' ? <>Versturen...</> : <><Send className="w-5 h-5" /> Verstuur Aanmelding</>}
-                  </button>
-                </form>
-              )}
-            </div>
-            
-            <div className="mt-12 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm prose prose-slate max-w-none">
-                <h2>Waarom kiezen voor SDG?</h2>
-                <p>Bij SDG Sint Jansklooster draait het om meer dan alleen muziek. We zijn een hechte vereniging waar jong en oud samenkomen. Onze leden genieten van professionele begeleiding, gezellige repetities en unieke optredens in en buiten het dorp.</p>
-                <ul>
-                    <li><strong>Toegankelijkheid:</strong> Je krijgt een instrument in bruikleen.</li>
-                    <li><strong>Kwaliteit:</strong> Lessen via gediplomeerde docenten van Blink.</li>
-                    <li><strong>Gezelligheid:</strong> Een warme community waar iedereen welkom is.</li>
-                </ul>
-            </div>
-          </div>
+        {/* Subtle decorative background elements */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-sdg-gold/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-sdg-red/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+      </section>
 
-          <div className="lg:col-span-5 order-2 lg:sticky lg:top-28">
-            <MusicalAdvisor />
+      {/* 2. SEGMENTATION: Clear Paths */}
+      <section className="py-20 border-b border-gray-100">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
             
-            <div className="mb-8 pl-2">
-              <h2 className="text-3xl font-serif font-bold text-slate-900 flex items-center gap-2"><HelpCircle className="text-sdg-gold" />Veelgestelde vragen</h2>
-              <p className="text-slate-500 mt-2 font-light">Alles wat je moet weten over contributie, instrumenten en lessen.</p>
+            {/* Path: Youth */}
+            <div className="group cursor-pointer" onClick={() => { setIntent('youth'); document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' }); }}>
+              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Star className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
+                Voor de Jeugd
+              </h3>
+              <p className="text-slate-500 font-light leading-relaxed mb-6">
+                Samen met Blink Kunstcollectief bieden we een complete opleiding. 
+                Inclusief gratis instrument en gediplomeerde docenten. 
+                Spelenderwijs leren in een veilige omgeving.
+              </p>
+              <span className="text-blue-600 font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+                Bekijk jeugdopleiding <ChevronDown className="w-4 h-4" />
+              </span>
             </div>
-            
-            <div className="space-y-2 mb-12">
-              {DUMMY_FAQS.map((faq, index) => (
-                <FAQItem key={index} id={`faq-${index}`} question={faq.vraag} answer={faq.antwoord} />
-              ))}
+
+            {/* Path: Adults */}
+            <div className="group cursor-pointer" onClick={() => { setIntent('adult'); document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' }); }}>
+              <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <User className="w-8 h-8 text-amber-600" />
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-slate-900 mb-3 group-hover:text-amber-600 transition-colors">
+                Volwassenen & Herintreders
+              </h3>
+              <p className="text-slate-500 font-light leading-relaxed mb-6">
+                Heb je vroeger gespeeld? Of wil je het leren? 
+                Bij ons hoef je geen auditie te doen. 
+                Kom sfeer proeven tijdens een repetitie en ontdek of het klikt.
+              </p>
+              <span className="text-amber-600 font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+                Lees meer voor volwassenen <ChevronDown className="w-4 h-4" />
+              </span>
             </div>
+
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* 3. CONVERSION SECTION: Low Threshold */}
+      <section id="contact-form" className="py-24 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-24">
+            
+            {/* Left: Persuasion & FAQ */}
+            <div className="lg:col-span-5 space-y-12">
+              <div>
+                <h2 className="text-3xl font-serif font-bold text-slate-900 mb-6">Waarom SDG?</h2>
+                <div className="space-y-6">
+                  <FeaturePoint 
+                    title="Gratis Instrument" 
+                    desc="Je hoeft geen dure investering te doen. Je krijgt een instrument in bruikleen." 
+                  />
+                  <FeaturePoint 
+                    title="Professionele Les" 
+                    desc="Kwaliteit staat voorop. Onze docenten zijn conservatorium geschoold." 
+                  />
+                  <FeaturePoint 
+                    title="Gezellige Sfeer" 
+                    desc="Na de repetitie blijven we vaak hangen. We zijn een hechte club." 
+                  />
+                </div>
+              </div>
+
+              {/* Collapsed FAQ */}
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5 text-sdg-gold" /> Veelgestelde vragen
+                </h3>
+                <div className="border-t border-gray-100">
+                  <FAQItem 
+                    question="Wat kost het lidmaatschap?" 
+                    answer="De contributie is afhankelijk van leeftijd en lesvorm. We hanteren zeer schappelijke tarieven omdat we muziek toegankelijk willen houden. Vul het formulier in voor een actueel overzicht." 
+                  />
+                  <FAQItem 
+                    question="Wanneer zijn de repetities?" 
+                    answer="De Fanfare repeteert op vrijdagavond, de Malletband op dinsdagavond. Je bent altijd welkom om vrijblijvend te komen luisteren." 
+                  />
+                  <FAQItem 
+                    question="Moet ik auditie doen?" 
+                    answer="Nee! Bij ons staat plezier voorop. We kijken samen welk niveau je hebt en hoe je het beste kunt instromen." 
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right: The Form */}
+            <div className="lg:col-span-7">
+              <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-gray-200/50 border border-gray-100 p-8 md:p-12 relative">
+                
+                {/* Form Header */}
+                <div className="mb-8">
+                  <span className="text-sdg-red font-bold uppercase tracking-widest text-xs mb-2 block">Contact</span>
+                  <h2 className="text-3xl font-serif font-bold text-slate-900">Laten we kennismaken</h2>
+                  <p className="text-slate-500 font-light mt-2">
+                    Vul dit formulier in. Geen verplichtingen, we nemen gewoon even contact op om je vragen te beantwoorden of een afspraak te maken.
+                  </p>
+                </div>
+
+                {formStatus === 'success' ? (
+                  <div className="bg-green-50 rounded-2xl p-8 text-center animate-fade-in border border-green-100">
+                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-xl font-bold text-green-800 mb-2">Bedankt!</h3>
+                    <p className="text-green-700">We hebben je bericht ontvangen. We bellen of mailen je snel terug.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 ml-1">Naam</label>
+                        <input name="naam" required className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-sdg-gold/20 outline-none transition-all" placeholder="Je naam" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-slate-700 ml-1">Telefoonnummer</label>
+                        <input name="telefoon" type="tel" className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-sdg-gold/20 outline-none transition-all" placeholder="06 12345678" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                       <label className="text-sm font-bold text-slate-700 ml-1">Emailadres</label>
+                       <input name="email" type="email" required className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-sdg-gold/20 outline-none transition-all" placeholder="jouw@email.nl" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 ml-1">Waar gaat het over?</label>
+                      <div className="relative">
+                        <select 
+                          name="onderwerp" 
+                          defaultValue={intent === 'youth' ? "Jeugdopleiding / Proefles" : intent === 'adult' ? "Lid worden / Sfeer proeven" : "Algemene vraag"}
+                          className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-sdg-gold/20 outline-none appearance-none transition-all"
+                        >
+                          <option>Ik wil een proefles aanvragen (Jeugd)</option>
+                          <option>Ik wil sfeer proeven / meespelen (Volwassene)</option>
+                          <option>Ik heb een algemene vraag</option>
+                          <option>Ik wil Vriend / Donateur worden</option>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-4 h-4" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 ml-1">Opmerking / Vraag</label>
+                      <textarea name="bericht" rows={3} className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-sdg-gold/20 outline-none transition-all resize-none" placeholder="Vertel kort wat je zoekt of wat je vraag is..."></textarea>
+                    </div>
+
+                    <div className="pt-2">
+                      <button type="submit" disabled={formStatus === 'submitting'} className="w-full bg-sdg-red text-white font-bold text-lg py-4 rounded-xl hover:bg-red-800 transition-all shadow-lg hover:shadow-sdg-red/20 flex items-center justify-center gap-2">
+                        {formStatus === 'submitting' ? 'Versturen...' : <><Send className="w-5 h-5" /> Verstuur Bericht</>}
+                      </button>
+                      <p className="text-center text-xs text-slate-400 mt-4">Je zit nergens aan vast. We nemen gewoon contact op.</p>
+                    </div>
+                  </form>
+                )}
+
+                {/* AI Assistant docked in the form area for context */}
+                <div className="mt-8 pt-8 border-t border-gray-100">
+                   <MusicalAdvisor />
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 };

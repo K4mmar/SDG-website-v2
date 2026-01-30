@@ -46,7 +46,7 @@ const Card: React.FC<{
         {/* Floating Badge Icon */}
         <div className="absolute top-6 right-6 z-20">
             <div className="bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl text-sdg-red transform group-hover:rotate-12 transition-transform duration-500 border border-white/50">
-                {React.cloneElement(icon as React.ReactElement, { size: 24 })}
+                {React.cloneElement(icon as React.ReactElement<any>, { size: 24 })}
             </div>
         </div>
       </div>
