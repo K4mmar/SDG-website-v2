@@ -193,11 +193,12 @@ const Education: React.FC = () => {
                 Meld je aan
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
+              
               <button 
                 onClick={toggleMute}
-                className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/20 transition-all flex items-center gap-2"
+                className="px-8 py-4 bg-white text-slate-900 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2"
               >
-                {isMuted ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                {isMuted ? <Volume2 className="w-5 h-5 text-sdg-red" /> : <VolumeX className="w-5 h-5 text-slate-500" />}
                 {isMuted ? 'Geluid aan' : 'Geluid uit'}
               </button>
             </div>
