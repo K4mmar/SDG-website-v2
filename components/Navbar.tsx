@@ -14,7 +14,8 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const logoUrl = "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2012/07/SDG-logo-nieuw-web.png&w=300&output=webp";
+  // Nieuwe logo URL via image proxy voor optimalisatie
+  const logoUrl = "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-01-at-11.53.08.jpeg&w=300&output=webp";
 
   useEffect(() => {
     const handleScroll = () => {
