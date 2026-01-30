@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Music, Heart, Recycle, ArrowRight } from 'lucide-react';
-import { getRecruitmentPagesImages } from '../lib/wordpress';
+import { getRecruitmentData, RecruitmentData } from '../lib/wordpress';
 
 const Card: React.FC<{ 
     title: string; 
@@ -68,20 +68,29 @@ const Card: React.FC<{
 };
 
 const Recruitment: React.FC = () => {
-  const FALLBACKS = {
-    'boek-ons': 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800&auto=format&fit=crop',
-    'steun-ons': 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=800&auto=format&fit=crop',
-    'doe-mee': 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=800&auto=format&fit=crop',
+  const FALLBACKS: Record<string, { image: string, desc: string }> = {
+    'boek-ons': {
+        image: 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=800&auto=format&fit=crop',
+        desc: 'Van intieme serenades tot feestelijke jubilea: wij voegen een gouden muzikale rand toe aan uw bijzondere momenten in het dorp.'
+    },
+    'steun-ons': {
+        image: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=800&auto=format&fit=crop',
+        desc: 'Dankzij onze Vrienden en sponsors kunnen we blijven investeren in kwalitatieve instrumenten en onze unieke dorpscultuur.'
+    },
+    'doe-mee': {
+        image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?q=80&w=800&auto=format&fit=crop',
+        desc: 'Onze vereniging draait op passie en inzet. Help mee bij evenementen of draag je steentje bij aan de gemeenschap.'
+    },
   };
 
-  const [wpImages, setWpImages] = useState<Record<string, string | undefined>>({});
+  const [wpData, setWpData] = useState<Record<string, RecruitmentData>>({});
 
   useEffect(() => {
-    async function loadImages() {
-      const images = await getRecruitmentPagesImages();
-      setWpImages(images);
+    async function loadData() {
+      const data = await getRecruitmentData();
+      setWpData(data);
     }
-    loadImages();
+    loadData();
   }, []);
 
   return (
@@ -109,28 +118,28 @@ const Recruitment: React.FC = () => {
         <div className="grid md:grid-cols-3 gap-10 lg:gap-14">
           <Card
             title="Boek ons"
-            desc="Van intieme serenades tot feestelijke jubilea: wij voegen een gouden muzikale rand toe aan uw bijzondere momenten in het dorp."
+            desc={wpData['boek-ons']?.description || FALLBACKS['boek-ons'].desc}
             icon={<Music />}
-            image={wpImages['boek-ons']}
-            fallback={FALLBACKS['boek-ons']}
+            image={wpData['boek-ons']?.image}
+            fallback={FALLBACKS['boek-ons'].image}
             link="/boek-ons"
             linkText="Regel een optreden"
           />
           <Card
             title="Steun ons"
-            desc="Dankzij onze Vrienden en sponsors kunnen we blijven investeren in kwalitatieve instrumenten en onze unieke dorpscultuur."
+            desc={wpData['steun-ons']?.description || FALLBACKS['steun-ons'].desc}
             icon={<Heart />}
-            image={wpImages['steun-ons']}
-            fallback={FALLBACKS['steun-ons']}
+            image={wpData['steun-ons']?.image}
+            fallback={FALLBACKS['steun-ons'].image}
             link="/steun-ons"
             linkText="Word ook Vriend"
           />
           <Card
             title="Doe mee"
-            desc="Onze vereniging draait op passie en inzet. Help mee bij evenementen of draag je steentje bij aan de gemeenschap."
+            desc={wpData['doe-mee']?.description || FALLBACKS['doe-mee'].desc}
             icon={<Recycle />}
-            image={wpImages['doe-mee']}
-            fallback={FALLBACKS['doe-mee']}
+            image={wpData['doe-mee']?.image}
+            fallback={FALLBACKS['doe-mee'].image}
             link="/doe-mee"
             linkText="Bekijk mogelijkheden"
           />

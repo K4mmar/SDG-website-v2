@@ -5,7 +5,7 @@ import {
   Music, Sparkles, Wind, Drum, 
   CheckCircle, ArrowRight, Star, Play, Pause,
   Trophy, ChevronDown, ChevronUp, HelpCircle, ExternalLink, User,
-  Baby
+  Baby, Volume2, VolumeX
 } from 'lucide-react';
 
 // --- DATA CONFIGURATION ---
@@ -101,11 +101,11 @@ const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 const Education: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'youth' | 'adult'>('youth');
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
-  const [showVideo, setShowVideo] = useState(false); 
+  const [isMuted, setIsMuted] = useState(true);
   
   const navigate = useNavigate();
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
-  const videoRef = useRef<HTMLDivElement>(null);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     return () => {
@@ -120,8 +120,11 @@ const Education: React.FC = () => {
     navigate('/lid-worden');
   };
   
-  const scrollToVideo = () => {
-      videoRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const toggleMute = () => {
+    if (heroVideoRef.current) {
+      heroVideoRef.current.muted = !heroVideoRef.current.muted;
+      setIsMuted(heroVideoRef.current.muted);
+    }
   };
 
   const toggleAudio = async (id: string, audioUrl: string | undefined, e: React.MouseEvent) => {
@@ -152,15 +155,22 @@ const Education: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
       
-      {/* 1. HERO SECTION */}
-      <section className="relative min-h-[70vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/7M8A8099.jpg&output=webp&q=80&w=1600" 
-            alt="Muziek maken bij SDG" 
-            className="w-full h-full object-cover object-center brightness-[0.65]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/40 to-transparent"></div>
+      {/* 1. HERO SECTION WITH VIDEO */}
+      <section className="relative min-h-[75vh] flex items-center overflow-hidden">
+        <div className="absolute inset-0 z-0 bg-slate-900">
+           <video 
+              ref={heroVideoRef}
+              autoPlay 
+              muted 
+              loop 
+              playsInline
+              className="w-full h-full object-cover object-center opacity-80"
+              poster="https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/7M8A8099.jpg&output=webp&q=80&w=1600"
+           >
+              <source src="https://api.sdgsintjansklooster.nl/wp-content/Video/250128v02%20SDG%20Ledenwerving.mp4" type="video/mp4" />
+           </video>
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/60 to-transparent/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent"></div>
         </div>
 
         <div className="container mx-auto px-6 relative z-10 pt-32 pb-16 md:pt-20 md:pb-0">
@@ -184,10 +194,11 @@ const Education: React.FC = () => {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button 
-                onClick={scrollToVideo}
+                onClick={toggleMute}
                 className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/20 transition-all flex items-center gap-2"
               >
-                <Play className="w-5 h-5 fill-current" /> Bekijk sfeerimpressie
+                {isMuted ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                {isMuted ? 'Geluid aan' : 'Geluid uit'}
               </button>
             </div>
           </div>
@@ -398,44 +409,7 @@ const Education: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. VIDEO SECTION */}
-      <section ref={videoRef} className="py-24 bg-slate-900 relative overflow-hidden">
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-7xl opacity-20 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-r from-sdg-red/30 to-sdg-gold/30 blur-[120px] rounded-full mix-blend-screen"></div>
-         </div>
-
-         <div className="container mx-auto px-6 relative z-10">
-             <div className="text-center mb-12">
-                 <span className="text-sdg-gold font-bold uppercase tracking-[0.2em] text-xs mb-3 block animate-fade-in">Sfeerimpressie</span>
-                 <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-4">Beleef de Muziek</h2>
-                 <p className="text-slate-400 font-light max-w-xl mx-auto">Krijg een uniek inkijkje bij onze vereniging.</p>
-             </div>
-             
-             <div className="max-w-5xl mx-auto">
-                <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-black group cursor-pointer">
-                    {!showVideo ? (
-                        <div onClick={() => setShowVideo(true)} className="absolute inset-0 w-full h-full">
-                           <img src="https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=1600" className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-700 scale-105 group-hover:scale-100" alt="Video thumbnail" />
-                           <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="relative">
-                                 <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-75"></div>
-                                 <div className="relative w-20 h-20 md:w-24 md:h-24 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/50 group-hover:scale-110 transition-transform duration-500">
-                                     <Play className="w-8 h-8 md:w-10 md:h-10 text-white fill-current ml-1" />
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                    ) : (
-                        <video autoPlay controls className="w-full h-full object-cover animate-fade-in">
-                           <source src="https://api.sdgsintjansklooster.nl/wp-content/Video/250128v02%20SDG%20Ledenwerving.mp4" type="video/mp4" />
-                        </video>
-                    )}
-                </div>
-             </div>
-         </div>
-      </section>
-
-      {/* 6. FAQ */}
+      {/* 5. FAQ */}
       <section className="py-20 bg-white border-t border-gray-100">
         <div className="container mx-auto px-6 max-w-4xl">
            <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
@@ -462,7 +436,7 @@ const Education: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. CTA BANNER (Replacement for Form) */}
+      {/* 6. CTA BANNER (Replacement for Form) */}
       <section className="py-24 bg-slate-900 relative overflow-hidden text-white text-center">
         <div className="absolute top-0 right-0 w-64 h-64 bg-sdg-gold/10 rounded-full blur-[80px] -mr-32 -mt-32 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-sdg-red/10 rounded-full blur-[80px] -ml-32 -mb-32 pointer-events-none"></div>

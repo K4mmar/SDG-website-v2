@@ -37,6 +37,11 @@ export interface Page {
   };
 }
 
+export interface RecruitmentData {
+  image?: string;
+  description?: string;
+}
+
 async function fetchFromWP(url: string, isGraphQL: boolean = false, query?: string) {
   const targetUrl = isGraphQL ? GRAPHQL_URL : url;
   const options: RequestInit = isGraphQL ? {
@@ -73,6 +78,22 @@ const fixContentUrls = (html: string | undefined) => {
       const proxied = proxyImage(srcUrl);
       return proxied ? `src="${proxied}"` : match;
   });
+};
+
+// Hulpfunctie om HTML te strippen en in te korten voor de kaarten
+const processExcerpt = (html: string): string | undefined => {
+  if (!html) return undefined;
+  // Verwijder alle HTML tags
+  const plainText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  
+  // Als de tekst leeg is, return undefined zodat fallback wordt gebruikt
+  if (!plainText) return undefined;
+
+  // Maximaal aantal karakters (bijv. 160) om de grid netjes te houden
+  if (plainText.length > 160) {
+    return plainText.substring(0, 160).trim() + '...';
+  }
+  return plainText;
 };
 
 export async function getNewsPosts(): Promise<Post[]> {
@@ -167,17 +188,19 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
   } catch (e) { return null; }
 }
 
-export async function getRecruitmentPagesImages(): Promise<Record<string, string | undefined>> {
+export async function getRecruitmentData(): Promise<Record<string, RecruitmentData>> {
   const slugs = ['boek-ons', 'steun-ons', 'doe-mee'];
-  const results: Record<string, string | undefined> = {};
+  const results: Record<string, RecruitmentData> = {};
 
   try {
-    // Probeer eerst via GraphQL voor de drie specifieke slugs
+    // Probeer eerst via GraphQL voor de drie specifieke slugs.
+    // We halen 'content' op omdat 'excerpt' bij pagina's vaak leeg is.
     const query = `
-      query GetRecruitmentImages {
+      query GetRecruitmentData {
         pages(where: { nameIn: ["boek-ons", "steun-ons", "doe-mee"] }) {
           nodes {
             slug
+            content(format: RENDERED)
             featuredImage {
               node {
                 sourceUrl
@@ -191,23 +214,28 @@ export async function getRecruitmentPagesImages(): Promise<Record<string, string
     const pages = data?.data?.pages?.nodes || [];
     
     pages.forEach((page: any) => {
-      if (page.featuredImage?.node?.sourceUrl) {
-        results[page.slug] = proxyImage(page.featuredImage.node.sourceUrl);
-      }
+      results[page.slug] = {
+        image: page.featuredImage?.node?.sourceUrl 
+          ? proxyImage(page.featuredImage.node.sourceUrl) 
+          : undefined,
+        description: processExcerpt(page.content)
+      };
     });
 
     // Fallback: Als GraphQL iets mist, probeer per stuk via REST
     for (const slug of slugs) {
       if (!results[slug]) {
         const page = await getPageBySlug(slug);
-        if (page?.featuredImage?.node?.sourceUrl) {
-          // De getPageBySlug proxied de URL al, dus we kunnen hem direct toekennen
-          results[slug] = page.featuredImage.node.sourceUrl;
+        if (page) {
+          results[slug] = {
+            image: page.featuredImage?.node?.sourceUrl,
+            description: processExcerpt(page.content)
+          };
         }
       }
     }
   } catch (e) {
-    console.error("SDG-Master: Fout bij ophalen recruitment images:", e);
+    console.error("SDG-Master: Fout bij ophalen recruitment data:", e);
   }
 
   return results;
