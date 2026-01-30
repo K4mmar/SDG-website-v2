@@ -1,10 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Music, Sparkles, Wind, Drum, 
   CheckCircle, ArrowRight, Star, Play, Pause,
   Trophy, ChevronDown, ChevronUp, HelpCircle, ExternalLink, User,
-  Baby, GraduationCap
+  Baby
 } from 'lucide-react';
 
 // --- DATA CONFIGURATION ---
@@ -99,12 +100,10 @@ const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 
 const Education: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'youth' | 'adult'>('youth');
-  const [activeTeamId, setActiveTeamId] = useState<string>(''); 
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const [showVideo, setShowVideo] = useState(false); 
-  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
-
-  const formRef = useRef<HTMLDivElement>(null);
+  
+  const navigate = useNavigate();
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLDivElement>(null);
 
@@ -117,17 +116,12 @@ const Education: React.FC = () => {
     };
   }, []);
 
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const handleSignUp = () => {
+    navigate('/lid-worden');
   };
   
   const scrollToVideo = () => {
       videoRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleTeamSelect = (teamId: string) => {
-    setActiveTeamId(teamId);
-    scrollToForm();
   };
 
   const toggleAudio = async (id: string, audioUrl: string | undefined, e: React.MouseEvent) => {
@@ -153,12 +147,6 @@ const Education: React.FC = () => {
         }
       }
     }
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormStatus('submitting');
-    setTimeout(() => { setFormStatus('success'); }, 1500);
   };
 
   return (
@@ -189,7 +177,7 @@ const Education: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
-                onClick={scrollToForm}
+                onClick={handleSignUp}
                 className="px-8 py-4 bg-sdg-red text-white rounded-full font-bold text-lg hover:bg-red-700 transition-all shadow-lg hover:shadow-sdg-red/30 flex items-center justify-center gap-2 group"
               >
                 Meld je aan
@@ -398,8 +386,8 @@ const Education: React.FC = () => {
                       </div>
                     </div>
                     <div className="mt-auto">
-                      <button onClick={() => handleTeamSelect(team.id)} className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-md ${activeTeamId === team.id ? 'bg-slate-800 text-white ring-4 ring-slate-200' : 'bg-white border-2 border-slate-100 text-slate-600 hover:border-sdg-red hover:text-sdg-red'}`}>
-                        {activeTeamId === team.id ? 'Dit spreekt me aan ✓' : 'Kies deze groep'}
+                      <button onClick={handleSignUp} className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-md bg-white border-2 border-slate-100 text-slate-600 hover:border-sdg-red hover:text-sdg-red">
+                        Kies deze groep
                       </button>
                     </div>
                   </div>
@@ -474,74 +462,31 @@ const Education: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. CONVERSION FORM */}
-      <section ref={formRef} id="proefles-form" className="py-24 bg-slate-900 relative overflow-hidden text-white">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-lg rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden">
-            <div className="grid md:grid-cols-5 h-full">
-              <div className="md:col-span-2 bg-slate-950/50 p-10 flex flex-col justify-center">
-                  <h3 className="text-3xl font-serif font-bold mb-4 text-white">
-                    {activeTab === 'youth' ? 'Meld je aan!' : 'Kom kennismaken'}
-                  </h3>
-                  <p className="text-slate-300 mb-8 font-light">
-                    {activeTab === 'youth' 
-                      ? 'Doe mee aan 3 proeflessen en ontdek welk instrument bij jou past.' 
-                      : 'Vul het formulier in. We nemen contact op om eens langs te komen op een repetitie.'}
-                  </p>
-                  
-                  {activeTab === 'youth' && (
-                    <ul className="space-y-4 text-sm text-slate-200">
-                      <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-sdg-gold" /><span>Lessen via Blink</span></li>
-                      <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-sdg-gold" /><span>3 Gratis Proeflessen</span></li>
-                      <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-sdg-gold" /><span>Gratis instrument</span></li>
-                    </ul>
-                  )}
-              </div>
-              <div className="md:col-span-3 p-10 md:p-12 bg-white text-slate-900">
-                {formStatus === 'success' ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center animate-fade-in py-10">
-                    <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6"><CheckCircle className="w-10 h-10" /></div>
-                    <h4 className="text-2xl font-bold text-slate-900 mb-2">Aanvraag Verstuurd!</h4>
-                    <p className="text-slate-600">We nemen zo snel mogelijk contact op.</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleFormSubmit} className="space-y-6">
-                    <div>
-                      <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Naam</label>
-                      <input type="text" required className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none focus:ring-2 focus:ring-sdg-red" placeholder="Jouw naam" />
-                    </div>
-                    
-                    {activeTab === 'youth' ? (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Naam Kind</label>
-                          <input type="text" required className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none" placeholder="Naam kind" />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Leeftijd Kind</label>
-                          <input type="number" required className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none" placeholder="Leeftijd" />
-                        </div>
-                      </div>
-                    ) : (
-                       <div>
-                        <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Instrument (Optioneel)</label>
-                        <input type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none" placeholder="Bijv. Trompet, of 'Geen idee'" />
-                      </div>
-                    )}
-
-                    <div>
-                       <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Telefoonnummer</label>
-                       <input type="tel" required className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 outline-none" placeholder="06..." />
-                    </div>
-
-                    <button type="submit" disabled={formStatus === 'submitting'} className="w-full bg-sdg-red text-white font-bold text-lg py-4 rounded-xl hover:bg-red-800 transition-all shadow-lg transform hover:-translate-y-1">
-                      {formStatus === 'submitting' ? 'Versturen...' : activeTab === 'youth' ? 'Vraag Proefles Aan' : 'Neem Contact Op'}
-                    </button>
-                  </form>
-                )}
-              </div>
-            </div>
-          </div>
+      {/* 7. CTA BANNER (Replacement for Form) */}
+      <section className="py-24 bg-slate-900 relative overflow-hidden text-white text-center">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-sdg-gold/10 rounded-full blur-[80px] -mr-32 -mt-32 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-sdg-red/10 rounded-full blur-[80px] -ml-32 -mb-32 pointer-events-none"></div>
+        
+        <div className="container mx-auto px-6 relative z-10 max-w-3xl">
+          <h2 className="text-3xl md:text-5xl font-serif font-bold mb-6">
+            Klaar om mee te spelen?
+          </h2>
+          <p className="text-slate-300 text-lg md:text-xl font-light mb-10 max-w-2xl mx-auto">
+            {activeTab === 'youth' 
+              ? 'Meld je aan voor 3 gratis proeflessen en ontdek welk instrument bij jou past.' 
+              : 'Kom vrijblijvend sfeer proeven tijdens een repetitie of vraag direct meer informatie aan.'}
+          </p>
+          
+          <button 
+            onClick={handleSignUp}
+            className="px-10 py-5 bg-gradient-to-r from-sdg-gold to-amber-500 text-white rounded-full font-bold text-lg hover:shadow-lg hover:scale-105 transition-all shadow-sdg-gold/30 flex items-center justify-center gap-3 mx-auto"
+          >
+            Ga naar Aanmeldformulier <ArrowRight className="w-5 h-5" />
+          </button>
+          
+          <p className="mt-8 text-sm text-slate-500">
+            Het invullen van het formulier is vrijblijvend. We nemen contact op om de mogelijkheden te bespreken.
+          </p>
         </div>
       </section>
     </div>
