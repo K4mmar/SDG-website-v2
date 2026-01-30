@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   // Nieuwe logo URL via image proxy voor optimalisatie
-  const logoUrl = "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2026/01/WhatsApp-Image-2026-01-01-at-11.53.08.jpeg&w=300&output=webp";
+  const logoUrl = "https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2026/01/Logo-2026.png&w=300&output=webp";
 
   useEffect(() => {
     const handleScroll = () => {
