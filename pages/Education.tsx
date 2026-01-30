@@ -5,7 +5,7 @@ import {
   Music, Sparkles, Wind, Drum, 
   CheckCircle, ArrowRight, Star, Play, Pause,
   Trophy, ChevronDown, ChevronUp, HelpCircle, ExternalLink, User,
-  Baby, Volume2, VolumeX
+  Baby, X
 } from 'lucide-react';
 
 // --- DATA CONFIGURATION ---
@@ -101,11 +101,22 @@ const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 const Education: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'youth' | 'adult'>('youth');
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
-  const [isMuted, setIsMuted] = useState(true);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   
   const navigate = useNavigate();
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // Pauzeer de achtergrondvideo als de modal open is
+    if (heroVideoRef.current) {
+      if (showVideoModal) {
+        heroVideoRef.current.pause();
+      } else {
+        heroVideoRef.current.play().catch(() => {});
+      }
+    }
+  }, [showVideoModal]);
 
   useEffect(() => {
     return () => {
@@ -118,13 +129,6 @@ const Education: React.FC = () => {
 
   const handleSignUp = () => {
     navigate('/lid-worden');
-  };
-  
-  const toggleMute = () => {
-    if (heroVideoRef.current) {
-      heroVideoRef.current.muted = !heroVideoRef.current.muted;
-      setIsMuted(heroVideoRef.current.muted);
-    }
   };
 
   const toggleAudio = async (id: string, audioUrl: string | undefined, e: React.MouseEvent) => {
@@ -195,11 +199,11 @@ const Education: React.FC = () => {
               </button>
               
               <button 
-                onClick={toggleMute}
-                className="px-8 py-4 bg-white text-slate-900 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2"
+                onClick={() => setShowVideoModal(true)}
+                className="px-8 py-4 bg-white text-slate-900 rounded-full font-bold text-lg hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2 group"
               >
-                {isMuted ? <Volume2 className="w-5 h-5 text-sdg-red" /> : <VolumeX className="w-5 h-5 text-slate-500" />}
-                {isMuted ? 'Geluid aan' : 'Geluid uit'}
+                <Play className="w-5 h-5 text-sdg-red fill-current group-hover:scale-110 transition-transform" />
+                Bekijk Video
               </button>
             </div>
           </div>
@@ -464,6 +468,34 @@ const Education: React.FC = () => {
           </p>
         </div>
       </section>
+
+      {/* VIDEO MODAL */}
+      {showVideoModal && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 md:p-8 animate-fade-in"
+          onClick={() => setShowVideoModal(false)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors bg-white/10 p-2 rounded-full hover:bg-white/20"
+            onClick={() => setShowVideoModal(false)}
+          >
+            <X size={32} />
+          </button>
+          
+          <div 
+            className="w-full max-w-7xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl relative ring-1 ring-white/10"
+            onClick={e => e.stopPropagation()}
+          >
+             <video 
+               src="https://api.sdgsintjansklooster.nl/wp-content/Video/250128v02%20SDG%20Ledenwerving.mp4" 
+               className="w-full h-full object-contain"
+               controls
+               autoPlay
+               playsInline
+             />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
