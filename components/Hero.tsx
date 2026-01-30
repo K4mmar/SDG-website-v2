@@ -50,7 +50,7 @@ const Hero: React.FC = () => {
           >
             <span className="h-[1px] w-8 bg-sdg-gold/60 inline-block"></span>
             <span className="text-sdg-gold font-sans font-semibold tracking-[0.2em] uppercase text-sm">
-              Christelijke Muziekvereniging
+              Christelijke Muziekvereniging Soli Deo Gloria
             </span>
             <span className="h-[1px] w-8 bg-sdg-gold/60 inline-block"></span>
           </div>
@@ -73,18 +73,7 @@ const Hero: React.FC = () => {
             </span>
           </h1>
 
-          {/* 3. Sub-headline - The "Elegant" Context line */}
-          <div 
-             className={`mb-8 md:mb-10 transition-all duration-1000 delay-500 ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-          >
-            <p className="text-xl md:text-3xl font-serif italic text-gray-200">
-              Het kloppend hart van <span className="font-bold not-italic text-white text-shadow-sm">Sint Jansklooster</span>
-            </p>
-          </div>
-
-          {/* 4. Description - Hidden on small mobile screens to save space */}
+          {/* 3. Description - Hidden on small mobile screens to save space */}
           <p 
             className={`hidden sm:block text-lg md:text-xl text-gray-300 mb-10 md:mb-12 max-w-2xl mx-auto font-light leading-relaxed transition-all duration-1000 delay-700 ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -93,7 +82,7 @@ const Hero: React.FC = () => {
             Van jong talent tot ervaren muzikant: bij SDG vind je passie, kwaliteit en een warm welkom.
           </p>
           
-          {/* 5. Action Buttons */}
+          {/* 4. Action Buttons */}
           <div 
             className={`flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center transition-all duration-1000 delay-900 ${
               isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -122,7 +111,7 @@ const Hero: React.FC = () => {
         </div>
       </div>
 
-      {/* 6. Bottom Bar / Social Proof (The Pillars) */}
+      {/* 5. Bottom Bar / Social Proof (The Pillars) */}
       <div className={`relative z-10 border-t border-white/10 bg-black/40 md:bg-black/20 backdrop-blur-md mt-auto transition-all duration-1000 delay-[1200ms] ${
          isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}>
