@@ -1,9 +1,9 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Music, Sparkles, Wind, Drum, 
-  MapPin, Wallet, GraduationCap, Users, 
-  CheckCircle, ArrowRight, Star, Play, Pause,
-  Trophy, User, ArrowDown, ExternalLink
+  Users, CheckCircle, ArrowRight, Star, Play, Pause,
+  Trophy, ChevronDown, ChevronUp, HelpCircle, ExternalLink, User
 } from 'lucide-react';
 
 // --- DATA CONFIGURATION ---
@@ -74,23 +74,27 @@ const ROADMAP = [
   }
 ];
 
-const PARENT_BENEFITS = [
-  {
-    icon: <Wallet className="w-6 h-6 text-green-600" />,
-    title: "Gratis Instrument",
-    desc: "Geen dure aanschaf: je krijgt een instrument van de vereniging in bruikleen voor de gehele opleidingsperiode."
-  },
-  {
-    icon: <Users className="w-6 h-6 text-sdg-red" />,
-    title: "Blink Kunstcollectief",
-    desc: "Wij werken samen met Blink voor professioneel kunstonderwijs. Kwaliteit en plezier staan hierbij centraal."
-  },
-  {
-    icon: <GraduationCap className="w-6 h-6 text-blue-600" />,
-    title: "Erkende Kwaliteit",
-    desc: "Je krijgt les van gediplomeerde docenten volgens officiële landelijke muziekexamens."
-  }
-];
+// --- COMPONENTS ---
+
+const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="border-b border-gray-100 last:border-0">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex justify-between items-center py-4 text-left group hover:text-sdg-red transition-colors"
+      >
+        <span className="font-serif font-bold text-slate-700 text-lg">{question}</span>
+        {isOpen ? <ChevronUp className="w-5 h-5 text-sdg-gold" /> : <ChevronDown className="w-5 h-5 text-gray-300 group-hover:text-sdg-red" />}
+      </button>
+      <div 
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}
+      >
+        <p className="text-slate-500 font-light leading-relaxed pr-8">{answer}</p>
+      </div>
+    </div>
+  );
+};
 
 const Education: React.FC = () => {
   const [activeTeamId, setActiveTeamId] = useState<string>(''); 
@@ -240,7 +244,7 @@ const Education: React.FC = () => {
          </div>
       </section>
 
-      {/* 3. THE ROADMAP */}
+      {/* 3. THE ROADMAP (Jeugd) */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
@@ -302,8 +306,55 @@ const Education: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. THE TEAMS */}
-      <section id="teams" className="py-24 bg-white relative overflow-hidden">
+      {/* 5. VOLWASSENEN & HERINTREDERS (Nieuwe sectie) */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="container mx-auto px-6 relative z-10">
+           <div className="grid lg:grid-cols-2 gap-16 items-center">
+             <div>
+                <span className="text-sdg-gold font-bold uppercase tracking-[0.2em] text-xs mb-3 block">Ook voor volwassenen</span>
+                <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-6">Herintreders & Starters</h2>
+                <div className="space-y-6 text-slate-600 font-light leading-relaxed">
+                  <p>
+                    Heb je vroeger een instrument gespeeld en begint het weer te kriebelen? Of heb je altijd al muziek willen maken maar is het er nooit van gekomen?
+                  </p>
+                  <p>
+                    Bij SDG hoef je geen auditie te doen. Plezier staat voorop. We kijken samen wat je niveau is en hoe je het beste kunt instromen. Voor herintreders bieden we opfriscursussen aan en beginners kunnen les krijgen via onze docenten.
+                  </p>
+                  <ul className="space-y-3 mt-4">
+                    <li className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-sdg-red" />
+                      <span>Geen auditie, wel kwaliteit</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-sdg-red" />
+                      <span>Instrument van de vereniging</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-sdg-red" />
+                      <span>Gezellige 'derde helft'</span>
+                    </li>
+                  </ul>
+                  <div className="pt-4">
+                     <a href="/lid-worden" className="inline-flex items-center gap-2 text-slate-900 font-bold border-b-2 border-sdg-gold pb-1 hover:text-sdg-gold transition-colors">
+                       Neem contact op voor een kennismaking <ArrowRight className="w-4 h-4" />
+                     </a>
+                  </div>
+                </div>
+             </div>
+             <div className="relative">
+                <div className="absolute -inset-4 bg-sdg-gold/10 rounded-[2.5rem] rotate-3"></div>
+                <img 
+                  src="https://images.unsplash.com/photo-1543788327-1b072049fa02?q=80&w=800&auto=format&fit=crop" 
+                  alt="Volwassenen muziekles" 
+                  className="relative rounded-[2rem] shadow-2xl w-full h-auto object-cover"
+                />
+             </div>
+           </div>
+        </div>
+      </section>
+
+      {/* 6. THE TEAMS */}
+      <section id="teams" className="py-24 bg-slate-50 relative overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16 max-w-3xl mx-auto">
             <h2 className="text-4xl font-serif font-bold text-slate-900 mb-4">Wat past bij jou?</h2>
@@ -348,7 +399,34 @@ const Education: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. CONVERSION FORM */}
+      {/* 7. FAQ SECTION (Verplaatst van JoinUs) */}
+      <section className="py-20 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-6 max-w-4xl">
+           <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+              <HelpCircle className="w-6 h-6 text-sdg-gold" /> Veelgestelde vragen
+           </h3>
+           <div className="bg-slate-50 rounded-3xl p-8 md:p-10 border border-gray-100">
+              <FAQItem 
+                question="Wat kost het lidmaatschap?" 
+                answer="De contributie is afhankelijk van leeftijd en lesvorm. We hanteren zeer schappelijke tarieven omdat we muziek toegankelijk willen houden. Neem contact op voor een actueel overzicht." 
+              />
+              <FAQItem 
+                question="Wanneer zijn de repetities?" 
+                answer="De Fanfare repeteert op vrijdagavond, de Malletband op dinsdagavond. Je bent altijd welkom om vrijblijvend te komen luisteren." 
+              />
+              <FAQItem 
+                question="Moet ik auditie doen?" 
+                answer="Nee! Bij ons staat plezier voorop. We kijken samen welk niveau je hebt en hoe je het beste kunt instromen." 
+              />
+              <FAQItem 
+                question="Moet ik zelf een instrument kopen?" 
+                answer="Nee, in de meeste gevallen krijg je een instrument van de vereniging in bruikleen zolang je lid bent en/of lessen volgt." 
+              />
+           </div>
+        </div>
+      </section>
+
+      {/* 8. CONVERSION FORM */}
       <section ref={formRef} id="proefles-form" className="py-24 bg-slate-900 relative overflow-hidden text-white">
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-lg rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden">
@@ -388,6 +466,9 @@ const Education: React.FC = () => {
                     <button type="submit" disabled={formStatus === 'submitting'} className="w-full bg-sdg-red text-white font-bold text-lg py-4 rounded-xl hover:bg-red-800 transition-all shadow-lg transform hover:-translate-y-1">
                       {formStatus === 'submitting' ? 'Versturen...' : 'Vraag Proefles Aan'}
                     </button>
+                    <p className="text-xs text-center text-slate-400 mt-4">
+                      Liever eerst even bellen of ben je ouder dan 18? <a href="/lid-worden" className="underline hover:text-sdg-red">Gebruik het algemene contactformulier</a>.
+                    </p>
                   </form>
                 )}
               </div>
