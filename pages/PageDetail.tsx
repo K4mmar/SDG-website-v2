@@ -71,7 +71,8 @@ const PageDetail: React.FC = () => {
     'privacy': 'privacy-policy-2',
     'steun-ons': 'steun-ons',
     'fanfare': 'fanfare', // Expliciete mapping voor zekerheid
-    'malletband': 'malletband' // Expliciete mapping voor zekerheid
+    'malletband': 'malletband', // Expliciete mapping voor zekerheid
+    'klankjorum': 'klankjorum'
   };
 
   useEffect(() => {

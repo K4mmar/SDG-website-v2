@@ -142,6 +142,12 @@ const Hero: React.FC = () => {
                </Link>
                
                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-sdg-red"></span>
+
+               <Link to="/klankjorum" className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
+                 Klankjorum
+               </Link>
+               
+               <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-sdg-red"></span>
                
                <Link to="/jeugd" className="hover:text-white transition-colors cursor-pointer whitespace-nowrap hover:underline decoration-sdg-gold underline-offset-4">
                  Opleiding

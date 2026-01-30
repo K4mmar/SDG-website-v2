@@ -33,10 +33,11 @@ const Navbar: React.FC = () => {
   const isHeroPage = location.pathname === '/' || location.pathname.startsWith('/nieuws/');
   const showSolidNavbar = scrolled || !isHeroPage;
 
-  // Aangepast naar korte URL's
+  // Aangepast naar korte URL's inclusief Klankjorum
   const groepenLinks = [
     { name: 'Fanfare', path: '/fanfare' },
     { name: 'Malletband', path: '/malletband' },
+    { name: 'Klankjorum', path: '/klankjorum' },
   ];
 
   const communityLinks = [
