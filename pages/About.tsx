@@ -23,7 +23,7 @@ const IDENTITY_CARDS = [
     subtitle: 'Onze Identiteit',
     desc: 'Alleen aan God de Eer. Onze christelijke basis is de bron van waaruit we musiceren en met elkaar omgaan.',
     icon: <BookOpen className="w-8 h-8" />,
-    image: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1528825539566-2bcb5882445c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     colSpan: 'md:col-span-1',
     theme: 'gold'
   },

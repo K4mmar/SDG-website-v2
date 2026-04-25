@@ -3,18 +3,20 @@ import React from 'react';
 
 interface Sponsor {
   name: string;
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 const SPONSORS: Sponsor[] = [
+  { name: 'Plus Kerssies', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2026%2F04%2FPlus-Kerssies.png&output=webp&q=80' },
+  { name: 'Alex Bruintjes', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2026%2F04%2Fjachtschilders-en-spuitbedrijf.jpg&output=webp&q=80' },
+  { name: 'Albert Weijs', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2026%2F04%2Fhout-en-metaalkunst-albert-weijs-2.png&output=webp&q=80' },
+  { name: 'De Glasservice Express', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2026%2F04%2Fge-de-glasservice-express.png&output=webp&q=80' },
   { name: 'Boeve', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fboeve.png&output=webp&q=80' },
-  { name: 'Weijs ICT', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fweijs-ict.png&output=webp&q=80' },
   { name: 'Wapen van Utrecht', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fwapen-van-utrecht.png&output=webp&q=80' },
   { name: 'VOF J. Driesen', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fvof-j.-driesen.jpg&output=webp&q=80' },
   { name: 'Vinke', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fvinke.png&output=webp&q=80' },
   { name: 'Verkoopplaats', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fverkoopplaats.png&output=webp&q=80' },
   { name: 'Van Beek', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fvan-beek.png&output=webp&q=80' },
-  { name: 'V.D. Linde', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fv.d.-linde.png&output=webp&q=80' },
   { name: 'Team 2', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fteam-2.png&output=webp&q=80' },
   { name: 'Syntech', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fsyntech.png&output=webp&q=80' },
   { name: 'Ruach', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fruach.jpg&output=webp&q=80' },
@@ -22,7 +24,6 @@ const SPONSORS: Sponsor[] = [
   { name: 'Rook Bouw', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Frook-bouw.jpg&output=webp&q=80' },
   { name: 'RM', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Frm.png&output=webp&q=80' },
   { name: 'Rabobank', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Frabobank.jpg&output=webp&q=80' },
-  { name: 'R en S', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fr-en-s.png&output=webp&q=80' },
   { name: 'Procal', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fprocal.png&output=webp&q=80' },
   { name: 'Oldenijens', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Foldenijens.jpg&output=webp&q=80' },
   { name: 'Lok', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Flok.png&output=webp&q=80' },
@@ -31,10 +32,9 @@ const SPONSORS: Sponsor[] = [
   { name: 'Hubo', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fhubo.png&output=webp&q=80' },
   { name: 'Hansman', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fhansman.jpg&output=webp&q=80' },
   { name: 'G. Smit', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fg.-smit.jpg&output=webp&q=80' },
-  { name: 'Expert', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fexpert.png&output=webp&q=80' },
   { name: 'Drogt', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fdrogt.jpg&output=webp&q=80' },
-  { name: 'D. van Dalen', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fd.-van-dalen.png&output=webp&q=80' },
-  { name: 'Coop', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fcoop.png&output=webp&q=80' },
+  { name: 'Dakrenovatie- & Rietdekkersbedrijf Bovendeur – Sint Jansklooster' },
+  { name: 'Vee en kalverhandel L. van der Linde – Sint Jansklooster' },
   { name: 'A. de Jonge', imageUrl: 'https://images.weserv.nl/?url=https%3A%2F%2Fapi.sdgsintjansklooster.nl%2Fwp-content%2Fuploads%2F2021%2F08%2Fa.-de-jonge.png&output=webp&q=80' },
 ];
 
@@ -44,6 +44,9 @@ interface SponsorGridProps {
 }
 
 const SponsorGrid: React.FC<SponsorGridProps> = ({ variant = 'full', title }) => {
+  const sponsorsWithLogo = SPONSORS.filter(s => s.imageUrl);
+  const sponsorsWithoutLogo = SPONSORS.filter(s => !s.imageUrl);
+
   return (
     <div className={`w-full py-16 ${variant === 'monochrome' ? 'bg-white' : 'bg-slate-50'}`}>
       <div className="container mx-auto px-6">
@@ -54,8 +57,9 @@ const SponsorGrid: React.FC<SponsorGridProps> = ({ variant = 'full', title }) =>
           </div>
         )}
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center justify-items-center">
-          {SPONSORS.map((sponsor) => (
+        {/* Sponsors with Logo */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center justify-items-center mb-16">
+          {sponsorsWithLogo.map((sponsor) => (
             <div 
               key={sponsor.name}
               className="w-full flex items-center justify-center p-4 h-24 grayscale-container"
@@ -74,6 +78,25 @@ const SponsorGrid: React.FC<SponsorGridProps> = ({ variant = 'full', title }) =>
             </div>
           ))}
         </div>
+
+        {/* Text-based Sponsors */}
+        {sponsorsWithoutLogo.length > 0 && (
+          <div className="pt-12 border-t border-slate-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+              {sponsorsWithoutLogo.map((sponsor) => (
+                <div 
+                  key={sponsor.name}
+                  className="flex items-center space-x-4 p-4 bg-white/50 rounded-lg border-l-4 border-sdg-red group hover:bg-white transition-all duration-300"
+                >
+                  <div className="w-2 h-2 rounded-full bg-sdg-gold opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <span className="text-sm font-medium text-slate-700 leading-tight">
+                    {sponsor.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

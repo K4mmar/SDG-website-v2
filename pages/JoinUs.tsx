@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Send, CheckCircle, ChevronDown, Mail, Phone, MapPin } from 'lucide-react';
+import SponsorGrid from '../components/SponsorGrid';
 
 const FORM_ENDPOINT = "https://formspree.io/f/xjknjogr";
 
@@ -26,8 +27,9 @@ const JoinUs: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-28 pb-20">
-      <div className="container mx-auto px-6">
+    <>
+      <div className="bg-slate-50 min-h-screen pt-28 pb-20">
+        <div className="container mx-auto px-6">
         
         <div className="max-w-4xl mx-auto">
           {/* Simple Header */}
@@ -122,7 +124,9 @@ const JoinUs: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      <SponsorGrid title="Onze Sponsoren" variant="full" />
+    </>
   );
 };
 

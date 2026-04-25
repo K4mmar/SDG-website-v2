@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Music, Facebook, Instagram, Mail, MapPin } from 'lucide-react';
+import { Facebook, Instagram, Mail, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
@@ -10,9 +10,12 @@ const Footer: React.FC = () => {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
-            <Link to="/" className="text-2xl font-bold flex items-center gap-2 mb-4 text-white">
-              <Music className="w-8 h-8 text-sdg-gold" />
-              <span>SDG</span>
+            <Link to="/" className="inline-block mb-6 hover:opacity-80 transition-opacity">
+              <img 
+                src="https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2026/01/Logo-2026.png&w=300&output=webp" 
+                alt="SDG Logo" 
+                className="h-16 w-auto brightness-0 invert" 
+              />
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed">
               Christelijke Muziekvereniging Soli Deo Gloria Sint Jansklooster. 

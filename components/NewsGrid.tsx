@@ -50,17 +50,9 @@ const NewsGrid: React.FC = () => {
   return (
     <section className="py-24 bg-white">
       <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
-          <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4">Laatste Nieuws</h2>
-            <p className="text-slate-500 text-lg font-light">Updates van het huidige verenigingsjaar.</p>
-          </div>
-          <button 
-              onClick={() => navigate('/nieuws')}
-              className="flex items-center text-sdg-red font-semibold hover:text-red-900 transition-colors border-b-2 border-transparent hover:border-sdg-red pb-1"
-          >
-              Bekijk archief <ArrowRight className="ml-2 w-4 h-4" />
-          </button>
+        <div className="mb-16">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4">Laatste Nieuws</h2>
+          <p className="text-slate-500 text-lg font-light">Updates van het huidige verenigingsjaar.</p>
         </div>
 
         {(posts.length === 0 || error) ? (

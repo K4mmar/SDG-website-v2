@@ -452,7 +452,7 @@ const Education: React.FC = () => {
           </h2>
           <p className="text-slate-300 text-lg md:text-xl font-light mb-10 max-w-2xl mx-auto">
             {activeTab === 'youth' 
-              ? 'Meld je aan voor 3 gratis proeflessen en ontdek welk instrument bij jou past.' 
+              ? 'Meld je aan voor 4 gratis proeflessen en ontdek welk instrument bij jou past.' 
               : 'Kom vrijblijvend sfeer proeven tijdens een repetitie of vraag direct meer informatie aan.'}
           </p>
           
