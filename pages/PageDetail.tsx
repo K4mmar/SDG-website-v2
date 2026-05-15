@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPageBySlug, Page } from '../lib/wordpress';
-import { ArrowLeft, Share2, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import SponsorGrid from '../components/SponsorGrid';
+import ShareButton from '../components/ShareButton';
 
 const STATIC_CONTENT: Record<string, { title: string; content: string; image?: string }> = {
   'identiteit': {
@@ -185,9 +186,7 @@ const PageDetail: React.FC = () => {
               Terug
             </button>
             <div className="hidden sm:block">
-              <button className="text-slate-400 hover:text-sdg-gold transition-colors">
-                <Share2 className="w-5 h-5" />
-              </button>
+              <ShareButton title={page.title} />
             </div>
           </div>
 

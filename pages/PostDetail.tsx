@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPostBySlug } from '../lib/wordpress';
 import { getUpcomingEvents, CalendarEvent } from '../lib/calendar';
-import { ArrowLeft, Calendar, Tag, Share2, Clock, MapPin } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag, Clock, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import ShareButton from '../components/ShareButton';
 
 const PostDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -112,9 +113,7 @@ const PostDetail: React.FC = () => {
                 {backLabel}
                 </button>
                 <div className="hidden sm:block">
-                <button className="text-slate-400 hover:text-sdg-gold transition-colors">
-                    <Share2 className="w-5 h-5" />
-                </button>
+                    <ShareButton title={post.title} />
                 </div>
             </div>
 
