@@ -13,22 +13,37 @@ async function fetchCalendarData(): Promise<string> {
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(CALENDAR_URL)}`
   ];
 
-  for (const url of proxies) {
+  const fetchWithTimeout = async (url: string, timeout = 5000): Promise<string> => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(id);
+      
       if (response.ok) {
         const text = await response.text();
-        // Check of het echt een iCal bestand is
         if (text.includes('BEGIN:VCALENDAR')) {
-          console.log(`SDG-Agenda: Succesvol geladen via ${url}`);
+          console.log(`SDG-Agenda: Succesvol geladen via ${url.split('/')[2]}`);
           return text;
         }
       }
-    } catch (e) {
-      console.warn(`SDG-Agenda: Proxy ${url} mislukt.`);
+      throw new Error(`Ongeldige data of fout via ${url}`);
+    } catch (err) {
+      clearTimeout(id);
+      throw err;
     }
+  };
+
+  try {
+    // Start alle proxy aanvragen tegelijk (in parallel)
+    // Promise.any retourneert de eerste die succesvol afrondt.
+    // Dit voorkomt dat je moet wachten op een trage server als een andere sneller is.
+    const result = await Promise.any(proxies.map(url => fetchWithTimeout(url, 8000)));
+    return result;
+  } catch (error) {
+    throw new Error('Geen enkele proxy kon de agenda laden. Controleer de internetverbinding of de URL.');
   }
-  throw new Error('Geen enkele proxy kon de agenda laden. Controleer de internetverbinding of de URL.');
 }
 
 export interface CalendarEvent {
