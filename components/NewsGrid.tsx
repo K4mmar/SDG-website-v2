@@ -16,16 +16,8 @@ const NewsGrid: React.FC = () => {
     try {
       const data = await getNewsPosts();
       
-      // STRIKT FILTER: Alleen berichten van het huidige jaar (2025)
-      const currentYear = new Date().getFullYear();
-      const filtered = data.filter(post => new Date(post.date).getFullYear() === currentYear);
-      
-      // Als er nog geen berichten in 2025 zijn, tonen we de laatste 3 van vorig jaar als fallback
-      if (filtered.length === 0) {
-        setPosts(data.slice(0, 3));
-      } else {
-        setPosts(filtered.slice(0, 6));
-      }
+      // We tonen de laatste 6 berichten, ongeacht het jaartal
+      setPosts(data.slice(0, 6));
     } catch (e) {
       console.error("SDG News Error:", e);
       setError("Het lukt niet om de berichten op te halen.");
@@ -52,7 +44,7 @@ const NewsGrid: React.FC = () => {
       <div className="container mx-auto px-6">
         <div className="mb-16">
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4">Laatste Nieuws</h2>
-          <p className="text-slate-500 text-lg font-light">Updates van het huidige verenigingsjaar.</p>
+          <p className="text-slate-500 text-lg font-light">Blijf op de hoogte van de laatste updates en evenementen.</p>
         </div>
 
         {(posts.length === 0 || error) ? (

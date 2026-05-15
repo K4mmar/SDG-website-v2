@@ -47,6 +47,7 @@ const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
   };
 
   const primaryLink = extractLink(event.description);
+  const isHtml = (text: string) => /<[a-z][\s\S]*>/i.test(text);
 
   return (
     <div 
@@ -127,10 +128,20 @@ const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
         >
           <div className="px-6 md:px-8 pb-8 pt-0 pl-[calc(1.5rem+80px)] md:pl-[calc(2rem+96px)]">
              <div className="border-t border-gray-100 pt-4">
-                <div className="flex items-start gap-3 text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">
-                   <AlignLeft className="w-4 h-4 mt-1 text-sdg-gold shrink-0" />
-                   <div className="prose prose-sm max-w-none text-slate-600 font-light">
-                      {renderDescriptionWithLinks(event.description || '')}
+                <div className="flex items-start gap-4 text-slate-600 text-lg leading-relaxed">
+                   <AlignLeft className="w-6 h-6 mt-1 text-sdg-gold shrink-0" />
+                   <div className="prose prose-slate lg:prose-lg max-w-none text-slate-700 
+                     prose-p:text-slate-600 prose-p:leading-relaxed 
+                     prose-strong:text-slate-900 prose-strong:font-bold 
+                     prose-a:text-sdg-red hover:prose-a:underline
+                     prose-table:border-collapse prose-td:p-2 prose-tr:border-b prose-tr:border-slate-100">
+                      {isHtml(event.description || '') ? (
+                        <div className="overflow-x-auto w-full" dangerouslySetInnerHTML={{ __html: event.description || '' }} />
+                      ) : (
+                        <div className="whitespace-pre-wrap font-normal">
+                          {renderDescriptionWithLinks(event.description || '')}
+                        </div>
+                      )}
                    </div>
                 </div>
              </div>

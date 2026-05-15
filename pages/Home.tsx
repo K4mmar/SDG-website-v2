@@ -5,7 +5,6 @@ import Hero from '../components/Hero';
 import Recruitment from '../components/Recruitment';
 import NewsGrid from '../components/NewsGrid';
 import AgendaList from '../components/AgendaList';
-import Testimonials from '../components/Testimonials';
 import SponsorGrid from '../components/SponsorGrid';
 import { Crown, CheckCircle, ArrowRight } from 'lucide-react';
 
@@ -133,12 +132,6 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="bg-slate-50 py-16 border-y border-slate-100">
-         <div className="container mx-auto px-6">
-            <Testimonials />
-         </div>
       </section>
 
       <AgendaList />

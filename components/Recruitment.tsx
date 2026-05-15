@@ -11,10 +11,12 @@ const Card: React.FC<{
     image?: string; 
     fallback: string; 
     link: string; 
-    linkText: string 
-}> = ({ title, desc, icon, image, fallback, link, linkText }) => {
+    linkText: string;
+    wpLoading?: boolean;
+}> = ({ title, desc, icon, image, fallback, link, linkText, wpLoading }) => {
   const navigate = useNavigate();
   const [currentImage, setCurrentImage] = useState(image || fallback);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     setCurrentImage(image || fallback);
@@ -34,12 +36,22 @@ const Card: React.FC<{
       {/* Top Accent Line */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-sdg-gold to-amber-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-30"></div>
       
-      <div className="h-64 overflow-hidden relative">
+      <div className="h-64 overflow-hidden relative bg-white">
+        {/* Placeholder / Loading State */}
+        {(!imageLoaded || wpLoading) && (
+          <div className="absolute inset-0 bg-white z-10 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-slate-100 border-t-sdg-gold rounded-full animate-spin"></div>
+          </div>
+        )}
+        
         <img 
           src={currentImage} 
           alt={title} 
           onError={handleImageError}
-          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" 
+          onLoad={() => setImageLoaded(true)}
+          className={`w-full h-full object-cover transform group-hover:scale-110 transition-all duration-1000 ease-out ${
+            imageLoaded && !wpLoading ? 'opacity-100' : 'opacity-0'
+          }`} 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
         
@@ -84,11 +96,16 @@ const Recruitment: React.FC = () => {
   };
 
   const [wpData, setWpData] = useState<Record<string, RecruitmentData>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      const data = await getRecruitmentData();
-      setWpData(data);
+      try {
+        const data = await getRecruitmentData();
+        setWpData(data);
+      } finally {
+        setLoading(false);
+      }
     }
     loadData();
   }, []);
@@ -124,6 +141,7 @@ const Recruitment: React.FC = () => {
             fallback={FALLBACKS['boek-ons'].image}
             link="/boek-ons"
             linkText="Regel een optreden"
+            wpLoading={loading}
           />
           <Card
             title="Steun ons"
@@ -133,6 +151,7 @@ const Recruitment: React.FC = () => {
             fallback={FALLBACKS['steun-ons'].image}
             link="/steun-ons"
             linkText="Word ook Vriend"
+            wpLoading={loading}
           />
           <Card
             title="Doe mee"
@@ -142,6 +161,7 @@ const Recruitment: React.FC = () => {
             fallback={FALLBACKS['doe-mee'].image}
             link="/doe-mee"
             linkText="Bekijk mogelijkheden"
+            wpLoading={loading}
           />
         </div>
 

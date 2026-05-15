@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPageBySlug, Page } from '../lib/wordpress';
-import { ArrowLeft, Share2 } from 'lucide-react';
+import { ArrowLeft, Share2, ArrowRight } from 'lucide-react';
 import SponsorGrid from '../components/SponsorGrid';
 
 const STATIC_CONTENT: Record<string, { title: string; content: string; image?: string }> = {
@@ -198,6 +198,51 @@ const PageDetail: React.FC = () => {
                   dangerouslySetInnerHTML={{ __html: page.content }} 
                />
                
+               {(slug === 'boek-ons' || page.slug === 'boek-ons') && (
+                 <div className="mt-16 text-center">
+                    <button 
+                      onClick={() => navigate('/lid-worden?subject=optreden')}
+                      className="bg-sdg-red text-white px-8 py-4 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-red-800 transition-colors shadow-lg hover:shadow-sdg-red/20 inline-flex items-center gap-2"
+                    >
+                      Informeer naar de mogelijkheden <ArrowRight className="w-4 h-4" />
+                    </button>
+                 </div>
+               )}
+
+               {(slug === 'steun-ons' || page.slug === 'steun-ons') && (
+                 <div className="mt-16 text-center flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button 
+                      onClick={() => navigate('/lid-worden?subject=donateur')}
+                      className="bg-sdg-red text-white px-8 py-4 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-red-800 transition-colors shadow-lg hover:shadow-sdg-red/20 inline-flex items-center gap-2"
+                    >
+                      Word Vriend / Donateur <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => navigate('/lid-worden?subject=sponsor')}
+                      className="bg-white border-2 border-sdg-red text-sdg-red px-8 py-4 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-red-50 transition-colors inline-flex items-center gap-2"
+                    >
+                      Sponsor worden <ArrowRight className="w-4 h-4" />
+                    </button>
+                 </div>
+               )}
+
+               {(slug === 'doe-mee' || page.slug === 'doe-mee') && (
+                 <div className="mt-16 text-center flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button 
+                      onClick={() => navigate('/lid-worden')}
+                      className="bg-sdg-red text-white px-8 py-4 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-red-800 transition-colors shadow-lg hover:shadow-sdg-red/20 inline-flex items-center gap-2"
+                    >
+                      Kom sfeer proeven <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => navigate('/lid-worden?subject=vrijwilliger')}
+                      className="bg-white border-2 border-sdg-red text-sdg-red px-8 py-4 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-red-50 transition-colors inline-flex items-center gap-2"
+                    >
+                      Word vrijwilliger <ArrowRight className="w-4 h-4" />
+                    </button>
+                 </div>
+               )}
+
                {/* Specifieke Sponsor Sectie als dit de steun-ons pagina is met warme titel */}
                {(slug === 'steun-ons' || page.slug === 'steun-ons') && (
                  <div className="mt-20 pt-10 border-t border-gray-100">

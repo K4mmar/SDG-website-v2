@@ -98,14 +98,23 @@ const JoinUs: React.FC = () => {
                       <div className="relative">
                         <select 
                           name="onderwerp" 
-                          defaultValue={searchParams.get('subject') === 'proefles' ? 'Ik wil een proefles aanvragen' : 'Ik wil lid worden / sfeer proeven'}
+                          defaultValue={
+                            searchParams.get('subject') === 'proefles' ? 'Ik wil een proefles aanvragen' : 
+                            searchParams.get('subject') === 'optreden' ? 'Ik wil informeren naar een optreden' :
+                            searchParams.get('subject') === 'donateur' ? 'Ik wil Vriend / Donateur worden' :
+                            searchParams.get('subject') === 'sponsor' ? 'Ik wil sponsor worden' :
+                            searchParams.get('subject') === 'vrijwilliger' ? 'Ik wil vrijwilliger worden' :
+                            'Ik wil lid worden / sfeer proeven'
+                          }
                           className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-sdg-gold/20 outline-none appearance-none transition-all"
                         >
                           <option>Ik wil lid worden / sfeer proeven</option>
                           <option>Ik wil een proefles aanvragen</option>
                           <option>Ik wil vrijwilliger worden</option>
+                          <option>Ik wil informeren naar een optreden</option>
                           <option>Ik heb een algemene vraag</option>
                           <option>Ik wil Vriend / Donateur worden</option>
+                          <option>Ik wil sponsor worden</option>
                         </select>
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-4 h-4" />
                       </div>

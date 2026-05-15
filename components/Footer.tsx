@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed">
               Christelijke Muziekvereniging Soli Deo Gloria Sint Jansklooster. 
-              Samen muziek maken op hoog niveau in een gezellige sfeer.
+              Samen muziek maken in een gezellige sfeer.
             </p>
           </div>
 
@@ -53,16 +53,16 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="font-bold text-lg mb-4 text-white">Volg ons</h4>
             <div className="flex space-x-4 mb-6">
-              <a href="https://www.facebook.com/SDGSintJansklooster/" target="_blank" rel="noopener noreferrer" className="bg-slate-800 p-2 rounded-full hover:bg-sdg-red transition-colors text-white">
+              <a href="https://www.facebook.com/sdgsintjansklooster/?locale=nl_NL" target="_blank" rel="noopener noreferrer" className="bg-slate-800 p-2 rounded-full hover:bg-sdg-red transition-colors text-white">
                 <Facebook size={20} />
               </a>
-              <a href="https://www.instagram.com/sdgsintjansklooster/" target="_blank" rel="noopener noreferrer" className="bg-slate-800 p-2 rounded-full hover:bg-sdg-red transition-colors text-white">
+              <a href="https://www.instagram.com/sdg_sintjansklooster/" target="_blank" rel="noopener noreferrer" className="bg-slate-800 p-2 rounded-full hover:bg-sdg-red transition-colors text-white">
                 <Instagram size={20} />
               </a>
             </div>
             <div>
               <a 
-                href="/wp-admin" 
+                href="https://1drv.ms/f/c/651F5C4F4BFB4F3E/AoIQT-pPNZFEkb8IpWELWYg?e=ayNthk" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-xs text-slate-600 hover:text-slate-400 border border-slate-700 px-3 py-1 rounded inline-block"
