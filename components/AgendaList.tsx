@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { getUpcomingEvents, CalendarEvent } from '../lib/calendar';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { MapPin, Clock, CalendarDays, ExternalLink, Calendar, Loader2, ChevronDown, ChevronUp, AlignLeft } from 'lucide-react';
+import { MapPin, Clock, CalendarDays, ExternalLink, Calendar, Loader2, ChevronDown, ChevronUp, AlignLeft, CalendarPlus, Share2 } from 'lucide-react';
+import ShareButton from './ShareButton';
 
 // Hulpfunctie om tekst met URL's om te zetten naar React nodes met aanklikbare links
 const renderDescriptionWithLinks = (text: string) => {
@@ -38,6 +39,21 @@ const renderDescriptionWithLinks = (text: string) => {
 const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasDescription = !!event.description && event.description.trim().length > 0;
+
+  // Helper om een Google Calendar link te genereren
+  const getGoogleCalendarLink = (event: CalendarEvent) => {
+    const formatGDate = (date: Date) => {
+      return date.toISOString().replace(/-|:|\.\d+/g, '');
+    };
+
+    const start = formatGDate(event.start);
+    const end = formatGDate(event.end || new Date(event.start.getTime() + 2 * 60 * 60 * 1000));
+    const title = encodeURIComponent(event.title);
+    const details = encodeURIComponent(event.description || '');
+    const location = encodeURIComponent(event.location || '');
+
+    return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+  };
 
   // Helper om snel een link uit de beschrijving te halen voor de "Meer info" knop (zoals in de vorige versie)
   const extractLink = (text?: string) => {
@@ -97,6 +113,26 @@ const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
 
         {/* Actions / Toggles */}
         <div className="mt-2 md:mt-0 w-full md:w-auto flex items-center justify-end gap-3">
+          {/* Calendar & Share Mobile Actions */}
+          <div className="flex items-center gap-3">
+            <a 
+              href={getGoogleCalendarLink(event)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 hover:text-sdg-red hover:bg-slate-100 transition-all"
+              title="Voeg toe aan agenda"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CalendarPlus className="w-5 h-5" />
+            </a>
+            <div onClick={(e) => e.stopPropagation()} className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-50 text-slate-400 hover:text-sdg-gold hover:bg-slate-100 transition-all">
+              <ShareButton 
+                title={event.title} 
+                text={`Ga je mee naar ${event.title} van SDG Sint Jansklooster op ${format(event.start, 'd MMMM', { locale: nl })}?`}
+              />
+            </div>
+          </div>
+
           {/* Als er een link is, tonen we de 'snelle' knop ook nog, tenzij open */}
           {primaryLink && !isOpen && (
              <a 
@@ -130,18 +166,32 @@ const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
              <div className="border-t border-gray-100 pt-4">
                 <div className="flex items-start gap-4 text-slate-600 text-lg leading-relaxed">
                    <AlignLeft className="w-6 h-6 mt-1 text-sdg-gold shrink-0" />
-                   <div className="prose prose-slate lg:prose-lg max-w-none text-slate-700 
-                     prose-p:text-slate-600 prose-p:leading-relaxed 
-                     prose-strong:text-slate-900 prose-strong:font-bold 
-                     prose-a:text-sdg-red hover:prose-a:underline
-                     prose-table:border-collapse prose-td:p-2 prose-tr:border-b prose-tr:border-slate-100">
-                      {isHtml(event.description || '') ? (
-                        <div className="overflow-x-auto w-full" dangerouslySetInnerHTML={{ __html: event.description || '' }} />
-                      ) : (
-                        <div className="whitespace-pre-wrap font-normal">
-                          {renderDescriptionWithLinks(event.description || '')}
-                        </div>
-                      )}
+                   <div className="flex-grow">
+                     <div className="prose prose-slate lg:prose-lg max-w-none text-slate-700 
+                       prose-p:text-slate-600 prose-p:leading-relaxed 
+                       prose-strong:text-slate-900 prose-strong:font-bold 
+                       prose-a:text-sdg-red hover:prose-a:underline
+                       prose-table:border-collapse prose-td:p-2 prose-tr:border-b prose-tr:border-slate-100">
+                        {isHtml(event.description || '') ? (
+                          <div className="overflow-x-auto w-full" dangerouslySetInnerHTML={{ __html: event.description || '' }} />
+                        ) : (
+                          <div className="whitespace-pre-wrap font-normal">
+                            {renderDescriptionWithLinks(event.description || '')}
+                          </div>
+                        )}
+                     </div>
+                     
+                     <div className="mt-8 flex flex-wrap gap-4">
+                        <a 
+                          href={getGoogleCalendarLink(event)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 bg-sdg-red text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-red-800 transition-colors shadow-lg hover:shadow-sdg-red/20"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <CalendarPlus className="w-4 h-4" /> In agenda opslaan
+                        </a>
+                     </div>
                    </div>
                 </div>
              </div>
