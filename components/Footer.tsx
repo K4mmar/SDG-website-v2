@@ -40,11 +40,11 @@ const Footer: React.FC = () => {
             <ul className="space-y-3 text-slate-400 text-sm">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 shrink-0 text-sdg-red" />
-                <span>Dorpshuis Sint Jansklooster<br/>Monnikenweg 24</span>
+                <span>Stichting Dorpshuis Sint Janskamp<br/>Monnikenweg 38<br/>8326 BZ Sint Jansklooster</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 shrink-0 text-sdg-red" />
-                <a href="mailto:info@sdg-sintjansklooster.nl" className="hover:text-white">info@sdg-sintjansklooster.nl</a>
+                <a href="mailto:secretariaat@sdgsintjansklooster.nl" className="hover:text-white">secretariaat@sdgsintjansklooster.nl</a>
               </li>
             </ul>
           </div>

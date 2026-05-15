@@ -16,8 +16,16 @@ const PostDetail: React.FC = () => {
 
   // Determine back button destination and label
   const origin = location.state?.origin;
-  const backDestination = origin === 'archive' ? '/nieuws' : '/';
+  const fallbackDestination = origin === 'archive' ? '/nieuws' : '/';
   const backLabel = origin === 'archive' ? 'Terug naar archief' : 'Terug naar home';
+
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate(fallbackDestination);
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -95,7 +103,7 @@ const PostDetail: React.FC = () => {
             {/* Sticky Header Bar with Back Button */}
             <div className="bg-white border-b border-gray-100 p-6 md:p-8 flex justify-between items-center sticky top-0 z-40 bg-opacity-95 backdrop-blur-sm">
                 <button 
-                onClick={() => navigate(backDestination)} 
+                onClick={handleBack} 
                 className="group flex items-center text-slate-500 hover:text-sdg-red transition-colors text-sm font-bold uppercase tracking-wider"
                 >
                 <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mr-3 group-hover:bg-sdg-red/10 transition-colors">

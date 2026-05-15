@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useLocation, useNavigationType } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -11,18 +11,39 @@ import PostDetail from './pages/PostDetail';
 import PageDetail from './pages/PageDetail';
 import NewsArchive from './pages/NewsArchive';
 
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+const ScrollManager = () => {
+  const location = useLocation();
+  const navType = useNavigationType();
+  const scrollPositions = React.useRef<Record<string, number>>({});
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      scrollPositions.current[location.key] = window.scrollY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [location.key]);
+
+  React.useEffect(() => {
+    if (navType === 'POP') {
+      const pos = scrollPositions.current[location.key];
+      if (pos !== undefined) {
+        // Restore immediately, and also slightly delayed to account for rendering
+        window.scrollTo(0, pos);
+        setTimeout(() => window.scrollTo(0, pos), 50);
+      }
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location.key, navType]);
+
   return null;
 };
 
 const App: React.FC = () => {
   return (
     <Router>
-      <ScrollToTop />
+      <ScrollManager />
       <div className="flex flex-col min-h-screen bg-white text-slate-900">
         <Navbar />
         <main className="flex-grow">

@@ -62,16 +62,16 @@ const YOUTH_ROADMAP = [
   },
   {
     step: 2,
-    title: "Instrument Kiezen",
-    age: "Vanaf 8 jaar",
-    desc: "Je kiest je favoriete instrument en krijgt les van gediplomeerde docenten. Je krijgt je eigen instrument in bruikleen van de vereniging.",
+    title: "Instrument & Les",
+    age: "Traject 1,5 - 2 jaar",
+    desc: "Kies je instrument en krijg les van vakdocenten. Voor € 20,- p.m. leiden we je op tot je eerste examen. Je krijgt een instrument in bruikleen.",
     icon: <Star className="w-5 h-5" />
   },
   {
     step: 3,
     title: "Het Grote Orkest",
-    age: "Diploma A/B",
-    desc: "Je bent klaar voor het 'echte' werk: de Fanfare of de Malletband. Concerten, optochten en levenslange vriendschappen.",
+    age: "A-Diploma",
+    desc: "Zodra je je A-diploma hebt, hoor je bij het grote orkest! Je krijgt een officieel uniform en speelt mee tijdens alle concerten en optochten.",
     icon: <Trophy className="w-5 h-5" />
   }
 ];
@@ -90,9 +90,13 @@ const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, ans
         {isOpen ? <ChevronUp className="w-5 h-5 text-sdg-gold" /> : <ChevronDown className="w-5 h-5 text-gray-300 group-hover:text-sdg-red" />}
       </button>
       <div 
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[1000px] opacity-100 mb-6' : 'max-h-0 opacity-0'}`}
       >
-        <p className="text-slate-500 font-light leading-relaxed pr-8">{answer}</p>
+        <div className="text-slate-500 font-light leading-relaxed pr-8 text-sm md:text-base space-y-4">
+          {answer.split('\n\n').map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -102,6 +106,9 @@ const Education: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'youth' | 'adult'>('youth');
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  
+  // SECTION ARCHIVE: Set to true to re-enable "Waar kom je terecht?" section
+  const SHOW_TEAMS_SECTION = false;
   
   const navigate = useNavigate();
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
@@ -128,7 +135,11 @@ const Education: React.FC = () => {
   }, []);
 
   const handleSignUp = () => {
-    navigate('/lid-worden');
+    if (activeTab === 'youth') {
+      navigate('/lid-worden?subject=proefles');
+    } else {
+      navigate('/lid-worden');
+    }
   };
 
   const toggleAudio = async (id: string, audioUrl: string | undefined, e: React.MouseEvent) => {
@@ -180,13 +191,12 @@ const Education: React.FC = () => {
         <div className="container mx-auto px-6 relative z-10 pt-32 pb-16 md:pt-20 md:pb-0">
           <div className="max-w-3xl animate-fade-in-up">
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight drop-shadow-lg">
-              Ontdek de muzikant <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sdg-gold to-amber-200">in jezelf.</span>
+              Begin jouw <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sdg-gold to-amber-200">muzikale reis.</span>
             </h1>
             
             <p className="text-lg md:text-2xl text-gray-100 mb-10 leading-relaxed font-light max-w-2xl">
-              Of je nu 8 bent of 80: muziek verbindt, daagt uit en geeft energie. 
-              Bij SDG Sint Jansklooster is er plek voor elk talent en elk niveau.
+              Of je nu op zoek bent naar muziekles voor je kind, of als volwassene (opnieuw) een instrument wilt oppakken. Wij helpen je op weg.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
@@ -210,33 +220,62 @@ const Education: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. TAB SELECTION (THE SEGMENTATION SWITCH) */}
-      <section className="relative z-20 -mt-12 px-6">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-white rounded-full p-2 shadow-xl border border-gray-100 flex relative">
-             <div 
-               className={`absolute top-2 bottom-2 w-[calc(50%-8px)] bg-slate-900 rounded-full transition-all duration-300 ease-out shadow-md ${
-                 activeTab === 'youth' ? 'left-2' : 'left-[calc(50%+4px)]'
-               }`}
-             ></div>
-             
-             <button 
-               onClick={() => setActiveTab('youth')}
-               className={`relative z-10 w-1/2 py-4 rounded-full text-center font-bold text-sm md:text-base uppercase tracking-wider transition-colors duration-300 flex items-center justify-center gap-2 ${
-                 activeTab === 'youth' ? 'text-white' : 'text-slate-500 hover:text-slate-900'
-               }`}
-             >
-               <Baby className="w-5 h-5" /> Voor de Jeugd
-             </button>
-             
-             <button 
-               onClick={() => setActiveTab('adult')}
-               className={`relative z-10 w-1/2 py-4 rounded-full text-center font-bold text-sm md:text-base uppercase tracking-wider transition-colors duration-300 flex items-center justify-center gap-2 ${
-                 activeTab === 'adult' ? 'text-white' : 'text-slate-500 hover:text-slate-900'
-               }`}
-             >
-               <User className="w-5 h-5" /> Voor Volwassenen
-             </button>
+      {/* 2. PATH SELECTION */}
+      <section className="relative z-20 -mt-8 md:-mt-16 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <div className="bg-white rounded-3xl p-6 md:p-10 shadow-2xl border border-gray-100">
+            <h2 className="text-center text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-8">Voor wie zoek je informatie?</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <button 
+                onClick={() => setActiveTab('youth')}
+                className={`relative overflow-hidden group rounded-2xl p-6 md:p-8 text-left transition-all duration-300 border-2 ${
+                  activeTab === 'youth' 
+                    ? 'border-sdg-red bg-red-50/50 shadow-md ring-4 ring-red-50' 
+                    : 'border-slate-100 bg-slate-50 hover:border-red-200 hover:bg-white hover:shadow-lg'
+                }`}
+              >
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-sdg-red/5 rounded-full blur-3xl transition-opacity duration-500 ${activeTab === 'youth' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}></div>
+                <div className="relative z-10 flex flex-col sm:flex-row items-start gap-5 tracking-tight">
+                  <div className={`p-4 rounded-2xl shrink-0 transition-colors duration-300 ${activeTab === 'youth' ? 'bg-sdg-red text-white shadow-lg shadow-red-200' : 'bg-white border border-slate-200 text-slate-500 group-hover:bg-red-50 group-hover:text-sdg-red group-hover:border-red-100'}`}>
+                    <Baby className="w-8 h-8 md:w-10 md:h-10" />
+                  </div>
+                  <div>
+                    <h3 className={`text-xl md:text-2xl font-bold mb-3 transition-colors ${activeTab === 'youth' ? 'text-sdg-red' : 'text-slate-900'}`}>Voor mijn kind</h3>
+                    <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
+                      Ontdek alles over de muziek- en slagwerklessen voor de jeugd, inclusief ons instrumentenplan.
+                    </p>
+                    <div className={`mt-5 inline-flex items-center gap-2 font-bold text-sm transition-all duration-300 ${activeTab === 'youth' ? 'text-sdg-red opacity-100 translate-y-0' : 'text-slate-400 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0'}`}>
+                      Bekijk Jeugdopleiding <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => setActiveTab('adult')}
+                className={`relative overflow-hidden group rounded-2xl p-6 md:p-8 text-left transition-all duration-300 border-2 ${
+                  activeTab === 'adult' 
+                    ? 'border-sdg-gold bg-amber-50/50 shadow-md ring-4 ring-amber-50' 
+                    : 'border-slate-100 bg-slate-50 hover:border-amber-200 hover:bg-white hover:shadow-lg'
+                }`}
+              >
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-sdg-gold/5 rounded-full blur-3xl transition-opacity duration-500 ${activeTab === 'adult' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}></div>
+                <div className="relative z-10 flex flex-col sm:flex-row items-start gap-5 tracking-tight">
+                  <div className={`p-4 rounded-2xl shrink-0 transition-colors duration-300 ${activeTab === 'adult' ? 'bg-gradient-to-br from-sdg-gold to-amber-500 text-white shadow-lg shadow-amber-200' : 'bg-white border border-slate-200 text-slate-500 group-hover:bg-amber-50 group-hover:text-sdg-gold group-hover:border-amber-100'}`}>
+                    <User className="w-8 h-8 md:w-10 md:h-10" />
+                  </div>
+                  <div>
+                    <h3 className={`text-xl md:text-2xl font-bold mb-3 transition-colors ${activeTab === 'adult' ? 'text-amber-600' : 'text-slate-900'}`}>Voor mezelf (volwassenen)</h3>
+                    <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
+                      Of je nu wilt beginnen of een herintreder bent, bekijk de mogelijkheden voor volwassenen.
+                    </p>
+                    <div className={`mt-5 inline-flex items-center gap-2 font-bold text-sm transition-all duration-300 ${activeTab === 'adult' ? 'text-amber-600 opacity-100 translate-y-0' : 'text-slate-400 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0'}`}>
+                      Bekijk Volwassenen <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -331,20 +370,20 @@ const Education: React.FC = () => {
                           
                           <div className="bg-slate-50 p-6 rounded-2xl border border-gray-100 mt-8">
                              <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                               <CheckCircle className="w-5 h-5 text-sdg-red" /> Waarom aansluiten?
+                               <CheckCircle className="w-5 h-5 text-sdg-red" /> Altijd welkom
                              </h4>
                              <ul className="space-y-3 text-base">
                                 <li className="flex items-start gap-3">
                                   <span className="w-1.5 h-1.5 bg-sdg-gold rounded-full mt-2 shrink-0"></span>
-                                  <span><strong>Instrument in bruikleen:</strong> Geen dure investering nodig.</span>
+                                  <span><strong>Instrument beschikbaar:</strong> De vereniging stelt instrumenten (zoals saxofoons of koper) kosteloos in bruikleen beschikbaar.</span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                   <span className="w-1.5 h-1.5 bg-sdg-gold rounded-full mt-2 shrink-0"></span>
-                                  <span><strong>Opfriscursussen:</strong> Via onze docenten kun je je niveau weer opkrikken.</span>
+                                  <span><strong>Lessen gesubsidieerd:</strong> Tot het B-diploma betaal je slechts € 20,- p.m. Daarna vervalt het lesgeld en betaal je alleen contributie (€ 15,- p.m.).</span>
                                 </li>
                                 <li className="flex items-start gap-3">
                                   <span className="w-1.5 h-1.5 bg-sdg-gold rounded-full mt-2 shrink-0"></span>
-                                  <span><strong>Geen verplichtingen:</strong> Kom eerst vrijblijvend sfeer proeven tijdens een repetitie.</span>
+                                  <span><strong>Direct instromen:</strong> Met een A-diploma of vergelijkbaar niveau kun je direct aansluiten bij het orkest en ontvang je een uniform.</span>
                                 </li>
                              </ul>
                           </div>
@@ -353,8 +392,8 @@ const Education: React.FC = () => {
                      <div className="relative h-full min-h-[400px]">
                         <div className="absolute top-0 right-0 w-3/4 h-3/4 bg-sdg-gold/10 rounded-[3rem] -z-10 translate-x-4 -translate-y-4"></div>
                         <img 
-                          src="https://images.unsplash.com/photo-1543788327-1b072049fa02?q=80&w=800&auto=format&fit=crop" 
-                          alt="Volwassenen orkest" 
+                          src="https://api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/SDG-s1-1.jpg" 
+                          alt="Muziek als passie bij SDG" 
                           className="rounded-2xl shadow-2xl w-full h-full object-cover"
                         />
                      </div>
@@ -366,53 +405,55 @@ const Education: React.FC = () => {
 
       </div>
 
-      {/* 4. SHARED: THE ENSEMBLES */}
-      <section id="teams" className="py-24 bg-slate-50 relative overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-4xl font-serif font-bold text-slate-900 mb-4">Waar kom je terecht?</h2>
-            <p className="text-slate-600 text-lg">
-              {activeTab === 'youth' ? 'Na je basisopleiding stroom je door naar een van onze groepen.' : 'Afhankelijk van je instrument en voorkeur sluit je aan bij:'}
-            </p>
-          </div>
-          <div className="grid lg:grid-cols-3 gap-8">
-            {TEAMS.map((team) => {
-              const isPlaying = playingAudio === team.id;
-              return (
-                <div key={team.id} className="group relative rounded-3xl overflow-hidden bg-white shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col h-full hover:-translate-y-2 border border-gray-100">
-                  <div className="h-60 overflow-hidden relative shrink-0">
-                     <img src={team.image} alt={team.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                     <div className={`absolute inset-0 bg-gradient-to-t ${team.color} opacity-60 mix-blend-multiply`}></div>
-                     <button onClick={(e) => toggleAudio(team.id, team.audioUrl, e)} className="absolute top-4 right-4 w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/40 hover:bg-white hover:text-sdg-red transition-all shadow-lg z-20">
-                       {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-1" />}
-                     </button>
-                     <div className="absolute bottom-4 left-4 right-4 text-white z-20">
-                        <div className={`inline-flex p-3 rounded-xl bg-white/90 backdrop-blur shadow-lg ${team.text} mb-3`}>{team.icon}</div>
-                        <h3 className="text-2xl font-bold font-serif">{team.title}</h3>
-                     </div>
-                  </div>
-                  <div className="p-8 flex flex-col flex-grow">
-                    <p className="text-slate-700 mb-6 leading-relaxed">{team.description}</p>
-                    <div className={`p-5 rounded-2xl ${team.bg} mb-6`}>
-                      <p className={`font-bold text-sm uppercase mb-3 ${team.text}`}>Instrumenten:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {team.instruments.map(inst => (
-                          <span key={inst} className="px-3 py-1 bg-white rounded-lg text-sm font-medium text-slate-700 shadow-sm border border-slate-100">{inst}</span>
-                        ))}
+      {/* 4. SHARED: THE ENSEMBLES - ARCHIVED: Set SHOW_TEAMS_SECTION to true to re-enable */}
+      {SHOW_TEAMS_SECTION && (
+        <section id="teams" className="py-24 bg-slate-50 relative overflow-hidden">
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="text-center mb-16 max-w-3xl mx-auto">
+              <h2 className="text-4xl font-serif font-bold text-slate-900 mb-4">Waar kom je terecht?</h2>
+              <p className="text-slate-600 text-lg">
+                {activeTab === 'youth' ? 'Na je basisopleiding stroom je door naar een van onze groepen.' : 'Afhankelijk van je instrument en voorkeur sluit je aan bij:'}
+              </p>
+            </div>
+            <div className="grid lg:grid-cols-3 gap-8">
+              {TEAMS.map((team) => {
+                const isPlaying = playingAudio === team.id;
+                return (
+                  <div key={team.id} className="group relative rounded-3xl overflow-hidden bg-white shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col h-full hover:-translate-y-2 border border-gray-100">
+                    <div className="h-60 overflow-hidden relative shrink-0">
+                       <img src={team.image} alt={team.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                       <div className={`absolute inset-0 bg-gradient-to-t ${team.color} opacity-60 mix-blend-multiply`}></div>
+                       <button onClick={(e) => toggleAudio(team.id, team.audioUrl, e)} className="absolute top-4 right-4 w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/40 hover:bg-white hover:text-sdg-red transition-all shadow-lg z-20">
+                         {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-1" />}
+                       </button>
+                       <div className="absolute bottom-4 left-4 right-4 text-white z-20">
+                          <div className={`inline-flex p-3 rounded-xl bg-white/90 backdrop-blur shadow-lg ${team.text} mb-3`}>{team.icon}</div>
+                          <h3 className="text-2xl font-bold font-serif">{team.title}</h3>
+                       </div>
+                    </div>
+                    <div className="p-8 flex flex-col flex-grow">
+                      <p className="text-slate-700 mb-6 leading-relaxed">{team.description}</p>
+                      <div className={`p-5 rounded-2xl ${team.bg} mb-6`}>
+                        <p className={`font-bold text-sm uppercase mb-3 ${team.text}`}>Instrumenten:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {team.instruments.map(inst => (
+                            <span key={inst} className="px-3 py-1 bg-white rounded-lg text-sm font-medium text-slate-700 shadow-sm border border-slate-100">{inst}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mt-auto">
+                        <button onClick={handleSignUp} className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-md bg-white border-2 border-slate-100 text-slate-600 hover:border-sdg-red hover:text-sdg-red">
+                          Kies deze groep
+                        </button>
                       </div>
                     </div>
-                    <div className="mt-auto">
-                      <button onClick={handleSignUp} className="w-full py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-md bg-white border-2 border-slate-100 text-slate-600 hover:border-sdg-red hover:text-sdg-red">
-                        Kies deze groep
-                      </button>
-                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 5. FAQ */}
       <section className="py-20 bg-white border-t border-gray-100">
@@ -420,10 +461,24 @@ const Education: React.FC = () => {
            <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
               <HelpCircle className="w-6 h-6 text-sdg-gold" /> Veelgestelde vragen
            </h3>
-           <div className="bg-slate-50 rounded-3xl p-8 md:p-10 border border-gray-100">
+           <div className="bg-slate-50 rounded-3xl p-6 md:p-10 border border-gray-100">
               <FAQItem 
-                question="Wat kost het lidmaatschap?" 
-                answer="De contributie is afhankelijk van leeftijd en lesvorm. We hanteren zeer schappelijke tarieven omdat we muziek toegankelijk willen houden. Neem contact op voor een actueel overzicht." 
+                question="Hoe werkt het opleidingstraject en wat zijn de kosten?" 
+                answer="Afhankelijk van het talent en de capaciteiten duurt het ongeveer 1½ tot 2 jaar voordat er aan een examen kan worden meegedaan. Wij stimuleren en subsidiëren de lessen tot en met het A- en B-diploma.
+
+Voor het volgen van de lessen betaal je slechts € 20,00 per maand (€ 240,- per jaar). Het instrument (zoals een alt-saxofoon) wordt door de vereniging in bruikleen beschikbaar gesteld." 
+              />
+              <FAQItem 
+                question="Wat gebeurt er na het behalen van een diploma?" 
+                answer="Wanneer het A-diploma is gehaald, mag je meespelen met het grote orkest en krijg je een officieel uniform.
+
+Zodra ook het B-diploma is behaald, ga je contributie betalen (€ 15,00 per maand) en komt het lesgeld van € 20,00 te vervallen. Je kunt daarna nog verder lessen voor het C- en D-diploma, maar dan komen de volledige leskosten voor eigen rekening. Het verdient aanbeveling om in ieder geval tot en met het B-diploma door te gaan om goed mee te kunnen komen met het grote orkest." 
+              />
+              <FAQItem 
+                question="Hoe zit het met de betaling en tussentijds stoppen?" 
+                answer="Het lesgeld kan maandelijks (bij voorkeur automatisch) worden overgemaakt.
+
+Omdat wij de lesgelden een jaar van tevoren voor het hele seizoen moeten afdragen aan Blink Kunstcollectief, wordt bij tussentijds stoppen van je gevraagd om het lesgeld te blijven betalen tot aan het eind van het seizoen." 
               />
               <FAQItem 
                 question="Wanneer zijn de repetities?" 
@@ -432,10 +487,6 @@ const Education: React.FC = () => {
               <FAQItem 
                 question="Moet ik auditie doen?" 
                 answer="Nee! Bij ons staat plezier voorop. We kijken samen welk niveau je hebt en hoe je het beste kunt instromen." 
-              />
-              <FAQItem 
-                question="Moet ik zelf een instrument kopen?" 
-                answer="Nee, in de meeste gevallen krijg je een instrument van de vereniging in bruikleen zolang je lid bent en/of lessen volgt." 
               />
            </div>
         </div>

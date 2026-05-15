@@ -62,6 +62,14 @@ const PageDetail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
   const SLUG_MAPPING: Record<string, string> = {
     'jeugd': 'jeugd-2',
     'over-ons': 'identiteit',
@@ -168,7 +176,7 @@ const PageDetail: React.FC = () => {
         <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden max-w-5xl mx-auto">
           <div className="bg-white border-b border-gray-100 p-6 md:p-8 flex justify-between items-center sticky top-0 z-10 bg-opacity-95 backdrop-blur-sm">
             <button 
-              onClick={() => navigate('/')} 
+              onClick={handleBack} 
               className="group flex items-center text-slate-500 hover:text-sdg-red transition-colors text-sm font-bold uppercase tracking-wider"
             >
               <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mr-3 group-hover:bg-sdg-red/10 transition-colors">

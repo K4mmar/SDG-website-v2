@@ -1,11 +1,14 @@
 
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Send, CheckCircle, ChevronDown, Mail, Phone, MapPin } from 'lucide-react';
 import SponsorGrid from '../components/SponsorGrid';
 
 const FORM_ENDPOINT = "https://formspree.io/f/xjknjogr";
 
 const JoinUs: React.FC = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,11 +53,11 @@ const JoinUs: React.FC = () => {
                 <ul className="space-y-4 text-sm text-slate-600">
                   <li className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-sdg-red shrink-0" />
-                    <span>Dorpshuis Sint Jansklooster<br/>Monnikenweg 24</span>
+                    <span>Stichting Dorpshuis Sint Janskamp<br/>Monnikenweg 38<br/>8326 BZ Sint Jansklooster</span>
                   </li>
                   <li className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-sdg-red shrink-0" />
-                    <a href="mailto:info@sdg-sintjansklooster.nl" className="hover:text-sdg-gold transition-colors">info@sdg-sintjansklooster.nl</a>
+                    <a href="mailto:secretariaat@sdgsintjansklooster.nl" className="hover:text-sdg-gold transition-colors">secretariaat@sdgsintjansklooster.nl</a>
                   </li>
                 </ul>
               </div>
@@ -95,10 +98,11 @@ const JoinUs: React.FC = () => {
                       <div className="relative">
                         <select 
                           name="onderwerp" 
+                          defaultValue={searchParams.get('subject') === 'proefles' ? 'Ik wil een proefles aanvragen' : 'Ik wil lid worden / sfeer proeven'}
                           className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:bg-white focus:ring-2 focus:ring-sdg-gold/20 outline-none appearance-none transition-all"
                         >
                           <option>Ik wil lid worden / sfeer proeven</option>
-                          <option>Ik wil een proefles aanvragen (Jeugd)</option>
+                          <option>Ik wil een proefles aanvragen</option>
                           <option>Ik wil vrijwilliger worden</option>
                           <option>Ik heb een algemene vraag</option>
                           <option>Ik wil Vriend / Donateur worden</option>

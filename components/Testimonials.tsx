@@ -103,7 +103,7 @@ const Testimonials: React.FC = () => {
               Stel je vraag
             </button>
             <button 
-              onClick={() => navigate('/jeugd')}
+              onClick={() => navigate('/lid-worden?subject=proefles')}
               className="border border-white/30 text-white px-8 py-4 rounded-full font-bold uppercase tracking-wider text-sm hover:bg-white/10 transition-all"
             >
               Proefles aanvragen

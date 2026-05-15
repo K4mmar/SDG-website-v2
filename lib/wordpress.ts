@@ -96,47 +96,59 @@ const processExcerpt = (html: string): string | undefined => {
   return plainText;
 };
 
+let cachedNews: Post[] | null = null;
+let cachedNewsPromise: Promise<Post[]> | null = null;
+
 export async function getNewsPosts(): Promise<Post[]> {
-  const query = `
-    query GetRecentNews {
-      posts(first: 20, where: { orderby: { field: DATE, order: DESC } }) {
-        nodes {
-          id
-          title
-          slug
-          date
-          excerpt(format: RENDERED)
-          featuredImage {
-            node {
-              sourceUrl
+  if (cachedNews) return cachedNews;
+  if (cachedNewsPromise) return cachedNewsPromise;
+
+  cachedNewsPromise = (async () => {
+    const query = `
+      query GetRecentNews {
+        posts(first: 20, where: { orderby: { field: DATE, order: DESC } }) {
+          nodes {
+            id
+            title
+            slug
+            date
+            excerpt(format: RENDERED)
+            featuredImage {
+              node {
+                sourceUrl
+              }
             }
           }
         }
       }
+    `;
+    try {
+      const result = await fetchFromWP('', true, query);
+      const nodes = result?.data?.posts?.nodes || [];
+      cachedNews = nodes.map((post: any) => ({
+        ...post,
+        excerpt: fixContentUrls(post.excerpt),
+        featuredImage: post.featuredImage ? { node: { sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || '' } } : undefined
+      }));
+      return cachedNews!;
+    } catch (e) {
+      const restUrl = `${BASE_DOMAIN}/wp-json/wp/v2/posts?_embed&per_page=20`;
+      const posts = await fetchFromWP(restUrl);
+      cachedNews = posts.map((p: any) => ({
+        id: p.id.toString(),
+        title: p.title.rendered,
+        slug: p.slug,
+        date: p.date,
+        excerpt: p.excerpt.rendered,
+        featuredImage: p._embedded?.['wp:featuredmedia']?.[0]?.source_url 
+          ? { node: { sourceUrl: proxyImage(p._embedded['wp:featuredmedia'][0].source_url) } }
+          : undefined
+      }));
+      return cachedNews!;
     }
-  `;
-  try {
-    const result = await fetchFromWP('', true, query);
-    const nodes = result?.data?.posts?.nodes || [];
-    return nodes.map((post: any) => ({
-      ...post,
-      excerpt: fixContentUrls(post.excerpt),
-      featuredImage: post.featuredImage ? { node: { sourceUrl: proxyImage(post.featuredImage.node.sourceUrl) || '' } } : undefined
-    }));
-  } catch (e) {
-    const restUrl = `${BASE_DOMAIN}/wp-json/wp/v2/posts?_embed&per_page=20`;
-    const posts = await fetchFromWP(restUrl);
-    return posts.map((p: any) => ({
-      id: p.id.toString(),
-      title: p.title.rendered,
-      slug: p.slug,
-      date: p.date,
-      excerpt: p.excerpt.rendered,
-      featuredImage: p._embedded?.['wp:featuredmedia']?.[0]?.source_url 
-        ? { node: { sourceUrl: proxyImage(p._embedded['wp:featuredmedia'][0].source_url) } }
-        : undefined
-    }));
-  }
+  })();
+  
+  return cachedNewsPromise;
 }
 
 export async function getAllPosts(): Promise<Post[]> {

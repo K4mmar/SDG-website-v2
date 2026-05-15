@@ -42,80 +42,92 @@ export interface CalendarEvent {
   isRecurring?: boolean;
 }
 
+let cachedEvents: CalendarEvent[] | null = null;
+let cachedEventsPromise: Promise<CalendarEvent[]> | null = null;
+
 export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
-  try {
-    const icsData = await fetchCalendarData();
-    const jcalData = ICAL.parse(icsData);
-    const comp = new ICAL.Component(jcalData);
-    const vevents = comp.getAllSubcomponents('vevent');
-    
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const futureLimit = new Date();
-    futureLimit.setFullYear(now.getFullYear() + 1);
+  if (cachedEvents) return cachedEvents;
+  if (cachedEventsPromise) return cachedEventsPromise;
 
-    const events: CalendarEvent[] = [];
+  cachedEventsPromise = (async () => {
+    try {
+      const icsData = await fetchCalendarData();
+      const jcalData = ICAL.parse(icsData);
+      const comp = new ICAL.Component(jcalData);
+      const vevents = comp.getAllSubcomponents('vevent');
+      
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const futureLimit = new Date();
+      futureLimit.setFullYear(now.getFullYear() + 1);
 
-    vevents.forEach((vevent) => {
-      const event = new ICAL.Event(vevent);
-      if (!event.startDate) return;
+      const events: CalendarEvent[] = [];
 
-      const summary = event.summary;
-      const description = event.description;
-      const location = event.location;
-      const allDay = event.startDate.isDate;
+      vevents.forEach((vevent) => {
+        const event = new ICAL.Event(vevent);
+        if (!event.startDate) return;
 
-      if (event.isRecurring()) {
-        const iterator = event.iterator();
-        let next;
-        let count = 0;
-        while ((next = iterator.next()) && count < 30) {
-          count++;
-          const start = next.toJSDate();
-          if (start > futureLimit) break;
-          
-          let end = start;
-          if (event.duration) {
-            end = new Date(start.getTime() + (event.duration.toSeconds() * 1000));
-          } else if (event.endDate) {
-            const duration = event.endDate.toJSDate().getTime() - event.startDate.toJSDate().getTime();
-            end = new Date(start.getTime() + duration);
+        const summary = event.summary;
+        const description = event.description;
+        const location = event.location;
+        const allDay = event.startDate.isDate;
+
+        if (event.isRecurring()) {
+          const iterator = event.iterator();
+          let next;
+          let count = 0;
+          while ((next = iterator.next()) && count < 30) {
+            count++;
+            const start = next.toJSDate();
+            if (start > futureLimit) break;
+            
+            let end = start;
+            if (event.duration) {
+              end = new Date(start.getTime() + (event.duration.toSeconds() * 1000));
+            } else if (event.endDate) {
+              const duration = event.endDate.toJSDate().getTime() - event.startDate.toJSDate().getTime();
+              end = new Date(start.getTime() + duration);
+            }
+
+            if (end >= now) {
+              events.push({
+                uid: `${event.uid}-${start.toISOString()}`,
+                title: summary,
+                description,
+                location,
+                start,
+                end,
+                allDay,
+                isRecurring: true
+              });
+            }
           }
-
-          if (end >= now) {
+        } else {
+          const start = event.startDate.toJSDate();
+          const end = event.endDate ? event.endDate.toJSDate() : start;
+          if (end >= now && start <= futureLimit) {
             events.push({
-              uid: `${event.uid}-${start.toISOString()}`,
+              uid: event.uid,
               title: summary,
               description,
               location,
               start,
               end,
               allDay,
-              isRecurring: true
+              isRecurring: false
             });
           }
         }
-      } else {
-        const start = event.startDate.toJSDate();
-        const end = event.endDate ? event.endDate.toJSDate() : start;
-        if (end >= now && start <= futureLimit) {
-          events.push({
-            uid: event.uid,
-            title: summary,
-            description,
-            location,
-            start,
-            end,
-            allDay,
-            isRecurring: false
-          });
-        }
-      }
-    });
+      });
 
-    return events.sort((a, b) => a.start.getTime() - b.start.getTime()).slice(0, 10);
-  } catch (error) {
-    console.error("SDG-Agenda Kritieke Fout:", error);
-    return [];
-  }
+      cachedEvents = events.sort((a, b) => a.start.getTime() - b.start.getTime()).slice(0, 10);
+      return cachedEvents;
+    } catch (error) {
+      console.error("SDG-Agenda Kritieke Fout:", error);
+      cachedEvents = [];
+      return cachedEvents;
+    }
+  })();
+  
+  return cachedEventsPromise;
 }
