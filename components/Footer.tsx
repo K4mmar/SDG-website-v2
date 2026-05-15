@@ -28,6 +28,8 @@ const Footer: React.FC = () => {
             <h4 className="font-bold text-lg mb-4 text-white">Vereniging</h4>
             <ul className="space-y-2 text-slate-400 text-sm">
               <li><Link to="/over-ons" className="hover:text-sdg-gold transition-colors">Over ons</Link></li>
+              <li><Link to="/organisatie" className="hover:text-sdg-gold transition-colors">Organisatie</Link></li>
+              <li><Link to="/over-ons#geschiedenis" className="hover:text-sdg-gold transition-colors">Geschiedenis</Link></li>
               <li><Link to="/lid-worden" className="hover:text-sdg-gold transition-colors">Lid worden</Link></li>
               <li><Link to="/nieuws" className="hover:text-sdg-gold transition-colors">Nieuws</Link></li>
               <li><Link to="/steun-ons" className="hover:text-sdg-gold transition-colors">Sponsors</Link></li>

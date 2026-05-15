@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Music, Heart, BookOpen, Users, Star, 
   Clock, Award, Calendar, ChevronDown, ArrowRight 
@@ -118,6 +118,19 @@ const ScrollFadeIn: React.FC<{ children: React.ReactNode; delay?: number }> = ({
 
 const About: React.FC = () => {
   const navigate = useNavigate();
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const id = hash.replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [hash]);
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-900">
@@ -301,7 +314,7 @@ const About: React.FC = () => {
       </section>
 
       {/* 4. HISTORY (TIMELINE) - PROFESSIONALIZED */}
-      <section className="py-24 bg-white overflow-hidden">
+      <section id="geschiedenis" className="py-24 bg-white overflow-hidden">
         <div className="container mx-auto px-6 max-w-5xl">
            <div className="text-center mb-24">
               <span className="text-sdg-red font-bold uppercase tracking-widest text-sm mb-2 block">Tijdlijn</span>

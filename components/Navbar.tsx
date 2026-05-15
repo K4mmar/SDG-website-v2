@@ -8,8 +8,10 @@ const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [groepenDropdownOpen, setGroepenDropdownOpen] = useState(false);
   const [communityDropdownOpen, setCommunityDropdownOpen] = useState(false);
+  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [mobileGroepenOpen, setMobileGroepenOpen] = useState(false);
   const [mobileCommunityOpen, setMobileCommunityOpen] = useState(false);
+  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,6 +31,7 @@ const Navbar: React.FC = () => {
     setIsOpen(false);
     setGroepenDropdownOpen(false);
     setCommunityDropdownOpen(false);
+    setAboutDropdownOpen(false);
   }, [location]);
 
   const isHeroPage = location.pathname === '/' || location.pathname.startsWith('/nieuws/');
@@ -185,14 +188,52 @@ const Navbar: React.FC = () => {
                </div>
             </div>
 
-            <Link
-                to="/over-ons"
-                className={`text-sm font-bold uppercase tracking-wider hover:text-sdg-gold transition-colors ${
-                  showSolidNavbar ? 'text-slate-800' : 'text-white/95'
-                }`}
+            {/* Over SDG Dropdown */}
+            <div 
+              className="relative group h-full flex items-center"
+              onMouseEnter={() => setAboutDropdownOpen(true)}
+              onMouseLeave={() => setAboutDropdownOpen(false)}
             >
-                Over SDG
-            </Link>
+               <button
+                 aria-expanded={aboutDropdownOpen}
+                 aria-haspopup="true"
+                 className={`flex items-center text-sm font-bold uppercase tracking-wider hover:text-sdg-gold transition-colors bg-transparent border-none cursor-pointer ${
+                   showSolidNavbar ? 'text-slate-800' : 'text-white/95'
+                 }`}
+               >
+                 Over SDG
+                 <ChevronDown className="ml-1 w-4 h-4" />
+               </button>
+               
+               <div 
+                className={`absolute left-0 top-full pt-4 w-48 transition-all duration-200 origin-top-left ${aboutDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                role="menu"
+               >
+                 <div className="bg-white rounded-2xl shadow-xl py-3 border border-gray-100 overflow-hidden flex flex-col">
+                    <Link
+                      to="/over-ons"
+                      role="menuitem"
+                      className="block w-full text-left px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sdg-red transition-colors"
+                    >
+                      Over de vereniging
+                    </Link>
+                    <Link
+                      to="/organisatie"
+                      role="menuitem"
+                      className="block w-full text-left px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sdg-red transition-colors"
+                    >
+                      Organisatie
+                    </Link>
+                    <Link
+                      to="/over-ons#geschiedenis"
+                      role="menuitem"
+                      className="block w-full text-left px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-sdg-red transition-colors"
+                    >
+                      Geschiedenis
+                    </Link>
+                 </div>
+               </div>
+            </div>
 
             <Link
               to="/lid-worden"
@@ -280,12 +321,39 @@ const Navbar: React.FC = () => {
               )}
             </div>
 
-            <Link
-                to="/over-ons"
-                className="text-lg font-bold text-slate-800 hover:text-sdg-red border-b border-gray-100 py-3 text-left block"
-            >
+            {/* Mobile About */}
+            <div className="border-b border-gray-100 py-3">
+              <button 
+                onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
+                className="flex w-full justify-between items-center text-lg font-bold text-slate-800 hover:text-sdg-red text-left"
+              >
                 Over SDG
-            </Link>
+                <ChevronDown className={`w-5 h-5 transition-transform ${mobileAboutOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {mobileAboutOpen && (
+                <div className="pl-4 mt-2 space-y-2 border-l-2 border-sdg-gold/30 ml-1 py-1 flex flex-col">
+                  <Link
+                    to="/over-ons"
+                    className="block w-full text-left text-base font-medium text-slate-600 hover:text-sdg-red py-1"
+                  >
+                    Over de vereniging
+                  </Link>
+                  <Link
+                    to="/organisatie"
+                    className="block w-full text-left text-base font-medium text-slate-600 hover:text-sdg-red py-1"
+                  >
+                    Organisatie
+                  </Link>
+                  <Link
+                    to="/over-ons#geschiedenis"
+                    className="block w-full text-left text-base font-medium text-slate-600 hover:text-sdg-red py-1"
+                  >
+                    Geschiedenis
+                  </Link>
+                </div>
+              )}
+            </div>
+
             <Link
               to="/lid-worden"
               className="bg-gradient-to-r from-sdg-gold to-amber-500 text-white text-center py-4 rounded-xl font-bold uppercase tracking-widest mt-8 shadow-lg shadow-sdg-gold/20 block"
