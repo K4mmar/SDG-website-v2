@@ -113,7 +113,7 @@ const PostDetail: React.FC = () => {
                 </div>
                 {backLabel}
                 </button>
-                <div className="hidden sm:block">
+                <div>
                     <ShareButton title={post.title} />
                 </div>
             </div>
