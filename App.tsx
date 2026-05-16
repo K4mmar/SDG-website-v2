@@ -11,6 +11,17 @@ import About from './pages/About';
 import PostDetail from './pages/PostDetail';
 import PageDetail from './pages/PageDetail';
 import NewsArchive from './pages/NewsArchive';
+import { initGA, usePageTracking } from './hooks/usePageTracking';
+import CookieConsentBanner from './components/CookieConsentBanner';
+
+// Initialiseer Google Analytics
+// Dit wordt nu afgehandeld en beveiligd in usePageTracking
+initGA();
+
+const PageTracker = () => {
+  usePageTracking();
+  return null;
+};
 
 const ScrollManager = () => {
   const location = useLocation();
@@ -45,8 +56,10 @@ const App: React.FC = () => {
   return (
     <HelmetProvider>
       <Router>
+        <PageTracker />
         <ScrollManager />
         <div className="flex flex-col min-h-screen bg-white text-slate-900">
+          <CookieConsentBanner />
           <Navbar />
           <main className="flex-grow">
             <Routes>

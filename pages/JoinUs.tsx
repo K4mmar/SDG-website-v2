@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Send, CheckCircle, ChevronDown, Mail, Phone, MapPin } from 'lucide-react';
 import SponsorGrid from '../components/SponsorGrid';
+import { trackEvent } from '../hooks/usePageTracking';
 
 const FORM_ENDPOINT = "https://formspree.io/f/xjknjogr";
 
@@ -24,7 +25,12 @@ const JoinUs: React.FC = () => {
         headers: { "Content-Type": "application/json", "Accept": "application/json" },
         body: JSON.stringify(data),
       });
-      if (response.ok) { setFormStatus('success'); myForm.reset(); } 
+      if (response.ok) { 
+        setFormStatus('success'); 
+        myForm.reset(); 
+        // Track the conversion event when form sends successfully
+        trackEvent('Lead', 'generate_lead', data.onderwerp as string);
+      } 
       else { setFormStatus('idle'); alert("Er ging iets mis. Probeer het later nog eens."); }
     } catch (error) { setFormStatus('idle'); alert("Er ging iets mis."); }
   };
