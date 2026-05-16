@@ -116,7 +116,7 @@ const NewsArchive: React.FC = () => {
                  return (
                    <div 
                      key={post.id} 
-                     onClick={() => navigate(`/nieuws/${post.slug}`, { state: { origin: 'archive' } })}
+                     onClick={() => navigate(`/nieuws/${post.slug}`, { state: { origin: 'archive', canGoBack: true } })}
                      className="group p-6 hover:bg-slate-50 cursor-pointer transition-colors flex flex-col md:flex-row gap-4 items-start md:items-center"
                    >
                       <div className="flex items-center gap-2 text-slate-400 text-sm font-medium min-w-[140px] shrink-0">

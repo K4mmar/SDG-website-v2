@@ -17,11 +17,12 @@ const PostDetail: React.FC = () => {
 
   // Determine back button destination and label
   const origin = location.state?.origin;
+  const canGoBack = location.state?.canGoBack;
   const fallbackDestination = origin === 'archive' ? '/nieuws' : '/';
   const backLabel = origin === 'archive' ? 'Terug naar archief' : 'Terug naar home';
 
   const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
+    if (canGoBack || (window.history.state && window.history.state.idx > 0)) {
       navigate(-1);
     } else {
       navigate(fallbackDestination);
