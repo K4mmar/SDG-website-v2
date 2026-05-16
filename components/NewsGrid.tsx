@@ -56,7 +56,7 @@ const NewsGrid: React.FC = () => {
              </button>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 snap-x snap-mandatory md:snap-none pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] after:content-[''] after:w-[1px] after:flex-shrink-0 md:after:hidden">
             {posts.map((post) => {
                const dateObj = new Date(post.date);
                const day = dateObj.getDate();
@@ -67,9 +67,9 @@ const NewsGrid: React.FC = () => {
                 <article 
                   key={post.id} 
                   onClick={() => navigate(`/nieuws/${post.slug}`)} 
-                  className="group block h-full cursor-pointer"
+                  className="group block h-full cursor-pointer w-[85vw] sm:w-[60vw] md:w-auto flex-shrink-0 snap-center sm:snap-start md:snap-align-none"
                 >
-                  <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col transform hover:-translate-y-1">
+                  <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col transform md:hover:-translate-y-1">
                     <div className="relative h-56 overflow-hidden bg-gray-100">
                       {imageUrl ? (
                         <img 
