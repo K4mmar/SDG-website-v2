@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getNewsPosts, Post } from '../lib/wordpress';
 import { ArrowRight, Newspaper, RefreshCw, AlertCircle, MoveRight } from 'lucide-react';
 import { motion, useScroll, useSpring } from 'framer-motion';
+import WpContent from './WpContent';
 
 const NewsGrid: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -173,9 +174,9 @@ const NewsScroller: React.FC<{ posts: Post[], navigate: any }> = ({ posts, navig
                     <h3 className="text-xl font-serif font-bold text-slate-900 group-hover:text-sdg-red transition-colors line-clamp-2 mb-3 leading-snug">
                       {post.title}
                     </h3>
-                    <div 
-                      className="text-slate-600 text-sm mb-6 line-clamp-3 font-light leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: post.excerpt }} 
+                    <WpContent 
+                      html={post.excerpt}
+                      className="text-slate-600 text-sm mb-6 line-clamp-3 font-light leading-relaxed prose-sm"
                     />
                     <div className="mt-auto flex items-center gap-2 text-sdg-red text-xs font-bold uppercase tracking-widest group-hover:gap-3 transition-all">
                       Lees meer <ArrowRight className="w-4 h-4" />

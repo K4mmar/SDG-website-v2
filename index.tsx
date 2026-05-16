@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import App from './App';
 
 console.log("SDG App: Initialiseren van index.tsx...");
@@ -13,13 +13,21 @@ const startApp = () => {
   }
 
   try {
-    const root = createRoot(rootElement);
-    root.render(
+    const appContent = (
       <React.StrictMode>
         <App />
       </React.StrictMode>
     );
-    console.log("SDG App: React render succesvol aangeroepen.");
+
+    // Als react-snap de HTML al heeft gegenereerd, hydrateren we in plaats van renderen.
+    if (rootElement.hasChildNodes()) {
+      hydrateRoot(rootElement, appContent);
+      console.log("SDG App: React hydrateRoot succesvol aangeroepen (prerendered).");
+    } else {
+      const root = createRoot(rootElement);
+      root.render(appContent);
+      console.log("SDG App: React render succesvol aangeroepen.");
+    }
   } catch (error) {
     console.error("SDG App: Kritieke fout tijdens de eerste render:", error);
     

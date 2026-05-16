@@ -5,6 +5,7 @@ import { getPageBySlug, Page } from '../lib/wordpress';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import SponsorGrid from '../components/SponsorGrid';
 import ShareButton from '../components/ShareButton';
+import WpContent from '../components/WpContent';
 
 const STATIC_CONTENT: Record<string, { title: string; content: string; image?: string }> = {
   'identiteit': {
@@ -192,9 +193,9 @@ const PageDetail: React.FC = () => {
 
           <div className="p-8 md:p-16">
             <div className="max-w-3xl mx-auto">
-               <div 
+               <WpContent 
+                  html={page.content}
                   className="prose prose-lg prose-slate hover:prose-a:text-sdg-red prose-img:rounded-2xl prose-img:shadow-lg max-w-none"
-                  dangerouslySetInnerHTML={{ __html: page.content }} 
                />
                
                {(slug === 'boek-ons' || page.slug === 'boek-ons') && (
