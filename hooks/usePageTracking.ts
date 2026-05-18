@@ -9,11 +9,15 @@ let isInitialized = false;
 export const initGA = () => {
   // Controleer of de gebruiker akkoord is gegaan met cookies (door react-cookie-consent)
   const consent = Cookies.get('CookieConsent');
-  if (consent === 'true' && MEASUREMENT_ID && !isInitialized) {
-    ReactGA.initialize(MEASUREMENT_ID);
-    isInitialized = true;
-    // Pst: registreer meteen een eerste hit als dit vanuit de banner gebeurt
-    ReactGA.send({ hitType: 'pageview', page: window.location.pathname + window.location.search });
+  if (consent === 'true' && !isInitialized) {
+    if (MEASUREMENT_ID) {
+      ReactGA.initialize(MEASUREMENT_ID);
+      isInitialized = true;
+      // Pst: registreer meteen een eerste hit als dit vanuit de banner gebeurt
+      ReactGA.send({ hitType: 'pageview', page: window.location.pathname + window.location.search });
+    } else {
+      console.warn("GA4 Measurement ID ontbreekt in de omgeving.");
+    }
   }
 };
 

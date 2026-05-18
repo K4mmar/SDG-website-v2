@@ -74,6 +74,7 @@ const Home: React.FC = () => {
                      key={img}
                      src={img} 
                      alt={`Historie SDG ${index + 1}`} 
+                     crossOrigin="anonymous"
                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[2000ms] ease-in-out ${
                        index === currentImageIndex ? 'opacity-100 scale-105' : 'opacity-0 scale-100'
                      }`}
