@@ -2,6 +2,8 @@ import React from 'react';
 import CookieConsent from 'react-cookie-consent';
 import { initGA } from '../hooks/usePageTracking';
 
+// De CookieConsentBanner wordt altijd getoond zodra de pagina is ingeladen,
+// ongeacht of de GA measurement ID.
 const CookieConsentBanner: React.FC = () => {
   return (
     <CookieConsent

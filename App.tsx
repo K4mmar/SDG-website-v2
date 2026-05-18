@@ -59,6 +59,7 @@ const App: React.FC = () => {
         <PageTracker />
         <ScrollManager />
         <div className="flex flex-col min-h-screen bg-white text-slate-900">
+          {/* De Cookie banner wordt altijd gerenderd. Logica zit intern. */}
           <CookieConsentBanner />
           <Navbar />
           <main className="flex-grow">

@@ -8,6 +8,7 @@ let isInitialized = false;
 
 export const initGA = () => {
   // Controleer of de gebruiker akkoord is gegaan met cookies (door react-cookie-consent)
+  // en voorkom dat we meerdere keren initialiseren.
   const consent = Cookies.get('CookieConsent');
   if (consent === 'true' && !isInitialized) {
     if (MEASUREMENT_ID) {
