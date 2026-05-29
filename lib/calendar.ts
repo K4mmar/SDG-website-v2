@@ -46,6 +46,12 @@ async function fetchCalendarData(): Promise<string> {
   }
 }
 
+export interface CalendarAttachment {
+  url: string;
+  filename?: string;
+  type?: string;
+}
+
 export interface CalendarEvent {
   uid: string;
   title: string;
@@ -55,6 +61,7 @@ export interface CalendarEvent {
   end: Date;
   allDay: boolean;
   isRecurring?: boolean;
+  attachments?: CalendarAttachment[];
 }
 
 let cachedEvents: CalendarEvent[] | null = null;
@@ -87,6 +94,17 @@ export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
         const location = event.location;
         const allDay = event.startDate.isDate;
 
+        const attachProps = vevent.getAllProperties('attach');
+        const attachments: CalendarAttachment[] = attachProps.map((prop: any) => {
+          const url = prop.getFirstValue();
+          if (!url || typeof url !== 'string') return null;
+          return {
+            url,
+            filename: prop.getParameter('filename') || 'Bijlage',
+            type: prop.getParameter('fmttype') || 'unknown'
+          };
+        }).filter(Boolean);
+
         if (event.isRecurring()) {
           const iterator = event.iterator();
           let next;
@@ -113,7 +131,8 @@ export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
                 start,
                 end,
                 allDay,
-                isRecurring: true
+                isRecurring: true,
+                attachments
               });
             }
           }
@@ -129,7 +148,8 @@ export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
               start,
               end,
               allDay,
-              isRecurring: false
+              isRecurring: false,
+              attachments
             });
           }
         }

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { getUpcomingEvents, CalendarEvent } from '../lib/calendar';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { MapPin, Clock, CalendarDays, ExternalLink, Calendar, Loader2, ChevronDown, ChevronUp, AlignLeft, CalendarPlus, Share2 } from 'lucide-react';
+import { MapPin, Clock, CalendarDays, ExternalLink, Calendar, Loader2, ChevronDown, ChevronUp, AlignLeft, CalendarPlus, Share2, Paperclip, FileText } from 'lucide-react';
 import ShareButton from './ShareButton';
 
 // Hulpfunctie om tekst met URL's om te zetten naar React nodes met aanklikbare links
@@ -36,9 +36,86 @@ const renderDescriptionWithLinks = (text: string) => {
   });
 };
 
+const AttachmentItem: React.FC<{ att: CalendarAttachment }> = ({ att }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const [retryThumbnail, setRetryThumbnail] = useState(false);
+
+  let isImage = att.type?.startsWith('image') || (att.url && att.url.match(/\.(jpeg|jpg|gif|png|webp)$/i));
+  let imageUrl = att.url;
+
+  const driveMatch = att.url ? att.url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) : null;
+  if (driveMatch && driveMatch[1]) {
+    isImage = true; // Try to load Drive files as images/thumbnails first
+    // Default to the uc view, if it fails, we fall back to thumbnail in the onError handler
+    imageUrl = retryThumbnail 
+      ? `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`
+      : `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+  }
+
+  // Large image card view
+  if (isImage && !imageFailed) {
+    return (
+      <a 
+        href={att.url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="group relative block w-full md:w-72 rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg transition-all shrink-0 bg-slate-100"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="aspect-[4/3] w-full bg-slate-200 overflow-hidden relative flex items-center justify-center">
+          <img 
+            src={imageUrl} 
+            alt={att.filename || 'Bijlage'} 
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 z-10 bg-white" 
+            onError={(e) => {
+              if (driveMatch && !retryThumbnail) {
+                setRetryThumbnail(true); // Try thumbnail URL before fully giving up
+              } else {
+                setImageFailed(true); // Fallback to list view
+              }
+            }}
+          />
+          {/* Loading placeholder underneath the image */}
+          <Loader2 className="w-6 h-6 text-slate-400 animate-spin absolute" />
+        </div>
+        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end justify-between pt-16 z-20">
+          <p className="text-sm font-bold text-white truncate pr-4 drop-shadow-sm">{att.filename?.replace(/\.[^/.]+$/, "") || 'Bijlage'}</p>
+          <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+            <ExternalLink className="w-4 h-4 text-white" />
+          </div>
+        </div>
+      </a>
+    );
+  }
+
+  // Compact document list item view (Fallback)
+  return (
+    <a 
+      href={att.url} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl p-3 transition-colors max-w-sm w-full md:w-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+        <FileText className="w-5 h-5 text-sdg-red" />
+      </div>
+      <div className="flex-grow min-w-0 pr-2">
+        <p className="text-sm font-bold text-slate-900 truncate">
+          {att.filename?.replace(/\.[^/.]+$/, "") || 'Bijlage'}
+        </p>
+        <p className="text-xs text-slate-500 uppercase tracking-widest truncate">
+          {att.type?.split('/')[1] || 'Bestand'}
+        </p>
+      </div>
+      <ExternalLink className="w-4 h-4 text-slate-400 shrink-0 ml-auto" />
+    </a>
+  );
+};
+
 const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const hasDescription = !!event.description && event.description.trim().length > 0;
+  const hasContent = (!!event.description && event.description.trim().length > 0) || (event.attachments && event.attachments.length > 0);
 
   // Helper om een Google Calendar link te genereren
   const getGoogleCalendarLink = (event: CalendarEvent) => {
@@ -71,7 +148,7 @@ const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
     >
       <div 
         className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-center cursor-pointer"
-        onClick={() => hasDescription && setIsOpen(!isOpen)}
+        onClick={() => hasContent && setIsOpen(!isOpen)}
       >
         {/* Date Box */}
         <div className="flex flex-col items-center justify-center bg-slate-50 rounded-2xl p-4 w-20 h-20 md:w-24 md:h-24 border border-slate-100 shrink-0 shadow-inner group-hover:bg-sdg-red group-hover:text-white transition-colors duration-300">
@@ -146,7 +223,7 @@ const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
              </a>
           )}
 
-          {hasDescription && (
+          {hasContent && (
              <button 
                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isOpen ? 'bg-sdg-red text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'}`}
                aria-label={isOpen ? "Sluit details" : "Toon details"}
@@ -158,7 +235,7 @@ const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
       </div>
 
       {/* Expandable Description Area */}
-      {hasDescription && (
+      {hasContent && (
         <div 
           className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
         >
@@ -172,14 +249,27 @@ const AgendaItem: React.FC<{ event: CalendarEvent }> = ({ event }) => {
                        prose-strong:text-slate-900 prose-strong:font-bold 
                        prose-a:text-sdg-red hover:prose-a:underline
                        prose-table:border-collapse prose-td:p-2 prose-tr:border-b prose-tr:border-slate-100">
-                        {isHtml(event.description || '') ? (
-                          <div className="overflow-x-auto w-full" dangerouslySetInnerHTML={{ __html: event.description || '' }} />
-                        ) : (
-                          <div className="whitespace-pre-wrap font-normal">
-                            {renderDescriptionWithLinks(event.description || '')}
-                          </div>
+                        {event.description && (
+                          isHtml(event.description) ? (
+                            <div className="overflow-x-auto w-full" dangerouslySetInnerHTML={{ __html: event.description }} />
+                          ) : (
+                            <div className="whitespace-pre-wrap font-normal">
+                              {renderDescriptionWithLinks(event.description)}
+                            </div>
+                          )
                         )}
                      </div>
+
+                     {event.attachments && event.attachments.length > 0 && (
+                        <div className="mt-6 flex flex-col gap-3">
+                           <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Bijlagen</h4>
+                           <div className="flex flex-wrap gap-4">
+                             {event.attachments.map((att, i) => (
+                               <AttachmentItem key={i} att={att} />
+                             ))}
+                           </div>
+                        </div>
+                     )}
                      
                      <div className="mt-8 flex flex-wrap gap-4">
                         <a 
