@@ -1,1 +1,9 @@
-/* /index.html 200
+# 1. SPA Routing voor React Router (Essentieel voor Netlify)
+# Dit zorgt ervoor dat wanneer iemand rechtstreeks naar sdgsintjansklooster.nl/nieuws surft,
+# Netlify de aanvraag intern doorstuurt naar index.html, zodat React Router de pagina kan laden.
+/* /index.html    200
+
+# 2. SEO & Behoud van de oude WordPress URL-waarde (301 Permanent Redirects)
+# Mocht je in de toekomst specifieke oude pagina-URLs willen omleiden naar nieuwe pagina's,
+# dan kun je die hieronder toevoegen volgens dit patroon:
+# /oude-wordpress-pagina/    /nieuwe-react-pagina    301
