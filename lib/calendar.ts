@@ -9,9 +9,9 @@ const CALENDAR_URL = 'https://calendar.google.com/calendar/ical/webmaster@sdgsin
 async function fetchCalendarData(): Promise<string> {
   const targetUrl = CALENDAR_URL;
   const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+    '/api/calendar', // Fallback 1: Local proxy (via vite dev server) of Netlify proxy (via_redirects)
+    `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
   ];
 
   const fetchWithTimeout = async (url: string, timeout = 10000): Promise<string> => {

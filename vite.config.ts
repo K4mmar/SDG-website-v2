@@ -12,6 +12,13 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        proxy: {
+          '/api/calendar': {
+            target: 'https://calendar.google.com',
+            changeOrigin: true,
+            rewrite: (path) => '/calendar/ical/webmaster@sdgsintjansklooster.nl/public/basic.ics',
+          }
+        }
       },
       plugins: [
         react(),

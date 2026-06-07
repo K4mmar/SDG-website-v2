@@ -392,7 +392,7 @@ const Education: React.FC = () => {
                      <div className="relative h-full min-h-[400px]">
                         <div className="absolute top-0 right-0 w-3/4 h-3/4 bg-sdg-gold/10 rounded-[3rem] -z-10 translate-x-4 -translate-y-4"></div>
                         <img 
-                          src="https://api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/SDG-s1-1.jpg" 
+                          src="https://images.weserv.nl/?url=api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/SDG-s1-1.jpg&output=webp&q=80&w=800" 
                           alt="Muziek als passie bij SDG" 
                           className="rounded-2xl shadow-2xl w-full h-full object-cover"
                         />
