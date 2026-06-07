@@ -7,13 +7,14 @@ const CALENDAR_URL = 'https://calendar.google.com/calendar/ical/webmaster@sdgsin
  * SDG Agenda Fetcher met Triple Fallback.
  */
 async function fetchCalendarData(): Promise<string> {
+  const targetUrl = CALENDAR_URL;
   const proxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(CALENDAR_URL)}`,
-    `https://corsproxy.io/?${encodeURIComponent(CALENDAR_URL)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(CALENDAR_URL)}`
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
+    `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
   ];
 
-  const fetchWithTimeout = async (url: string, timeout = 5000): Promise<string> => {
+  const fetchWithTimeout = async (url: string, timeout = 10000): Promise<string> => {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
     
@@ -38,10 +39,29 @@ async function fetchCalendarData(): Promise<string> {
   try {
     // Start alle proxy aanvragen tegelijk (in parallel)
     // Promise.any retourneert de eerste die succesvol afrondt.
-    // Dit voorkomt dat je moet wachten op een trage server als een andere sneller is.
-    const result = await Promise.any(proxies.map(url => fetchWithTimeout(url, 8000)));
+    const result = await Promise.any(proxies.map(url => fetchWithTimeout(url, 15000)));
+    
+    // Save backup to localStorage
+    try {
+      localStorage.setItem('sdg_agenda_backup', result);
+      localStorage.setItem('sdg_agenda_backup_time', Date.now().toString());
+    } catch (e) {
+      // Ignore quota exceeded errors
+    }
+    
     return result;
   } catch (error) {
+    // Fallback to localStorage if all proxies fail
+    try {
+      const backup = localStorage.getItem('sdg_agenda_backup');
+      if (backup && backup.includes('BEGIN:VCALENDAR')) {
+        console.warn('Gebruikmakend van offline/cache backup voor agenda');
+        return backup;
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+    
     throw new Error('Geen enkele proxy kon de agenda laden. Controleer de internetverbinding of de URL.');
   }
 }
@@ -66,10 +86,19 @@ export interface CalendarEvent {
 
 let cachedEvents: CalendarEvent[] | null = null;
 let cachedEventsPromise: Promise<CalendarEvent[]> | null = null;
+let lastFetchTime = 0;
 
 export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
-  if (cachedEvents) return cachedEvents;
-  if (cachedEventsPromise) return cachedEventsPromise;
+  const CACHE_TTL = 5 * 60 * 1000; // 5 minuten
+  const nowTime = Date.now();
+
+  if (cachedEvents && (nowTime - lastFetchTime < CACHE_TTL)) {
+    return cachedEvents;
+  }
+  
+  if (cachedEventsPromise) {
+    return cachedEventsPromise;
+  }
 
   cachedEventsPromise = (async () => {
     try {
@@ -108,9 +137,10 @@ export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
         if (event.isRecurring()) {
           const iterator = event.iterator();
           let next;
-          let count = 0;
-          while ((next = iterator.next()) && count < 30) {
-            count++;
+          let addedCount = 0;
+          let safetyLimit = 0;
+          while ((next = iterator.next()) && addedCount < 30 && safetyLimit < 50000) {
+            safetyLimit++;
             const start = next.toJSDate();
             if (start > futureLimit) break;
             
@@ -134,6 +164,7 @@ export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
                 isRecurring: true,
                 attachments
               });
+              addedCount++;
             }
           }
         } else {
@@ -155,12 +186,14 @@ export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
         }
       });
 
-      cachedEvents = events.sort((a, b) => a.start.getTime() - b.start.getTime()).slice(0, 10);
+      cachedEvents = events.sort((a, b) => a.start.getTime() - b.start.getTime()).slice(0, 20);
+      lastFetchTime = Date.now();
+      cachedEventsPromise = null;
       return cachedEvents;
     } catch (error) {
       console.error("SDG-Agenda Kritieke Fout:", error);
-      cachedEvents = [];
-      return cachedEvents;
+      cachedEventsPromise = null;
+      throw error;
     }
   })();
   

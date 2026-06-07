@@ -49,7 +49,6 @@ const Card: React.FC<{
           alt={title} 
           onError={handleImageError}
           onLoad={() => setImageLoaded(true)}
-          crossOrigin="anonymous"
           className={`w-full h-full object-cover transform group-hover:scale-110 transition-all duration-1000 ease-out ${
             imageLoaded && !wpLoading ? 'opacity-100' : 'opacity-0'
           }`} 

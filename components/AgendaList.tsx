@@ -296,6 +296,7 @@ const AgendaList: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [longLoading, setLongLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -306,10 +307,20 @@ const AgendaList: React.FC = () => {
     }, 3000);
 
     async function loadEvents() {
-      const data = await getUpcomingEvents();
-      if (isMounted) {
-        setEvents(data);
-        setLoading(false);
+      try {
+        const data = await getUpcomingEvents();
+        if (isMounted) {
+          setEvents(data);
+          setError(null);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError('Er is een fout opgetreden bij het ophalen van de agenda vanuit Google Calendar. Probeer het later opnieuw.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
     loadEvents();
@@ -349,6 +360,17 @@ const AgendaList: React.FC = () => {
              <div className={`mt-4 px-4 py-2 bg-yellow-50 text-yellow-700 text-sm rounded-lg border border-yellow-100 transition-opacity duration-500 ${longLoading ? 'opacity-100' : 'opacity-0'}`}>
                 Dit duurt iets langer dan normaal. We maken verbinding...
              </div>
+          </div>
+        ) : error ? (
+          <div className="bg-white p-10 rounded-3xl border border-red-100 bg-red-50 text-center flex flex-col items-center">
+             <CalendarDays className="w-12 h-12 text-red-300 mx-auto mb-4" />
+             <p className="text-red-700 text-lg font-medium">{error}</p>
+             <button 
+               onClick={() => { setLoading(true); setError(null); getUpcomingEvents().then(setEvents).catch(() => setError('Nog steeds een fout.')).finally(() => setLoading(false)); }} 
+               className="mt-6 px-6 py-2 bg-white text-red-700 font-bold text-sm rounded-full border border-red-200 hover:bg-red-100 transition-colors"
+             >
+               Opnieuw proberen
+             </button>
           </div>
         ) : events.length === 0 ? (
           <div className="bg-white p-10 rounded-3xl border border-gray-200 text-center">

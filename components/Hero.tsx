@@ -30,7 +30,6 @@ const Hero: React.FC = () => {
         <img
           src={bgImage}
           alt="SDG Sint Jansklooster optreden"
-          crossOrigin="anonymous"
           // Awwwards style: Minimal blur (depth of field feel), slightly zoomed for cinematic effect
           className={`w-full h-full object-cover transition-transform duration-[2000ms] ease-out ${isLoaded ? 'scale-105' : 'scale-100'} blur-[1px] brightness-[0.85]`}
         />

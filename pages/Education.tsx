@@ -394,7 +394,6 @@ const Education: React.FC = () => {
                         <img 
                           src="https://api.sdgsintjansklooster.nl/wp-content/uploads/2025/12/SDG-s1-1.jpg" 
                           alt="Muziek als passie bij SDG" 
-                          crossOrigin="anonymous"
                           className="rounded-2xl shadow-2xl w-full h-full object-cover"
                         />
                      </div>
@@ -422,7 +421,7 @@ const Education: React.FC = () => {
                 return (
                   <div key={team.id} className="group relative rounded-3xl overflow-hidden bg-white shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col h-full hover:-translate-y-2 border border-gray-100">
                     <div className="h-60 overflow-hidden relative shrink-0">
-                      <img src={team.image} alt={team.title} crossOrigin="anonymous" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <img src={team.image} alt={team.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                        <div className={`absolute inset-0 bg-gradient-to-t ${team.color} opacity-60 mix-blend-multiply`}></div>
                        <button onClick={(e) => toggleAudio(team.id, team.audioUrl, e)} className="absolute top-4 right-4 w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/40 hover:bg-white hover:text-sdg-red transition-all shadow-lg z-20">
                          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-1" />}
