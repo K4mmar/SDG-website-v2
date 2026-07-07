@@ -1,4 +1,4 @@
-/api/calendar  https://calendar.google.com/calendar/ical/webmaster@sdgsintjansklooster.nl/public/basic.ics  200
+/api/calendar  https://calendar.google.com/calendar/ical/webmastersdgsintjansklooster@gmail.com/public/basic.ics  200
 
 # 1. SPA Routing voor React Router (Essentieel voor Netlify)
 # Dit zorgt ervoor dat wanneer iemand rechtstreeks naar sdgsintjansklooster.nl/nieuws surft,

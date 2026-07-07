@@ -1,19 +1,14 @@
 
 import ICAL from 'ical.js';
 
-const CALENDAR_URL = 'https://calendar.google.com/calendar/ical/webmaster@sdgsintjansklooster.nl/public/basic.ics';
+const CALENDAR_URL = 'https://calendar.google.com/calendar/ical/webmastersdgsintjansklooster@gmail.com/public/basic.ics';
 
 /**
- * SDG Agenda Fetcher met Triple Fallback.
+ * SDG Agenda Fetcher
  */
 async function fetchCalendarData(): Promise<string> {
-  const targetUrl = CALENDAR_URL;
-  const proxies = [
-    '/api/calendar', // Fallback 1: Local proxy (via vite dev server) of Netlify proxy (via_redirects)
-    `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
-  ];
-
+  const targetUrl = '/api/calendar'; // Handles CORS via Netlify _redirects or local Express proxy
+  
   const fetchWithTimeout = async (url: string, timeout = 10000): Promise<string> => {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
@@ -25,7 +20,6 @@ async function fetchCalendarData(): Promise<string> {
       if (response.ok) {
         const text = await response.text();
         if (text.includes('BEGIN:VCALENDAR')) {
-          console.log(`SDG-Agenda: Succesvol geladen via ${url.split('/')[2]}`);
           return text;
         }
       }
@@ -37,9 +31,7 @@ async function fetchCalendarData(): Promise<string> {
   };
 
   try {
-    // Start alle proxy aanvragen tegelijk (in parallel)
-    // Promise.any retourneert de eerste die succesvol afrondt.
-    const result = await Promise.any(proxies.map(url => fetchWithTimeout(url, 15000)));
+    const result = await fetchWithTimeout(targetUrl, 5000);
     
     // Save backup to localStorage
     try {
@@ -51,7 +43,7 @@ async function fetchCalendarData(): Promise<string> {
     
     return result;
   } catch (error) {
-    // Fallback to localStorage if all proxies fail
+    // Fallback to localStorage if fetch fails
     try {
       const backup = localStorage.getItem('sdg_agenda_backup');
       if (backup && backup.includes('BEGIN:VCALENDAR')) {
@@ -62,7 +54,7 @@ async function fetchCalendarData(): Promise<string> {
       // Ignore localStorage errors
     }
     
-    throw new Error('Geen enkele proxy kon de agenda laden. Controleer de internetverbinding of de URL.');
+    throw new Error('De agenda URL (Google Calendar) is onbereikbaar of bestaat niet meer (404). Controleer of de kalender nog openbaar is.');
   }
 }
 

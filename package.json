@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "start": "node dist/server.cjs",
     "preview": "vite preview",
     "postbuild": "echo 'Skipping react-snap to prevent puppeteer errors in AI Studio container. Uncomment this or use Netlify to prerender.' || react-snap"
   },
@@ -23,6 +24,7 @@
     "@tailwindcss/vite": "^4.3.0",
     "date-fns": "^4.1.0",
     "dompurify": "^3.4.3",
+    "express": "^5.2.1",
     "framer-motion": "^12.38.0",
     "ical.js": "1.5.0",
     "js-cookie": "^3.0.7",
@@ -37,9 +39,12 @@
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "esbuild": "^0.28.1",
     "react-snap": "^1.23.0",
+    "tsx": "^4.23.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

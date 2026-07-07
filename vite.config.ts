@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
           '/api/calendar': {
             target: 'https://calendar.google.com',
             changeOrigin: true,
-            rewrite: (path) => '/calendar/ical/webmaster@sdgsintjansklooster.nl/public/basic.ics',
+            rewrite: (path) => '/calendar/ical/webmastersdgsintjansklooster@gmail.com/public/basic.ics',
           }
         }
       },

@@ -39,8 +39,12 @@ const PostDetail: React.FC = () => {
         setPost(postData);
         
         // Load calendar data
-        const calendarData = await getUpcomingEvents();
-        setEvents(calendarData.slice(0, 3)); 
+        try {
+          const calendarData = await getUpcomingEvents();
+          setEvents(calendarData.slice(0, 3)); 
+        } catch (e) {
+          console.warn('Kon agenda niet inladen op PostDetail:', e);
+        }
         
         setLoading(false);
       }
