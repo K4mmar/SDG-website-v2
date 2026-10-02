@@ -1,41 +1,40 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   Music, Heart, BookOpen, Users, Star, 
-  Clock, Award, Calendar, ChevronDown, ArrowRight 
+  Clock, Award, Calendar, ChevronDown, ArrowRight,
+  HeartHandshake, Sparkles
 } from 'lucide-react';
+import SEO from '../components/SEO';
 
-// --- DATA: IDENTITY CARDS (BENTO GRID) ---
-const IDENTITY_CARDS = [
+// --- DATA: DNA PILLARS (DE KRACHT VAN SDG) ---
+const DNA_PILLARS = [
   {
-    id: 'samen',
-    title: 'Muziek & Dorp',
-    subtitle: 'Samen Spelen',
-    desc: 'Wij zijn een relatief kleine vereniging waar het plezier van samen spelen voorop staat. Je hoort ons jaarlijks tijdens sfeervolle dorpsmomenten zoals de Kerstnacht en de opening van de Kloostermarkt.',
-    icon: <Music className="w-8 h-8" />,
-    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800&auto=format&fit=crop',
-    colSpan: 'md:col-span-2',
-    theme: 'red'
+    id: 'bron-en-toewijding',
+    title: 'Onze Bron en Toewijding',
+    kicker: 'Geloof, bezieling en ontmoeting',
+    desc: 'Met het evangelie van Jezus Christus als onze bron musiceren we tot eer van God. We zijn een warme en toegankelijke vereniging waar saamhorigheid en betrokkenheid centraal staan. Hier voelen muzikanten van alle leeftijden zich thuis.',
+    icon: Sparkles,
+    iconColor: 'text-sdg-red',
+    badgeBg: 'bg-red-50 border-red-100'
   },
   {
-    id: 'geloof',
-    title: 'Soli Deo Gloria',
-    subtitle: 'Onze Identiteit',
-    desc: 'Alleen aan God de Eer. Onze christelijke basis is de bron van waaruit we musiceren en met elkaar omgaan.',
-    icon: <BookOpen className="w-8 h-8" />,
-    image: 'https://images.unsplash.com/photo-1528825539566-2bcb5882445c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    colSpan: 'md:col-span-1',
-    theme: 'gold'
+    id: 'veelzijdig-repertoire',
+    title: 'Veelzijdig in Klank en Repertoire',
+    kicker: 'Fanfare, malletband en dweilorkest',
+    desc: 'Binnen onze fanfare, malletband en dweilorkest mag ieder lid zijn of haar muzikale gaven inzetten. Ons brede repertoire reikt van ingetogen koralen en koraalbewerkingen tot feestelijke marsen en hedendaagse (pop)muziek.',
+    icon: Music,
+    iconColor: 'text-amber-700',
+    badgeBg: 'bg-amber-50 border-amber-100'
   },
   {
-    id: 'toekomst',
-    title: 'Investeren in Jeugd',
-    subtitle: 'De Toekomst',
-    desc: 'De jeugd heeft de toekomst. We maken muziekles toegankelijk door de opleiding te subsidiëren. Daarnaast betrekken we onze leerlingen direct bij leuke activiteiten, zodat ze zich snel thuis voelen binnen de vereniging.',
-    icon: <Star className="w-8 h-8" />,
-    image: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?q=80&w=800&auto=format&fit=crop',
-    colSpan: 'md:col-span-3',
-    theme: 'dark'
+    id: 'verbindend-in-het-dorp',
+    title: 'Verbindend in het Dorp',
+    kicker: 'Zichtbaar in Sint Jansklooster en de regio',
+    desc: 'Als herkenbare en verbindende kracht in Sint Jansklooster en de regio zetten we onze muzikale gaven in voor kerkelijke, maatschappelijke en feestelijke momenten. Je hoort ons onder meer tijdens de kerstnacht, de Kloostermarkt, Sinterklaas, serenades en concerten.',
+    icon: HeartHandshake,
+    iconColor: 'text-slate-800',
+    badgeBg: 'bg-slate-100 border-slate-200'
   }
 ];
 
@@ -134,6 +133,10 @@ const About: React.FC = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-900">
+      <SEO 
+        title="Ons DNA & Over Ons - CMV Soli Deo Gloria Sint Jansklooster" 
+        description="Ontdek het DNA van Soli Deo Gloria Sint Jansklooster. Verbonden door muziek, met onze fanfare, malletband en dweilorkest met hart voor het dorp."
+      />
       
       {/* 1. HERO SECTION */}
       <div className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
@@ -161,49 +164,60 @@ const About: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. IDENTITY (BENTO GRID) - THE "NOW" */}
-      <section className="py-24 px-6 container mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-serif font-bold text-slate-900 mb-4">Ons DNA</h2>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-            Waar we voor staan en waarom we doen wat we doen.
-          </p>
-        </div>
+      {/* 2. ONS DNA (KRACHT, PASSIE & GEMEENSCHAP) */}
+      <section id="dna" className="py-20 md:py-28 px-6 bg-slate-50 relative overflow-hidden">
+        <div className="container mx-auto max-w-6xl">
+          {/* Header Structuur conform richtlijnen */}
+          <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
+            {/* 1. Subtiele pre-title */}
+            <span className="text-sdg-red font-semibold uppercase tracking-widest text-xs md:text-sm mb-3 block">
+              Ons DNA
+            </span>
+            
+            {/* 2. Krachtige headline (h2) die muziek, geloof en verbinding samenbrengt */}
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-slate-900 tracking-tight leading-tight">
+              Muziek maken tot eer van God, verbonden met ons dorp
+            </h2>
+            
+            {/* 3. Korte leadtekst (circa 2 zinnen) */}
+            <p className="mt-5 text-slate-600 text-base md:text-lg leading-relaxed">
+              Soli Deo Gloria is een actieve muziekvereniging die mensen en generaties samenbrengt door het plezier van samen musiceren. Vanuit ons christelijk geloof spelen we tot eer van God en dragen we met enthousiasme bij aan het dorpsleven in Sint Jansklooster.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {IDENTITY_CARDS.map((card, index) => (
-            <ScrollFadeIn key={card.id} delay={index * 100}>
-              <div className={`${card.colSpan} group relative h-80 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer`}>
-                {/* Background Image */}
-                <div className="absolute inset-0">
-                  <img 
-                    src={card.image} 
-                    alt={card.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-75 group-hover:brightness-50"
-                  />
-                  <div className={`absolute inset-0 opacity-60 mix-blend-multiply transition-opacity duration-300 ${
-                    card.theme === 'red' ? 'bg-sdg-red' : 
-                    card.theme === 'gold' ? 'bg-yellow-600' : 
-                    card.theme === 'blue' ? 'bg-blue-900' : 'bg-slate-900'
-                  }`}></div>
-                </div>
-
-                {/* Content Overlay */}
-                <div className="absolute inset-0 p-8 flex flex-col justify-end text-white">
-                  <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                    <div className="mb-4 bg-white/20 backdrop-blur-md w-12 h-12 rounded-xl flex items-center justify-center border border-white/30">
-                      {card.icon}
+          {/* Drie kaarten */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {DNA_PILLARS.map((pillar, index) => {
+              const IconComponent = pillar.icon;
+              return (
+                <ScrollFadeIn key={pillar.id} delay={index * 120}>
+                  <article className="h-full bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-start">
+                    {/* Icoon */}
+                    <div className="mb-6">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${pillar.badgeBg} ${pillar.iconColor} shadow-xs`}>
+                        <IconComponent className="w-7 h-7" strokeWidth={1.8} />
+                      </div>
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-white/80 mb-1 block">{card.subtitle}</span>
-                    <h3 className="text-2xl font-serif font-bold mb-3">{card.title}</h3>
-                    <p className="text-slate-200 text-sm leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 max-w-sm">
-                      {card.desc}
+
+                    {/* Titel */}
+                    <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-900 mb-1.5">
+                      {pillar.title}
+                    </h3>
+                    
+                    {/* Thema */}
+                    <p className="text-xs font-semibold text-sdg-red mb-3 tracking-wide">
+                      {pillar.kicker}
                     </p>
-                  </div>
-                </div>
-              </div>
-            </ScrollFadeIn>
-          ))}
+
+                    {/* Beschrijving */}
+                    <p className="text-slate-600 text-sm md:text-base leading-relaxed">
+                      {pillar.desc}
+                    </p>
+                  </article>
+                </ScrollFadeIn>
+              );
+            })}
+          </div>
         </div>
       </section>
 
