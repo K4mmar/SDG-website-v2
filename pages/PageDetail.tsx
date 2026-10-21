@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPageBySlug, Page } from '../lib/wordpress';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShieldAlert, Calendar, Home } from 'lucide-react';
 import SponsorGrid from '../components/SponsorGrid';
 import ShareButton from '../components/ShareButton';
 import WpContent from '../components/WpContent';
@@ -43,16 +43,78 @@ const STATIC_CONTENT: Record<string, { title: string; content: string; image?: s
       <p>Het duurde niet zo lang tot er 7 mooie koperen instrumenten kwamen. Verpakt in een grote kist arriveerden ze bij Geert Leeuw aan de Kloosterweg. De eerste instrumentenleverancier was de firma Kessels uit Tilburg.</p>
       <h3>De Eerste Klanken</h3>
       <p>Daar men in de persoon van dhr. Van der Meij een dirigent zag, maar er geen grote trommelslager was, moest hij beide functies maar op zich nemen. We kunnen ons dat nu moeilijk voorstellen, maar het ging, want op 2e Pinksterdag van het jaar 1901 vond het eerste optreden plaats van het pas opgerichte S.D.G. Ik noem het maar optreden, want van een concert kon toen nog geen sprake zijn.</p>
-      <p>Als eerste werk werd het koraal Psalm 42 gespeeld. Deze bekende melodie over het hijgend hert, momenteel bekend als moede hinde, werd door bijna de hele bevolking van het Land van Vollenhove met bewondering en ontroering aangehoord. In het verslag van een der oprichters staat: <em>‘’velen, die deze muziek hoorden, kregen tranen in de ogen en vroegen zich af hoe het mogelijk was, dat uit deze instrumenten zulke mooie muziek kon komen.’’</em></p>
+      <p>Als eerste werk werd het koraal Psalm 42 gespeeld. Deze bekende melodie over het hijgend hert, momenteel bekend als moede hinde, werd door bijna de hele bevolking van het Land van Vollenhove met bewondering en ontroering aangehoord.</p>
       <h3>Groeien en Koninklijk Bezoek</h3>
       <p>Over de financiële toestand van de beginperiode weten we helaas heel weinig. Wel is bekend, dat er met een contributie van 5 cent per week werd begonnen. Er kwam steeds meer animo voor de vereniging, want omstreeks 1905 was S.D.G. al een korps, dat voor een groepsfoto in aanmerking kwam. Het telde toen 15 leden.</p>
-      <p>In 1921 stond S.D.G. opgesteld aan de Veneweg in afwachting van de koningin, die het gemaal aan de Blokzijlerdijk officieel zou bezoeken. Toen de wagen met onze vorstin in het zicht kwam (in de wagen zaten de Koningin en haar echtgenote Prins Hendrik, en hun dochter Prinses Juliana), werd vol overgave het volkslied gespeeld, maar de koningin reed door en de muzikanten moesten zich haasten om op tijd bij het werkbezoek te kunnen zijn.</p>
+      <p>In 1921 stond S.D.G. opgesteld aan de Veneweg in afwachting van de koningin, die het gemaal aan de Blokzijlerdijk officieel zou bezoeken. Toen de wagen met onze vorstin in het zicht kwam, werd vol overgave het volkslied gespeeld.</p>
       <h3>Oorlogsjaren en Wederopbouw</h3>
-      <p>De eerste gang van S.D.G. naar het concours te Steenwijk vond in 1924 plaats. Na de angstige en spannende mobilisatietijd kwamen de donkere oorlogsjaren 1940-1945. In het jaar 1942 moest een document worden getekend van de Cultuurkamer van de Wehrmacht. Hierin stond, dat uitsluitend voor hen moest worden gewerkt. Hieraan werd geen gehoor gegeven. Een tweede brief volgde, waarin de bezetter de instrumenten opeiste. Zoals zovelen in die tijd ‘’doken’’ ook de instrumenten ‘’onder’’ en tot het voorjaar van 1945 verdween S.D.G. achter de schermen.</p>
-      <p>De eerste avond after de bevrijding, waarop weer gemarcheerd werd, kwam Jurrie Weijs behouden terug uit Oostenrijk. Hij stond direct weer in de voorste gelederen als trommelslager.</p>
-      <h3>Uniformen en de Toekomst</h3>
-      <p>Nadat begin 1957 de Koninklijke goedkeuring voor onze vereniging verkregen was, werd in dat voorjaar een geheel nieuwe bezetting aangeschaft. Op 22 juni 1964 vond de symbolische overdracht plaats van het eerste uniform, waarbij burgemeester Krol opmerkte, dat kleren nu werkelijk de man maakten.</p>
-      <p>Een echte crisis heeft S.D.G. gelukkig nooit gekend. Natuurlijk waren er ups en downs. We hopen, dat dit ook in de toekomst zo mag blijven. Deze band onderling als korps, maar ook tussen publiek en korps. Toch hopen we ook in de toekomst op uw meeleven en uw belangstelling voor onze vereniging te mogen rekenen.</p>
+      <p>De eerste gang van S.D.G. naar het concours te Steenwijk vond in 1924 plaats. Na de angstige en spannende mobilisatietijd kwamen de donkere oorlogsjaren 1940-1945. In het jaar 1942 dook het instrumentarium onder om inbeslagname door de bezetter te voorkomen. Direct na de bevrijding in 1945 klonk de muziek weer vrij door de straten.</p>
+      <h3>Koninklijke Goedkeuring</h3>
+      <p>Nadat begin 1957 de Koninklijke goedkeuring voor onze vereniging verkregen was, bloeide de vereniging verder op tot de veelzijdige en hechte vereniging die we vandaag de dag zijn.</p>
+    `
+  },
+  'fanfare': {
+    title: 'Fanfareorkest',
+    content: `
+      <p class="lead">Het fanfareorkest vormt het hart van CMV Soli Deo Gloria Sint Jansklooster. Een hechte groep muzikanten brengt met enthousiasme een breed en warm repertoire ten gehore.</p>
+      <h3>Samenklank & Repertoire</h3>
+      <p>De bezetting van onze fanfare bestaat uit bugels, trompetten, hoorns, trombones, baritons, euphoniums en bastuba's, aangevuld met een saxofoongroep (sopraan-, alt-, tenor- en baritonsaxofoon) en ritmisch slagwerk. Ons repertoire reikt van ingetogen koralen en koraalbewerkingen tot feestelijke concertwerken, marsen en eigentijdse popmuziek.</p>
+      <h3>Muzikale Leiding & Repetities</h3>
+      <p>Het orkest repeteert wekelijks op woensdagavond van 19:30 tot 21:30 uur in Sint Jansklooster. Naast de wekelijkse repetities verzorgen we optredens bij dorpsactiviteiten, kerkdiensten, concoursen en ons jaarlijkse jubileum- of najaarsconcert.</p>
+      <p>Heb je interesse om mee te spelen of wil je na een pauze weer beginnen? Je bent van harte welkom om eens vrijblijvend de sfeer te komen proeven tijdens een repetitie!</p>
+    `
+  },
+  'malletband': {
+    title: 'De Malletband',
+    content: `
+      <p class="lead">De malletband van Soli Deo Gloria is een dynamische, energieke slagwerkgroep die melodisch én ritmisch van zich laat horen.</p>
+      <h3>Melodisch & Ritmisch Slagwerk</h3>
+      <p>Met moderne gestemde percussie-instrumenten zoals marimba's, xylofoons, vibrafoons en klokkenspelen, aangevuld met drumsets en veelzijdig bijslagwerk, brengt de malletband een eigentijdse en verrassende muzikale beleving. Het repertoire varieert van pop- en filmmuziek tot swingende ritmes en uitdagende slagwerkcomposities.</p>
+      <h3>Repetities</h3>
+      <p>De malletband repeteert wekelijks op maandagavond van 19:30 tot 21:30 uur in Sint Jansklooster. Lijkt het je leuk om melodisch of ritmisch slagwerk te spelen? Kom gerust eens binnenlopen of neem contact met ons op!</p>
+    `
+  },
+  'klankjorum': {
+    title: 'Klank & Jorum / Dweilorkest',
+    content: `
+      <p class="lead">Klank & Jorum is de vrolijke, feestelijke formatie van SDG. Overal waar gezelligheid en muziek samenkomen, zorgen wij voor een feestelijke sfeer!</p>
+      <h3>Muziek & Gezelligheid</h3>
+      <p>Met een enthousiaste bezetting van blazers en slagwerkers spelen we bekende meezingers, feestklassiekers en herkenbare hits. We treden regelmatig op tijdens dorpsfeesten, sportevenementen, markten en feestelijke serenades in Sint Jansklooster en de omliggende regio.</p>
+    `
+  },
+  'steun-ons': {
+    title: 'Steun SDG',
+    content: `
+      <p class="lead">Muziek verbindt ons dorp en brengt jong en oud samen. Dankzij de steun van onze betrokken dorpsgemeenschap kunnen we blijven investeren in kwalitatieve instrumenten, uniformen en muziekopleiding voor de jeugd.</p>
+      <h3>Vrienden van SDG & Donateurs</h3>
+      <p>Als donateur of 'Vriend van SDG' draagt u direct bij aan het behoud van de levendige muziekcultuur in Sint Jansklooster. Iedere bijdrage, groot of klein, wordt enorm gewaardeerd en zorgvuldig besteed.</p>
+      <h3>Sponsormogelijkheden</h3>
+      <p>Bent u ondernemer en wilt u onze vereniging sponsoren rondom concerten, optredens of evenementen? Neem gerust contact met ons op om de mogelijkheden te bespreken via info@sdgsintjansklooster.nl.</p>
+    `
+  },
+  'boek-ons': {
+    title: 'Boek SDG voor uw Gelegenheid',
+    content: `
+      <p class="lead">Zoekt u sfeervolle, feestelijke of plechtige muzikale omlijsting voor een dorpsactiviteit, jubileum, kerkdienst, opening of serenade?</p>
+      <h3>Optredens op Maat</h3>
+      <p>Onze geledingen (fanfareorkest, malletband of dweilorkest Klank & Jorum) kunnen inspelen op uw wensen. We denken graag mee over een passend repertoire en een geschikte bezetting voor uw evenement in Sint Jansklooster of de regio.</p>
+      <p>Voor aanvragen en beschikbaarheid kunt u vrijblijvend contact opnemen met ons secretariaat via info@sdgsintjansklooster.nl of via ons contactformulier.</p>
+    `
+  },
+  'doe-mee': {
+    title: 'Doe Mee bij Soli Deo Gloria',
+    content: `
+      <p class="lead">Samen muziek maken geeft energie, ontspanning en hechte vriendschappen. Bij Soli Deo Gloria is er voor iedere muziekliefhebber een warm thuis.</p>
+      <h3>Speel Mee in Onze Geledingen</h3>
+      <p>Of je nu net begint met muzieklessen, na jaren weer je instrument wilt oppakken of al ervaren bent: we verwelkomen je graag in ons fanfareorkest, onze malletband, de jeugdopleiding of het dweilorkest. Onze repetitieruimte staat open voor jong en oud!</p>
+    `
+  },
+  'privacy': {
+    title: 'Privacybeleid',
+    content: `
+      <p class="lead">Christelijke Muziekvereniging Soli Deo Gloria Sint Jansklooster respecteert de privacy van haar leden, donateurs en websitebezoekers.</p>
+      <h3>Gegevensverwerking</h3>
+      <p>Persoonsgegevens die via onze website worden verstrekt (bijvoorbeeld via het contact- of aanmeldformulier) worden uitsluitend gebruikt voor de afhandeling van uw vraag of lidmaatschapsverzoek. Gegevens worden nooit zonder toestemming aan derden verstrekt.</p>
     `
   }
 };
@@ -133,12 +195,57 @@ const PageDetail: React.FC = () => {
 
   if (!page || page.id === 'error-page') {
     return (
-      <div className="min-h-screen pt-32 bg-slate-50">
-        <div className="container mx-auto px-6 max-w-4xl text-center">
-          <h1 className="text-3xl font-serif font-bold mb-4 text-slate-800">Pagina niet gevonden</h1>
-          <button onClick={() => navigate('/')} className="mt-8 text-sdg-red hover:underline font-bold uppercase tracking-wide">
-            &larr; Terug naar home
-          </button>
+      <div className="min-h-screen pt-36 pb-20 bg-slate-50">
+        <div className="container mx-auto px-6 max-w-2xl text-center">
+          <div className="bg-white rounded-3xl border border-amber-200 p-8 sm:p-12 shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto mb-5 shadow-xs">
+              <ShieldAlert className="w-8 h-8" />
+            </div>
+
+            <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider mb-3">
+              Onderhoud WordPress-koppeling
+            </span>
+
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-3">
+              Pagina tijdelijk niet beschikbaar
+            </h1>
+
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+              Deze pagina wordt normaal gesproken ingeladen vanuit onze WordPress-omgeving. Vanwege een serverbeveiligingsupdate (rondom een bekend PHP-beveiligingslek) is deze inhoud tijdelijk niet bereikbaar.
+            </p>
+
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-700 mb-8 text-left flex items-start gap-3">
+              <Calendar className="w-5 h-5 text-sdg-red shrink-0 mt-0.5" />
+              <div>
+                <strong className="block text-slate-900 mb-0.5">Op zoek naar repetities of concerten?</strong>
+                <span>Onze concertagenda is live gekoppeld en volledig beschikbaar. Onze orkesten en opleidingen zijn gewoon actief.</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button 
+                onClick={handleBack} 
+                className="px-6 py-3 bg-slate-900 text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-sm inline-flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Terug</span>
+              </button>
+              <button 
+                onClick={() => navigate('/')} 
+                className="px-6 py-3 bg-slate-100 text-slate-800 rounded-full font-bold text-sm hover:bg-slate-200 transition-colors shadow-sm inline-flex items-center gap-2"
+              >
+                <Home className="w-4 h-4" />
+                <span>Naar de homepage</span>
+              </button>
+              <a
+                href="/#agenda"
+                className="px-6 py-3 bg-sdg-red text-white rounded-full font-bold text-sm hover:bg-red-800 transition-colors shadow-sm inline-flex items-center gap-2"
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Bekijk agenda</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     );

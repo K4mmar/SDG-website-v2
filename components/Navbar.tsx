@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Menu, X, ChevronDown, Music, Heart, Recycle } from 'lucide-react';
+import SystemStatusBanner from './SystemStatusBanner';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,12 +64,14 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav
-      aria-label="Hoofdnavigatie"
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        showSolidNavbar ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
-      } ${isOpen ? 'bg-white text-slate-900' : ''}`}
-    >
+    <header className="fixed top-0 left-0 w-full z-50">
+      <SystemStatusBanner />
+      <nav
+        aria-label="Hoofdnavigatie"
+        className={`w-full transition-all duration-300 ${
+          showSolidNavbar ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
+        } ${isOpen ? 'bg-white text-slate-900' : ''}`}
+      >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex justify-between items-center">
           <Link 
@@ -364,6 +367,7 @@ const Navbar: React.FC = () => {
         </div>
       )}
     </nav>
+    </header>
   );
 };
 

@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getNewsPosts, Post } from '../lib/wordpress';
-import { ArrowRight, Newspaper, RefreshCw, AlertCircle, MoveRight } from 'lucide-react';
+import { ArrowRight, Newspaper, RefreshCw, AlertCircle, MoveRight, ShieldAlert, Calendar } from 'lucide-react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import WpContent from './WpContent';
 
@@ -43,12 +43,59 @@ const NewsGrid: React.FC = () => {
     <section className="py-24 bg-white overflow-hidden">
       <div className="container mx-auto px-6">
         {(posts.length === 0 || error) ? (
-          <div className="bg-slate-50 rounded-3xl border border-gray-200 p-12 text-center max-w-4xl mx-auto">
-             <Newspaper className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-             <h3 className="text-xl font-bold text-slate-700 mb-2">Geen berichten gevonden</h3>
-             <button onClick={loadData} className="inline-flex items-center gap-2 px-8 py-3 bg-sdg-red text-white rounded-full font-bold hover:bg-red-800 transition-all shadow-lg mt-4">
-                <RefreshCw className="w-4 h-4" /> Vernieuwen
-             </button>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-10">
+              <span className="text-sdg-red font-bold uppercase tracking-widest text-xs mb-2 block">
+                Nieuws & Updates
+              </span>
+              <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-3">
+                Laatste Nieuws
+              </h2>
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-50/70 via-white to-slate-50 rounded-3xl border border-amber-200/80 p-8 sm:p-12 shadow-sm text-center relative overflow-hidden">
+              <div className="w-16 h-16 rounded-2xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto mb-6 shadow-xs">
+                <ShieldAlert className="w-8 h-8" />
+              </div>
+
+              <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider mb-3">
+                Tijdelijk offline wegens serveronderhoud
+              </span>
+
+              <h3 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-4">
+                Nieuwsberichten tijdelijk niet beschikbaar
+              </h3>
+
+              <p className="text-slate-600 max-w-2xl mx-auto text-base sm:text-lg font-light leading-relaxed mb-6">
+                Wegens een noodzakelijke beveiligingsupdate aan onze externe WordPress-database (naar aanleiding van een bekend PHP-beveiligingslek) is het nieuwsgedeelte tijdelijk niet bereikbaar.
+              </p>
+
+              <div className="max-w-xl mx-auto bg-white/90 border border-amber-200/60 rounded-2xl p-4 sm:p-5 mb-8 text-left text-xs sm:text-sm text-slate-700 shadow-xs flex items-start gap-3">
+                <Calendar className="w-5 h-5 text-sdg-red shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-slate-900 block mb-0.5">Onze agenda is wél live en up-to-date!</strong>
+                  <span>Benieuwd naar onze repetitietijden, concerten of optredens in Sint Jansklooster? Deze blijven gewoon realtime beschikbaar via onze Google Agenda-koppeling.</span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <a
+                  href="#agenda"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-sdg-red text-white rounded-full font-bold hover:bg-red-800 transition-all shadow-md text-sm"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Bekijk concertagenda</span>
+                </a>
+
+                <button 
+                  onClick={() => navigate('/lid-worden')}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-all shadow-md text-sm"
+                >
+                  <span>Speel mee of contact</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <NewsScroller posts={posts} navigate={navigate} />

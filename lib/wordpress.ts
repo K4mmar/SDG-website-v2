@@ -44,6 +44,20 @@ export interface RecruitmentData {
 
 async function fetchFromWP(url: string, isGraphQL: boolean = false, query?: string) {
   const targetUrl = isGraphQL ? GRAPHQL_URL : url;
+
+  const fetchWithTimeout = async (requestUrl: string, opts: RequestInit, timeoutMs = 2000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(requestUrl, { ...opts, signal: controller.signal });
+      clearTimeout(timer);
+      return res;
+    } catch (err) {
+      clearTimeout(timer);
+      throw err;
+    }
+  };
+
   const options: RequestInit = isGraphQL ? {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -51,14 +65,18 @@ async function fetchFromWP(url: string, isGraphQL: boolean = false, query?: stri
   } : { method: 'GET' };
 
   try {
-    const directResponse = await fetch(targetUrl, options);
+    const directResponse = await fetchWithTimeout(targetUrl, options, 1800);
     if (directResponse.ok) return await directResponse.json();
-    throw new Error('CORS');
+    throw new Error('Direct fetch failed');
   } catch (e) {
-    const finalUrl = `${PROXY_URL}${encodeURIComponent(targetUrl)}`;
-    const proxyResponse = await fetch(finalUrl, options);
-    if (!proxyResponse.ok) throw new Error(`Status: ${proxyResponse.status}`);
-    return await proxyResponse.json();
+    try {
+      const finalUrl = `${PROXY_URL}${encodeURIComponent(targetUrl)}`;
+      const proxyResponse = await fetchWithTimeout(finalUrl, options, 2200);
+      if (!proxyResponse.ok) throw new Error(`Status: ${proxyResponse.status}`);
+      return await proxyResponse.json();
+    } catch (err) {
+      throw err;
+    }
   }
 }
 
