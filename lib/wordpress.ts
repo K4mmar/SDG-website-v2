@@ -45,7 +45,7 @@ export interface RecruitmentData {
 async function fetchFromWP(url: string, isGraphQL: boolean = false, query?: string) {
   const targetUrl = isGraphQL ? GRAPHQL_URL : url;
 
-  const fetchWithTimeout = async (requestUrl: string, opts: RequestInit, timeoutMs = 2000) => {
+  const fetchWithTimeout = async (requestUrl: string, opts: RequestInit, timeoutMs = 7000) => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -65,13 +65,13 @@ async function fetchFromWP(url: string, isGraphQL: boolean = false, query?: stri
   } : { method: 'GET' };
 
   try {
-    const directResponse = await fetchWithTimeout(targetUrl, options, 1800);
+    const directResponse = await fetchWithTimeout(targetUrl, options, 6000);
     if (directResponse.ok) return await directResponse.json();
     throw new Error('Direct fetch failed');
   } catch (e) {
     try {
       const finalUrl = `${PROXY_URL}${encodeURIComponent(targetUrl)}`;
-      const proxyResponse = await fetchWithTimeout(finalUrl, options, 2200);
+      const proxyResponse = await fetchWithTimeout(finalUrl, options, 8000);
       if (!proxyResponse.ok) throw new Error(`Status: ${proxyResponse.status}`);
       return await proxyResponse.json();
     } catch (err) {

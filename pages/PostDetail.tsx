@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPostBySlug } from '../lib/wordpress';
 import { getUpcomingEvents, CalendarEvent } from '../lib/calendar';
-import { ArrowLeft, Calendar, Tag, Clock, MapPin, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag, Clock, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import ShareButton from '../components/ShareButton';
@@ -62,51 +62,9 @@ const PostDetail: React.FC = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen pt-36 pb-20 bg-slate-50">
-        <div className="container mx-auto px-6 max-w-2xl text-center">
-          <div className="bg-white rounded-3xl border border-amber-200 p-8 sm:p-12 shadow-sm">
-            <div className="w-16 h-16 rounded-2xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto mb-5 shadow-xs">
-              <ShieldAlert className="w-8 h-8" />
-            </div>
-
-            <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider mb-3">
-              Onderhoud WordPress-koppeling
-            </span>
-
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-3">
-              Nieuwsbericht tijdelijk niet beschikbaar
-            </h1>
-
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
-              In verband met een beveiligingsupdate aan onze WordPress-database (naar aanleiding van een bekend PHP-beveiligingslek) is dit nieuwsbericht tijdelijk offline gehaald. Onze verenigingsactiviteiten, concerten en repetities gaan gewoon door.
-            </p>
-
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-700 mb-8 text-left flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-sdg-red shrink-0 mt-0.5" />
-              <div>
-                <strong className="block text-slate-900 mb-0.5">Op zoek naar actuele data?</strong>
-                <span>Onze concertagenda is live gekoppeld en volledig up-to-date.</span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <button 
-                onClick={handleBack} 
-                className="px-6 py-3 bg-slate-900 text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-sm inline-flex items-center gap-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>{backLabel}</span>
-              </button>
-              <a
-                href="/#agenda"
-                className="px-6 py-3 bg-sdg-red text-white rounded-full font-bold text-sm hover:bg-red-800 transition-colors shadow-sm inline-flex items-center gap-2"
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Bekijk agenda</span>
-              </a>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen pt-32 text-center container mx-auto px-6">
+        <h1 className="text-3xl font-serif font-bold mb-4">Bericht niet gevonden</h1>
+        <button onClick={() => navigate('/')} className="text-sdg-red hover:underline font-bold">Terug naar home</button>
       </div>
     );
   }

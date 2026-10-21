@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllPosts, Post } from '../lib/wordpress';
-import { ChevronRight, Archive, Calendar, Search, ArrowLeft, ShieldAlert, ArrowRight } from 'lucide-react';
+import { ChevronRight, Archive, Calendar, Search, ArrowLeft } from 'lucide-react';
 
 const NewsArchive: React.FC = () => {
   const [allPosts, setAllPosts] = useState<Post[]>([]);
@@ -100,43 +100,6 @@ const NewsArchive: React.FC = () => {
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="h-24 bg-white rounded-xl border border-gray-200 animate-pulse"></div>
             ))}
-          </div>
-        ) : allPosts.length === 0 ? (
-          <div className="max-w-3xl bg-white rounded-3xl border border-amber-200 p-8 sm:p-12 text-center shadow-sm">
-             <div className="w-16 h-16 rounded-2xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto mb-5 shadow-xs">
-               <ShieldAlert className="w-8 h-8" />
-             </div>
-             <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider mb-3">
-               Onderhoud WordPress-koppeling
-             </span>
-             <h2 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900 mb-3">
-               Nieuwsarchief tijdelijk niet beschikbaar
-             </h2>
-             <p className="text-slate-600 max-w-xl mx-auto text-sm sm:text-base leading-relaxed mb-6">
-               In verband met een noodzakelijke beveiligingsupdate aan onze WordPress-server (rondom een bekend PHP-beveiligingslek) is het nieuwsarchief tijdelijk offline gehaald. We werken aan een spoedig en veilig herstel.
-             </p>
-             <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-700 max-w-lg mx-auto mb-8 text-left flex items-start gap-3">
-               <Calendar className="w-5 h-5 text-sdg-red shrink-0 mt-0.5" />
-               <div>
-                 <strong className="block text-slate-900 mb-0.5">Onze concertagenda is wel actueel!</strong>
-                 <span>Bekijk direct wanneer onze fanfare, malletband en orkesten optreden of repeteren.</span>
-               </div>
-             </div>
-             <div className="flex flex-wrap items-center justify-center gap-3">
-               <button
-                 onClick={() => navigate('/')}
-                 className="px-6 py-3 bg-slate-900 text-white rounded-full font-bold text-sm hover:bg-slate-800 transition-colors shadow-sm"
-               >
-                 Naar de homepage
-               </button>
-               <a
-                 href="/#agenda"
-                 className="px-6 py-3 bg-sdg-red text-white rounded-full font-bold text-sm hover:bg-red-800 transition-colors shadow-sm inline-flex items-center gap-2"
-               >
-                 <Calendar className="w-4 h-4" />
-                 <span>Bekijk agenda</span>
-               </a>
-             </div>
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-gray-200">
